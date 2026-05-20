@@ -1,0 +1,49 @@
+﻿@model SimpleToDoApp.Models.Todo
+
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+
+<div class="container mx-auto px-6 py-16 max-w-xl" style="font-family: 'Quicksand', sans-serif;">
+    
+    <div class="bg-white p-10 rounded-[3rem] border-2 border-slate-100 shadow-2xl shadow-slate-200/50 text-center">
+        
+        <div class="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+        </div>
+
+        <h1 class="text-3xl font-bold text-slate-800 mb-4">Bạn chắc chứ?</h1>
+        <p class="text-slate-500 mb-8 leading-relaxed">
+            Công việc <span class="font-bold text-slate-800">"@Model.Title"</span> sẽ biến mất vĩnh viễn khỏi danh sách của bạn đó.
+        </p>
+
+        <div class="bg-slate-50 p-6 rounded-2xl mb-8 text-left border border-slate-100">
+            <div class="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">Mô tả</div>
+            <p class="text-sm text-slate-600 italic">
+                @(string.IsNullOrEmpty(Model.Description) ? "Không có mô tả nào..." : Model.Description)
+            </p>
+        </div>
+
+        <form asp-action="DeleteTodos" method="post" class="flex flex-col gap-3">
+            <input type="hidden" asp-for="Id" />
+            
+            <button type="submit" class="w-full bg-rose-500 text-white font-bold py-4 rounded-2xl hover:bg-rose-600 shadow-lg shadow-rose-100 transition-all active:scale-95">
+                Đúng rồi, xóa nó đi!
+            </button>
+            
+            <a asp-action="Index" class="w-full bg-slate-100 text-slate-600 font-bold py-4 rounded-2xl hover:bg-slate-200 transition-all active:scale-95 text-center">
+                À không, quay lại thôi
+            </a>
+        </form>
+    </div>
+
+    <p class="text-center text-slate-400 text-xs mt-8 italic">
+        "Việc gì chưa xong thì mình cứ để đó, đừng vội xóa nha!"
+    </p>
+</div>
+
+<style>
+    body {
+        background-color: #fcfcfd;
+    }
+</style>

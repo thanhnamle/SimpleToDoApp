@@ -1,0 +1,85 @@
+﻿@model SimpleToDoApp.Models.Todo
+@{
+    ViewData["Title"] = "Viết task mới";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+
+<div class="container mx-auto px-6 py-12 max-w-5xl" style="font-family: 'Quicksand', sans-serif;">
+    <div class="mb-10">
+        <h1 class="text-4xl font-extrabold text-slate-800 tracking-tight">Tạo kế hoạch mới 🚀</h1>
+        <p class="text-slate-400 mt-2 text-lg">Ghi chú lại những việc quan trọng bạn cần làm.</p>
+    </div>
+
+    <form asp-action="AddNewTodos" method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        @Html.AntiForgeryToken()
+
+        <!-- Cột Trái: Nội dung chính -->
+        <div class="lg:col-span-2 space-y-8">
+            <div class="bg-white p-10 rounded-[3rem] border-2 border-slate-50 shadow-xl shadow-slate-100/40 space-y-8">
+                <div>
+                    <label asp-for="Title" class="block text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-4 ml-1">Tiêu đề công việc</label>
+                    <input asp-for="Title" placeholder="Ví dụ: Họp team buổi sáng..." class="w-full px-8 py-5 bg-slate-50 border-none rounded-[2rem] focus:ring-4 focus:ring-indigo-100 focus:bg-white transition-all outline-none text-slate-800 font-bold text-xl" />
+                </div>
+                <div>
+                    <label asp-for="Description" class="block text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-4 ml-1">Mô tả thêm</label>
+                    <textarea asp-for="Description" rows="5" placeholder="Ghi chú chi tiết tại đây..." class="w-full px-8 py-5 bg-slate-50 border-none rounded-[2rem] focus:ring-4 focus:ring-indigo-100 focus:bg-white transition-all outline-none text-slate-800 resize-none leading-relaxed"></textarea>
+                </div>
+            </div>
+
+            <!-- Thời gian -->
+            <div class="bg-white p-10 rounded-[3rem] border-2 border-slate-50 shadow-xl shadow-slate-100/40">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <label asp-for="StartDate" class="block text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-4 ml-1">Thời điểm bắt đầu</label>
+                        <input asp-for="StartDate" type="datetime-local" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" class="w-full px-8 py-5 bg-slate-50 border-none rounded-[2rem] focus:ring-4 focus:ring-indigo-100 outline-none text-slate-800 font-bold" />
+                    </div>
+                    <div>
+                        <label asp-for="DueDate" class="block text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-4 ml-1">Hạn chót</label>
+                        <input asp-for="DueDate" type="datetime-local" value="@DateTime.Now.AddHours(1).ToString("yyyy-MM-ddTHH:mm")" class="w-full px-8 py-5 bg-slate-50 border-none rounded-[2rem] focus:ring-4 focus:ring-rose-100 outline-none text-slate-800 font-bold" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột Phải: Phân loại -->
+        <div class="space-y-8">
+            <div class="bg-white p-10 rounded-[3rem] border-2 border-slate-50 shadow-xl shadow-slate-100/40 space-y-8">
+                <div>
+                    <label asp-for="Category" class="block text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-4 ml-1">Phân loại</label>
+                    <select asp-for="Category" class="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-400 outline-none font-bold text-slate-700">
+                        <option value="🏢 Công việc">🏢 Công việc</option>
+                        <option value="🏠 Cá nhân">🏠 Cá nhân</option>
+                        <option value="📚 Học tập">📚 Học tập</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label asp-for="Priority" class="block text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-4 ml-1">Mức độ ưu tiên</label>
+                    <select asp-for="Priority" class="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-400 outline-none font-bold text-slate-700">
+                        <option value="Thấp">🔵 Thấp</option>
+                        <option value="Trung bình" selected>🟡 Trung bình</option>
+                        <option value="Cao">🔴 Cao</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label asp-for="Status" class="block text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-3 ml-1">Trạng thái</label>
+                    <select asp-for="Status" class="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-400 outline-none font-bold text-slate-700">
+                        <option value="To Do">📝 Chờ làm</option>
+                        <option value="Doing">⏳ Đang làm</option>
+                        <option value="Done">✅ Đã xong</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center gap-3 p-5 bg-indigo-50 rounded-[2rem] border-2 border-indigo-100 group cursor-pointer transition-all">
+                    <input asp-for="IsAllDay" type="checkbox" id="isAllDay" class="w-6 h-6 rounded-lg text-indigo-600 focus:ring-indigo-400 cursor-pointer" />
+                    <label for="isAllDay" class="block text-sm font-extrabold text-indigo-800 cursor-pointer select-none">Cả ngày 📅</label>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full py-6 bg-indigo-600 text-white rounded-[2.5rem] font-extrabold text-xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-95">Tạo kế hoạch ngay</button>
+            <a asp-action="Index" class="block text-center text-slate-400 font-bold hover:text-slate-600 transition-all text-sm uppercase tracking-widest">Hủy bỏ</a>
+        </div>
+    </form>
+</div>

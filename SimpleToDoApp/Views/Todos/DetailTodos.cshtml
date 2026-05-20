@@ -1,0 +1,76 @@
+﻿@model SimpleToDoApp.Models.Todo
+
+@{
+    ViewData["Title"] = "Chi tiết công việc";
+}
+
+<div class="container mx-auto px-4 py-12 max-w-4xl" style="font-family: 'Quicksand', sans-serif;">
+    <div class="bg-white p-10 rounded-[3rem] border-2 border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden">
+
+        <!-- Vạch màu độ ưu tiên -->
+        <div class="absolute top-0 left-0 w-full h-2 @(Model.Priority == "Cao" ? "bg-rose-500" : Model.Priority == "Trung bình" ? "bg-amber-400" : "bg-sky-400")"></div>
+
+        <div class="flex justify-between items-start mb-8">
+            <div>
+                <span class="px-4 py-1.5 bg-slate-100 text-slate-500 rounded-xl text-xs font-bold uppercase tracking-widest">
+                    @Model.Category
+                </span>
+                <h1 class="text-4xl font-extrabold text-slate-800 mt-4">@Model.Title</h1>
+            </div>
+            <div class="flex flex-col items-end">
+                <span class="px-4 py-2 @(Model.Status == "Done" ? "bg-emerald-100 text-emerald-600" : "bg-indigo-100 text-indigo-600") rounded-2xl text-sm font-bold">
+                    @Model.Status
+                </span>
+                <p class="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-tighter">ID: #@Model.Id</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+            <!-- Ngày bắt đầu -->
+            <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Bắt đầu lúc</p>
+                <div class="flex items-center gap-3">
+                    <div class="p-3 bg-white rounded-2xl shadow-sm text-indigo-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        @* HIỂN THỊ CẢ NGÀY VÀ GIỜ Ở ĐÂY *@
+                        <p class="text-lg font-bold text-slate-800">@Model.StartDate.ToString("dd/MM/yyyy")</p>
+                        <p class="text-sm font-semibold text-indigo-600">@Model.StartDate.ToString("HH:mm")</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hạn chót -->
+            <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Hạn chót</p>
+                <div class="flex items-center gap-3">
+                    <div class="p-3 bg-white rounded-2xl shadow-sm text-rose-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        @* HIỂN THỊ CẢ NGÀY VÀ GIỜ Ở ĐÂY *@
+                        <p class="text-lg font-bold text-slate-800">@Model.DueDate.ToString("dd/MM/yyyy")</p>
+                        <p class="text-sm font-semibold text-rose-600">@Model.DueDate.ToString("HH:mm")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-10">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Mô tả chi tiết</h3>
+            <div class="p-8 bg-slate-50 rounded-[2rem] text-slate-600 leading-relaxed min-h-[150px]">
+                @Model.Description
+            </div>
+        </div>
+
+        <div class="flex gap-4 pt-6 border-t border-slate-50">
+            <a asp-action="EditTodos" asp-route-id="@Model.Id" class="flex-1 text-center py-4 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">Chỉnh sửa</a>
+            <a asp-action="Index" class="px-8 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all">Quay lại</a>
+        </div>
+    </div>
+</div>

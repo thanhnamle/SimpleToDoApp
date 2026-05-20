@@ -1,0 +1,54 @@
+﻿@{
+    dynamic data = Model;
+    string columnId = data.Id;
+    string header = data.Header;
+    IEnumerable<SimpleToDoApp.Models.Todo> tasks = data.Tasks;
+    string color = data.Color;
+}
+
+<div class="flex flex-col min-h-[700px] @color p-5 rounded-[2.5rem] transition-all border-2 border-transparent">
+    <div class="flex justify-between items-center mb-6 px-4">
+        <h3 class="text-sm font-extrabold text-slate-600 tracking-widest">@header</h3>
+        <span class="bg-white px-3 py-1 rounded-full text-xs font-bold text-slate-400 shadow-sm">@tasks.Count()</span>
+    </div>
+
+    <div id="list-@columnId.Replace(" ", "-")" data-status="@columnId" class="space-y-4 h-full min-h-[500px]">
+        @foreach (var task in tasks)
+        {
+            <div data-id="@task.Id" class="group relative overflow-hidden bg-white p-5 rounded-3xl shadow-sm border-2 border-slate-50 hover:border-indigo-200 transition-all cursor-grab active:cursor-grabbing">
+                <div class="absolute top-0 left-0 w-full h-1.5 @(task.Priority == "Cao" ? "bg-rose-500" : task.Priority == "Trung bình" ? "bg-amber-400" : "bg-sky-400")"></div>
+
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-[10px] font-bold px-2 py-1 bg-slate-100 text-slate-500 rounded-lg">@task.Category</span>
+                </div>
+                <a asp-action="DetailTodos" asp-route-id="@task.Id">
+                    <h4 class="font-bold text-slate-800 text-sm mb-1">@task.Title</h4>
+                    <p class="text-[11px] text-slate-400 line-clamp-2">@task.Description</p>
+                </a>
+                <div class="mt-4 flex items-center justify-between">
+                    <span class="text-[10px] font-bold text-slate-300">#@task.Id</span>
+                    <a asp-action="EditTodos" asp-route-id="@task.Id" class="text-xs font-bold text-indigo-500 opacity-0 group-hover:opacity-100 transition-all">Sửa</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .group {
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+    }
+
+    .sortable-drag {
+        opacity: 0;
+    }
+
+    .sortable-ghost {
+        opacity: 0.4;
+        background-color: #e0e7ff !important;
+        border: 2px dashed #4f46e5 !important;
+    }
+</style>
