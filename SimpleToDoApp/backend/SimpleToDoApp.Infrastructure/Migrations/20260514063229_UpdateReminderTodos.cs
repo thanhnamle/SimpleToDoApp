@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace SimpleToDoApp.Migrations
+namespace SimpleToDoApp.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class UpdateReminderTodos : Migration
