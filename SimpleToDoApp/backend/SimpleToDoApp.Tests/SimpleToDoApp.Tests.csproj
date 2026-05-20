@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\SimpleToDoApp.Application\SimpleToDoApp.Application.csproj" />
+    <ProjectReference Include="..\SimpleToDoApp.Domain\SimpleToDoApp.Domain.csproj" />
+    <ProjectReference Include="..\SimpleToDoApp.Infrastructure\SimpleToDoApp.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+</Project>
