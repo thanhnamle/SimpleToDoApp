@@ -126,8 +126,8 @@
 <app-todo-modal
   [isOpen]="modalOpen"
   [todo]="selectedTodo"
-  (close)="modalOpen = false"
-  (submit)="handleCreateOrUpdate($event)"
+  (close)="closeModal()"
+  (save)="handleCreateOrUpdate($event)"
 ></app-todo-modal>
 
 <!-- Hover Tooltip -->

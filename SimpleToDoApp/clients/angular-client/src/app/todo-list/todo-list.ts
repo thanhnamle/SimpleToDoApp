@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TodoService } from '../services/todo.service';
 import { NotificationService } from '../services/notification.service';
-import { Todo } from '../models/todo';
+import { CreateTodoRequest, Todo, UpdateTodoRequest } from '../models/todo';
 import { TodoModal } from '../todo-modal/todo-modal';
 import {
   LucidePlus,
@@ -167,9 +167,9 @@ export class TodoList implements OnInit {
     });
   }
 
-  handleCreateOrUpdate(payload: any) {
+  handleCreateOrUpdate(payload: CreateTodoRequest | UpdateTodoRequest) {
     if (this.selectedTodo && this.selectedTodo.id !== 0) {
-      this.todoService.update(this.selectedTodo.id, payload).subscribe({
+      this.todoService.update(this.selectedTodo.id, payload as UpdateTodoRequest).subscribe({
         next: () => {
           this.notificationService.showToast('Task updated successfully.', 'success');
           this.fetchTodos();
@@ -180,7 +180,7 @@ export class TodoList implements OnInit {
         }
       });
     } else {
-      this.todoService.create(payload).subscribe({
+      this.todoService.create(payload as CreateTodoRequest).subscribe({
         next: () => {
           this.notificationService.showToast('Task created successfully.', 'success');
           this.fetchTodos();
@@ -201,6 +201,11 @@ export class TodoList implements OnInit {
   openEditModal(todo: Todo) {
     this.selectedTodo = todo;
     this.modalOpen = true;
+  }
+
+  closeModal() {
+    this.modalOpen = false;
+    this.selectedTodo = null;
   }
 
   openDetailPanel(todo: Todo) {

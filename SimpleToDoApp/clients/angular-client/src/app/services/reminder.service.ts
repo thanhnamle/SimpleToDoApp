@@ -1,5 +1,6 @@
 import { Injectable, inject, signal, computed, OnDestroy } from '@angular/core';
 import { TodoService } from './todo.service';
+import { NotificationService } from './notification.service';
 import { Todo } from '../models/todo';
 
 export interface ReminderItem {
@@ -12,17 +13,17 @@ export interface ReminderItem {
 })
 export class ReminderService implements OnDestroy {
   private readonly todoService = inject(TodoService);
+  private readonly notificationService = inject(NotificationService);
   private todos = signal<Todo[]>([]);
   private intervalId: any;
+  private notifiedKeys = new Set<string>();
 
-  // Upcoming reminders: tasks due within their reminderMinutes window, not yet done
   upcomingReminders = computed<ReminderItem[]>(() => {
     const now = Date.now();
     return this.todos()
       .filter(t => t.status !== 'Done' && t.reminderMinutes > 0 && t.dueDate)
       .map(t => {
         const dueMs = new Date(t.dueDate).getTime();
-        const reminderMs = t.reminderMinutes * 60 * 1000;
         const minutesLeft = Math.round((dueMs - now) / 60000);
         return { todo: t, minutesLeft };
       })
@@ -34,8 +35,11 @@ export class ReminderService implements OnDestroy {
 
   load() {
     this.todoService.getAll().subscribe({
-      next: (data) => this.todos.set(data),
-      error: () => {} // silently fail — reminder is non-critical
+      next: (data) => {
+        this.todos.set(data);
+        this.notifyActiveReminders(data);
+      },
+      error: () => {}
     });
   }
 
@@ -61,5 +65,29 @@ export class ReminderService implements OnDestroy {
     const h = Math.floor(minutesLeft / 60);
     const m = minutesLeft % 60;
     return m > 0 ? `${h}h ${m}m left` : `${h}h left`;
+  }
+
+  private notifyActiveReminders(todos: Todo[]) {
+    const now = Date.now();
+
+    for (const todo of todos) {
+      if (todo.status === 'Done' || !todo.dueDate || todo.reminderMinutes <= 0) continue;
+
+      const dueMs = new Date(todo.dueDate).getTime();
+      if (isNaN(dueMs)) continue;
+
+      const reminderStartMs = dueMs - todo.reminderMinutes * 60 * 1000;
+      if (now < reminderStartMs || now > dueMs) continue;
+
+      const key = `${todo.id}:${todo.dueDate}:${todo.reminderMinutes}`;
+      if (this.notifiedKeys.has(key)) continue;
+
+      const minutesLeft = Math.max(0, Math.round((dueMs - now) / 60000));
+      this.notificationService.showToast(
+        `Reminder: "${todo.title}" is ${this.formatTimeLeft(minutesLeft).toLowerCase()}.`,
+        minutesLeft <= 0 ? 'warning' : 'info'
+      );
+      this.notifiedKeys.add(key);
+    }
   }
 }

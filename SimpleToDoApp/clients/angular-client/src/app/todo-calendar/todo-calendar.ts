@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TodoService } from '../services/todo.service';
 import { NotificationService } from '../services/notification.service';
-import { Todo } from '../models/todo';
+import { CreateTodoRequest, Todo, UpdateTodoRequest } from '../models/todo';
 import { TodoModal } from '../todo-modal/todo-modal';
 import {
   LucideChevronLeft,
@@ -156,9 +156,9 @@ export class TodoCalendar implements OnInit {
     this.modalOpen = true;
   }
 
-  handleCreateOrUpdate(payload: any) {
+  handleCreateOrUpdate(payload: CreateTodoRequest | UpdateTodoRequest) {
     if (this.selectedTodo && this.selectedTodo.id !== 0) {
-      this.todoService.update(this.selectedTodo.id, payload).subscribe({
+      this.todoService.update(this.selectedTodo.id, payload as UpdateTodoRequest).subscribe({
         next: () => {
           this.notificationService.showToast('Task updated successfully.', 'success');
           this.fetchCalendarTodos();
@@ -169,7 +169,7 @@ export class TodoCalendar implements OnInit {
         }
       });
     } else {
-      this.todoService.create(payload).subscribe({
+      this.todoService.create(payload as CreateTodoRequest).subscribe({
         next: () => {
           this.notificationService.showToast('Task created successfully.', 'success');
           this.fetchCalendarTodos();
@@ -185,6 +185,11 @@ export class TodoCalendar implements OnInit {
   openCreateModal() {
     this.selectedTodo = null;
     this.modalOpen = true;
+  }
+
+  closeModal() {
+    this.modalOpen = false;
+    this.selectedTodo = null;
   }
 
   getPriorityColor(p: string): string {

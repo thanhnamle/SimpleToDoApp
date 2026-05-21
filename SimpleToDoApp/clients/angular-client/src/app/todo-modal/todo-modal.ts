@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Todo } from '../models/todo';
+import { CreateTodoRequest, Todo, UpdateTodoRequest } from '../models/todo';
 import { LucideX, LucideAlertTriangle, LucideBell } from '@lucide/angular';
 
 @Component({
@@ -19,7 +19,7 @@ export class TodoModal implements OnChanges {
   @Input() isOpen = false;
   @Input() todo: Todo | null = null;
   @Output() close = new EventEmitter<void>();
-  @Output() submit = new EventEmitter<any>();
+  @Output() save = new EventEmitter<CreateTodoRequest | UpdateTodoRequest>();
 
   isEditMode = false;
   error: string | null = null;
@@ -124,7 +124,10 @@ export class TodoModal implements OnChanges {
     }
   }
 
-  onSubmit() {
+  onSubmit(event?: Event) {
+    event?.preventDefault();
+    event?.stopPropagation();
+
     if (!this.formData.title.trim()) {
       this.error = 'Title is required.';
       return;
@@ -138,12 +141,13 @@ export class TodoModal implements OnChanges {
       return;
     }
 
-    const safeDate = (val: string, fallback: Date) => {
-      if (!val) return fallback.toISOString();
-      // Handle date-only strings from All Day mode
-      const parsed = val.length === 10 ? new Date(val + 'T00:00:00') : new Date(val);
-      return isNaN(parsed.getTime()) ? fallback.toISOString() : parsed.toISOString();
-    };
+    const startDate = this.toApiDateTime(this.formData.startDate, new Date());
+    const dueDate = this.toApiDateTime(this.formData.dueDate, new Date(Date.now() + 3600000));
+
+    if (new Date(dueDate).getTime() < new Date(startDate).getTime()) {
+      this.error = 'Due date must be after start date.';
+      return;
+    }
 
     const payload = {
       title: this.formData.title.trim(),
@@ -153,12 +157,12 @@ export class TodoModal implements OnChanges {
       status: this.formData.status,
       isCompleted: this.formData.status === 'Done',
       isAllDay: this.formData.isAllDay,
-      reminderMinutes: this.formData.reminderMinutes || 0,
-      startDate: safeDate(this.formData.startDate, new Date()),
-      dueDate: safeDate(this.formData.dueDate, new Date(Date.now() + 3600000))
+      reminderMinutes: Number(this.formData.reminderMinutes) || 0,
+      startDate,
+      dueDate
     };
 
-    this.submit.emit(payload);
+    this.save.emit(payload);
     this.onClose();
   }
 
@@ -177,5 +181,26 @@ export class TodoModal implements OnChanges {
     const hh = pad(date.getHours());
     const mm = pad(date.getMinutes());
     return `${yyyy}-${MM}-${dd}T${hh}:${mm}`;
+  }
+
+  private toApiDateTime(value: string, fallback: Date): string {
+    if (!value) return this.formatDateTimeForApi(fallback);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return `${value}T00:00:00`;
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) return `${value}:00`;
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value)) return value.substring(0, 19);
+
+    const parsed = new Date(value);
+    return isNaN(parsed.getTime()) ? this.formatDateTimeForApi(fallback) : this.formatDateTimeForApi(parsed);
+  }
+
+  private formatDateTimeForApi(date: Date): string {
+    const pad = (num: number) => num.toString().padStart(2, '0');
+    const yyyy = date.getFullYear();
+    const MM = pad(date.getMonth() + 1);
+    const dd = pad(date.getDate());
+    const hh = pad(date.getHours());
+    const mm = pad(date.getMinutes());
+    const ss = pad(date.getSeconds());
+    return `${yyyy}-${MM}-${dd}T${hh}:${mm}:${ss}`;
   }
 }
