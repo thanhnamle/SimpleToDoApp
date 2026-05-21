@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
+using SimpleToDoApp.Domain.Enums;
 
 namespace SimpleToDoApp.Domain.Entities
 {
@@ -25,11 +26,11 @@ namespace SimpleToDoApp.Domain.Entities
 
         [Required]
         [Display(Name = "Priority")]
-        public required string Priority { get; set; }
+        public TodoPriority Priority { get; set; }
 
         [Required]
         [Display(Name = "Status")]
-        public required string Status { get; set; }
+        public TodoStatus Status { get; set; }
 
         [Required]
         public bool IsAllDay { get; set; }

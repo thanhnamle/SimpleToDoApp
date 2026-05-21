@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SimpleToDoApp.Domain\SimpleToDoApp.Domain.csproj" />
+    <ProjectReference Include="..\SimpleToDoApp.Application\SimpleToDoApp.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -10,6 +11,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.5.0" />
   </ItemGroup>
 
   <PropertyGroup>

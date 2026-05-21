@@ -1,0 +1,91 @@
+<!-- App Router Outlet -->
+<router-outlet></router-outlet>
+
+<!-- Custom Toast Notifications Overlay (Top Right) -->
+<div class="fixed top-6 right-6 z-[9999] flex flex-col gap-3 w-full max-w-sm pointer-events-none">
+  @for (toast of toasts(); track toast.id) {
+    <div
+      class="pointer-events-auto flex items-center justify-between gap-3.5 rounded-xl border p-4 shadow-xl backdrop-blur-xl animate-slide-in transition-all duration-200"
+      [class.bg-emerald-500/10]="toast.type === 'success'"
+      [class.border-emerald-500/20]="toast.type === 'success'"
+      [class.text-emerald-600]="toast.type === 'success'"
+      [class.dark:text-emerald-400]="toast.type === 'success'"
+
+      [class.bg-red-500/10]="toast.type === 'error'"
+      [class.border-red-500/20]="toast.type === 'error'"
+      [class.text-red-600]="toast.type === 'error'"
+      [class.dark:text-red-400]="toast.type === 'error'"
+
+      [class.bg-indigo-500/10]="toast.type === 'info'"
+      [class.border-indigo-500/20]="toast.type === 'info'"
+      [class.text-indigo-600]="toast.type === 'info'"
+      [class.dark:text-indigo-400]="toast.type === 'info'"
+
+      [class.bg-amber-500/10]="toast.type === 'warning'"
+      [class.border-amber-500/20]="toast.type === 'warning'"
+      [class.text-amber-600]="toast.type === 'warning'"
+      [class.dark:text-amber-400]="toast.type === 'warning'"
+    >
+      <div class="flex items-center gap-2.5 min-w-0">
+        @if (toast.type === 'success') {
+          <svg lucideCheckCircle2 class="h-5 w-5 shrink-0"></svg>
+        } @else if (toast.type === 'error') {
+          <svg lucideAlertCircle class="h-5 w-5 shrink-0"></svg>
+        } @else if (toast.type === 'warning') {
+          <svg lucideAlertTriangle class="h-5 w-5 shrink-0"></svg>
+        } @else {
+          <svg lucideInfo class="h-5 w-5 shrink-0"></svg>
+        }
+        <span class="text-sm font-semibold truncate">{{ toast.message }}</span>
+      </div>
+      <button
+        (click)="removeToast(toast.id)"
+        class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0"
+      >
+        <svg lucideX class="h-4 w-4"></svg>
+      </button>
+    </div>
+  }
+</div>
+
+<!-- Custom Confirmation Dialog Modal Overlay -->
+@if (confirmDialog(); as dialog) {
+  <div class="fixed inset-0 z-[9998] flex items-center justify-center p-4">
+    <!-- Backdrop -->
+    <div (click)="dialog.resolve(false)" class="fixed inset-0 bg-slate-950/60 dark:bg-slate-950/80 backdrop-blur-sm transition-opacity"></div>
+    
+    <!-- Modal Container -->
+    <div class="z-10 w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl transition-all">
+      <!-- Body -->
+      <div class="p-6">
+        <div class="flex gap-4">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500">
+            <svg lucideAlertTriangle class="h-5.5 w-5.5"></svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h4 class="text-md font-bold text-slate-950 dark:text-white leading-6">{{ dialog.title }}</h4>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">{{ dialog.message }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Footer actions -->
+      <div class="flex items-center justify-end gap-3 border-t border-slate-200 dark:border-slate-900 bg-slate-50 dark:bg-slate-950/20 px-6 py-4">
+        <button
+          type="button"
+          (click)="dialog.resolve(false)"
+          class="rounded-lg border border-slate-200 dark:border-slate-800 bg-transparent px-4 py-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+        >
+          {{ dialog.cancelLabel || 'Cancel' }}
+        </button>
+        <button
+          type="button"
+          (click)="dialog.resolve(true)"
+          class="rounded-lg bg-amber-500 hover:bg-amber-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-amber-500/10 hover:shadow-amber-500/20 active:scale-98 transition-all cursor-pointer"
+        >
+          {{ dialog.confirmLabel || 'Confirm' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

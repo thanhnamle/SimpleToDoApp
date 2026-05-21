@@ -1,0 +1,175 @@
+<div class="flex h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-hidden font-sans relative transition-colors duration-200">
+  @if (isSidebarOpen()) {
+    <div (click)="toggleSidebar()"
+      class="fixed inset-0 z-50 bg-slate-950/40 dark:bg-slate-950/60 backdrop-blur-sm lg:hidden transition-opacity duration-300">
+    </div>
+  }
+
+  @if (isBellOpen()) {
+    <div (click)="closeBell()" class="fixed inset-0 z-40"></div>
+  }
+
+  <aside
+    class="fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-slate-200 dark:border-slate-900 bg-white dark:bg-slate-950 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0"
+    [class.translate-x-0]="isSidebarOpen()" [class.-translate-x-full]="!isSidebarOpen()">
+    
+    <div class="flex h-20 items-center justify-between border-b border-slate-200 dark:border-slate-900 px-6">
+      <a routerLink="/" class="flex items-center gap-3 cursor-pointer select-none">
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-tr from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-500/10">
+          <svg lucideCheckSquare class="h-5 w-5"></svg>
+        </div>
+        <span class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-transparent dark:bg-gradient-to-r dark:from-white dark:to-slate-200 dark:bg-clip-text">ZenTodo</span>
+      </a>
+      <button (click)="toggleSidebar()" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white lg:hidden">
+        <svg lucideX class="h-5 w-5"></svg>
+      </button>
+    </div>
+
+    <nav class="flex-grow space-y-1.5 px-4 py-6">
+      <a routerLink="/todos" [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-l-4 border-indigo-500"
+        (click)="closeSidebarOnMobile()"
+        class="flex items-center gap-3.5 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-500 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/60 hover:text-slate-900 dark:hover:text-slate-200">
+        <svg lucideListTodo class="h-5 w-5"></svg>
+        Tasks List
+      </a>
+      <a routerLink="/todos/board"
+        routerLinkActive="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-l-4 border-indigo-500"
+        (click)="closeSidebarOnMobile()"
+        class="flex items-center gap-3.5 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-500 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/60 hover:text-slate-900 dark:hover:text-slate-200">
+        <svg lucideKanban class="h-5 w-5"></svg>
+        Kanban Board
+      </a>
+      <a routerLink="/todos/calendar"
+        routerLinkActive="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-l-4 border-indigo-500"
+        (click)="closeSidebarOnMobile()"
+        class="flex items-center gap-3.5 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-500 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/60 hover:text-slate-900 dark:hover:text-slate-200">
+        <svg lucideCalendar class="h-5 w-5"></svg>
+        Calendar
+      </a>
+    </nav>
+
+    <div class="border-t border-slate-200 dark:border-slate-900 p-4">
+      <div class="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-900 p-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 text-xs font-bold text-indigo-600 dark:text-indigo-400">
+            {{ userInitials() }}
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{{ username() }}</p>
+            <p class="text-[10px] text-slate-400 dark:text-slate-500 truncate">{{ email() }}</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1 shrink-0">
+          <button (click)="toggleTheme()" [title]="isDark() ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+            class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-900 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">
+            @if (isDark()) {
+              <svg lucideSun class="h-4.5 w-4.5 text-amber-400"></svg>
+            } @else {
+              <svg lucideMoon class="h-4.5 w-4.5 text-indigo-600"></svg>
+            }
+          </button>
+          <button (click)="onLogout()" title="Sign Out"
+            class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-900 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer">
+            <svg lucideLogOut class="h-4.5 w-4.5"></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="flex flex-1 flex-col overflow-hidden">
+    <header class="relative z-40 flex h-16 shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-900/60 px-6 bg-white/80 dark:bg-slate-950/40 backdrop-blur-xl transition-colors duration-200">
+      
+      <div class="flex items-center gap-3">
+        <button (click)="toggleSidebar()"
+          class="rounded-lg border border-slate-200 dark:border-slate-900 p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white lg:hidden">
+          <svg lucideMenu class="h-5.5 w-5.5"></svg>
+        </button>
+        
+        <a routerLink="/" class="flex items-center gap-2 lg:hidden cursor-pointer select-none">
+          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500 text-white">
+            <svg lucideCheckSquare class="h-4.5 w-4.5"></svg>
+          </div>
+          <span class="text-lg font-bold tracking-tight text-slate-950 dark:text-white">ZenTodo</span>
+        </a>
+      </div>
+
+      <div class="relative ml-auto">
+        <button (click)="toggleBell()" title="Reminders"
+          class="relative rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">
+          <svg lucideBell class="h-5 w-5"></svg>
+          @if (reminderService.reminderCount() > 0) {
+            <span class="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white shadow-md">
+              {{ reminderService.reminderCount() }}
+            </span>
+          }
+        </button>
+
+        @if (isBellOpen()) {
+          <div class="absolute right-0 top-full mt-2 z-50 w-80 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-4 py-3">
+              <div class="flex items-center gap-2">
+                <svg lucideBell class="h-4 w-4 text-indigo-500"></svg>
+                <span class="text-sm font-bold text-slate-900 dark:text-white">Reminders</span>
+                @if (reminderService.reminderCount() > 0) {
+                  <span class="rounded-full bg-red-500/10 border border-red-500/20 px-1.5 py-0.5 text-[9px] font-bold text-red-500">
+                    {{ reminderService.reminderCount() }} upcoming
+                  </span>
+                }
+              </div>
+              <button (click)="closeBell()" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
+                <svg lucideX class="h-4 w-4"></svg>
+              </button>
+            </div>
+
+            <div class="max-h-80 overflow-y-auto">
+              @if (reminderService.upcomingReminders().length === 0) {
+                <div class="flex flex-col items-center justify-center py-8 px-4 text-center">
+                  <svg lucideCheckCircle2 class="h-8 w-8 text-emerald-400 mb-2"></svg>
+                  <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">All caught up!</p>
+                  <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">No upcoming reminders right now.</p>
+                </div>
+              } @else {
+                <div class="divide-y divide-slate-100 dark:divide-slate-800">
+                  @for (reminder of reminderService.upcomingReminders(); track reminder.todo.id) {
+                    <div class="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                      <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg mt-0.5"
+                        [class.bg-red-500/10]="reminder.minutesLeft < 30"
+                        [class.bg-amber-500/10]="reminder.minutesLeft >= 30">
+                        @if (reminder.minutesLeft < 30) { 
+                          <svg lucideAlertTriangle class="h-4 w-4 text-red-500"></svg>
+                        } @else {
+                          <svg lucideClock class="h-4 w-4 text-amber-500"></svg>
+                        }
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{{ reminder.todo.title }}</p>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">{{ reminder.todo.category }}</p>
+                        <span class="inline-block mt-1 rounded-full px-2 py-0.5 text-[9px] font-bold"
+                          [class.bg-red-500/10]="reminder.minutesLeft < 30" [class.text-red-600]="reminder.minutesLeft < 30"
+                          [class.dark:text-red-400]="reminder.minutesLeft < 30"
+                          [class.bg-amber-500/10]="reminder.minutesLeft >= 30"
+                          [class.text-amber-600]="reminder.minutesLeft >= 30"
+                          [class.dark:text-amber-400]="reminder.minutesLeft >= 30">
+                          {{ reminderService.formatTimeLeft(reminder.minutesLeft) }}
+                        </span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto px-6 py-8 md:px-8 bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
+      <div class="mx-auto max-w-7xl h-full">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+  </div>
+</div>

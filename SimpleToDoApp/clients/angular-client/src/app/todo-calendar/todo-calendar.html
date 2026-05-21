@@ -1,0 +1,129 @@
+<div class="space-y-6 h-full flex flex-col">
+  <!-- Calendar Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shrink-0">
+    <div>
+      <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Calendar Schedule</h1>
+      <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Track your deadlined items and daily operations.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 shadow-sm">
+        <button
+          (click)="handlePrevMonth()"
+          class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+        >
+          <svg lucideChevronLeft class="h-5 w-5"></svg>
+        </button>
+        <span class="px-4 text-sm font-semibold text-slate-700 dark:text-slate-200">
+          {{ monthNames[month] }} {{ year }}
+        </span>
+        <button
+          (click)="handleNextMonth()"
+          class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+        >
+          <svg lucideChevronRight class="h-5 w-5"></svg>
+        </button>
+      </div>
+      <button
+        (click)="openCreateModal()"
+        class="flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/10 transition-all hover:from-indigo-600 hover:to-violet-700 active:scale-98 cursor-pointer"
+      >
+        <svg lucidePlus class="h-4.5 w-4.5"></svg>
+        New Event
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="flex-grow flex items-center justify-center h-64">
+      <svg lucideLoader2 class="h-10 w-10 animate-spin text-indigo-500"></svg>
+    </div>
+  } @else if (error()) {
+    <div class="flex flex-col items-center justify-center h-64 text-center rounded-2xl border border-red-500/10 bg-red-500/5 p-6 shrink-0">
+      <svg lucideAlertCircle class="h-12 w-12 text-red-400 mb-3"></svg>
+      <h3 class="text-lg font-bold text-slate-950 dark:text-white">Failed to load schedule</h3>
+      <p class="text-slate-500 dark:text-slate-400 text-sm mt-1 mb-4">{{ error() }}</p>
+      <button
+        (click)="fetchCalendarTodos()"
+        class="rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white cursor-pointer shadow-sm"
+      >
+        Try Again
+      </button>
+    </div>
+  } @else {
+    <div class="flex-grow flex flex-col rounded-2xl border border-slate-200 dark:border-slate-900 bg-white dark:bg-slate-900/20 backdrop-blur-xl overflow-hidden shadow-sm dark:shadow-xl transition-all duration-200">
+      <!-- Weekday Labels -->
+      <div class="grid grid-cols-7 border-b border-slate-200 dark:border-slate-900 bg-slate-50 dark:bg-slate-950/40 text-center py-3 shrink-0">
+        @for (w of weekdays; track w) {
+          <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            {{ w }}
+          </span>
+        }
+      </div>
+
+      <!-- Days Grid -->
+      <div class="flex-grow grid grid-cols-7 grid-rows-6 auto-rows-fr divide-y divide-x border-slate-200 dark:border-slate-900 divide-slate-200 dark:divide-slate-900/60 min-h-[400px]">
+        @for (day of days; track $index) {
+          @if (day === null) {
+            <div class="bg-slate-50/50 dark:bg-slate-950/10 border-slate-100 dark:border-slate-900/40 p-2 min-h-[70px] select-none"></div>
+          } @else {
+            <div
+              (click)="handleDayClick(day)"
+              class="relative p-2 min-h-[70px] bg-white dark:bg-slate-950/30 border-slate-200 dark:border-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors cursor-pointer group flex flex-col justify-between"
+            >
+              <!-- Day Indicator -->
+              <div class="flex justify-end mb-1">
+                <span
+                  class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition-all duration-200"
+                  [class.bg-indigo-500]="isToday(day)"
+                  [class.text-white]="isToday(day)"
+                  [class.shadow-md]="isToday(day)"
+                  [class.shadow-indigo-500\/20]="isToday(day)"
+                  [class.text-slate-400]="!isToday(day)"
+                  [class.dark:text-slate-400]="!isToday(day)"
+                  [class.group-hover:text-slate-900]="!isToday(day)"
+                  [class.dark:group-hover:text-slate-200]="!isToday(day)"
+                >
+                  {{ day }}
+                </span>
+              </div>
+
+              <!-- Day Tasks List -->
+              <div class="flex-grow overflow-y-auto space-y-1 max-h-[90px]">
+                @for (todo of getTodosForDay(day).slice(0, 3); track todo.id) {
+                  <div
+                    (click)="handleTodoClick($event, todo)"
+                    class="text-[9px] font-medium truncate px-2 py-0.5 rounded border cursor-pointer transition-all"
+                    [class.bg-slate-50]="todo.status === 'Done'"
+                    [class.dark:bg-slate-900]="todo.status === 'Done'"
+                    [class.border-slate-200]="todo.status === 'Done'"
+                    [class.dark:border-slate-800]="todo.status === 'Done'"
+                    [class.text-slate-400]="todo.status === 'Done'"
+                    [class.dark:text-slate-500]="todo.status === 'Done'"
+                    [class.line-through]="todo.status === 'Done'"
+                    [class]="todo.status !== 'Done' ? getPriorityColor(todo.priority) : ''"
+                    [title]="todo.title"
+                  >
+                    {{ todo.title }}
+                  </div>
+                }
+                @if (getTodosForDay(day).length > 3) {
+                  <div class="text-[8px] font-bold text-indigo-600 dark:text-indigo-400 text-center pt-0.5">
+                    +{{ getTodosForDay(day).length - 3 }} more
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Shared Todo Modal component -->
+<app-todo-modal
+  [isOpen]="modalOpen"
+  [todo]="selectedTodo"
+  (close)="modalOpen = false"
+  (submit)="handleCreateOrUpdate($event)"
+></app-todo-modal>
