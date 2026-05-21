@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TodoService } from '../services/todo.service';
 import { NotificationService } from '../services/notification.service';
+import { ReminderService } from '../services/reminder.service';
 import { CreateTodoRequest, Todo, UpdateTodoRequest } from '../models/todo';
 import { TodoModal } from '../todo-modal/todo-modal';
 import {
@@ -54,6 +55,7 @@ import {
 export class TodoList implements OnInit {
   private readonly todoService = inject(TodoService);
   private readonly notificationService = inject(NotificationService);
+  private readonly reminderService = inject(ReminderService);
 
   todos = signal<Todo[]>([]);
   filteredTodos = signal<Todo[]>([]);
@@ -127,10 +129,11 @@ export class TodoList implements OnInit {
     this.applyFilters();
 
     this.todoService.updateStatus(todo.id, nextStatus).subscribe({
-      next: () => {
-        this.notificationService.showToast('Status updated successfully.', 'success');
-        this.fetchTodos(); // Fetch fresh to keep client aligned with DB value conversion
-      },
+        next: () => {
+          this.notificationService.showToast('Status updated successfully.', 'success');
+          this.reminderService.load();
+          this.fetchTodos(); // Fetch fresh to keep client aligned with DB value conversion
+        },
       error: (err) => {
         console.error('Failed to update task status', err);
         const errorMsg = this.notificationService.parseApiError(err, 'Failed to update status.');
@@ -156,6 +159,7 @@ export class TodoList implements OnInit {
       this.todoService.delete(id).subscribe({
         next: () => {
           this.notificationService.showToast('Task deleted successfully.', 'success');
+          this.reminderService.load();
         },
         error: (err) => {
           console.error('Failed to delete task', err);
@@ -172,6 +176,7 @@ export class TodoList implements OnInit {
       this.todoService.update(this.selectedTodo.id, payload as UpdateTodoRequest).subscribe({
         next: () => {
           this.notificationService.showToast('Task updated successfully.', 'success');
+          this.reminderService.load();
           this.fetchTodos();
         },
         error: (err) => {
@@ -183,6 +188,7 @@ export class TodoList implements OnInit {
       this.todoService.create(payload as CreateTodoRequest).subscribe({
         next: () => {
           this.notificationService.showToast('Task created successfully.', 'success');
+          this.reminderService.load();
           this.fetchTodos();
         },
         error: (err) => {

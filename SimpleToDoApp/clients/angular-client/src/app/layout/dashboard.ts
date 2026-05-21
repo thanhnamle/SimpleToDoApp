@@ -84,7 +84,11 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   toggleBell() {
-    this.isBellOpen.update(v => !v);
+    const nextOpen = !this.isBellOpen();
+    this.isBellOpen.set(nextOpen);
+    if (nextOpen) {
+      this.reminderService.load();
+    }
   }
 
   closeBell() {

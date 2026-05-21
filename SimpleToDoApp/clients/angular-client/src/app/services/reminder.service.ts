@@ -15,11 +15,13 @@ export class ReminderService implements OnDestroy {
   private readonly todoService = inject(TodoService);
   private readonly notificationService = inject(NotificationService);
   private todos = signal<Todo[]>([]);
-  private intervalId: any;
+  private now = signal(Date.now());
+  private refreshIntervalId: any;
+  private clockIntervalId: any;
   private notifiedKeys = new Set<string>();
 
   upcomingReminders = computed<ReminderItem[]>(() => {
-    const now = Date.now();
+    const now = this.now();
     return this.todos()
       .filter(t => t.status !== 'Done' && t.reminderMinutes > 0 && t.dueDate)
       .map(t => {
@@ -36,6 +38,7 @@ export class ReminderService implements OnDestroy {
   load() {
     this.todoService.getAll().subscribe({
       next: (data) => {
+        this.now.set(Date.now());
         this.todos.set(data);
         this.notifyActiveReminders(data);
       },
@@ -44,14 +47,23 @@ export class ReminderService implements OnDestroy {
   }
 
   startPolling(intervalMs = 60000) {
+    this.stopPolling();
     this.load();
-    this.intervalId = setInterval(() => this.load(), intervalMs);
+    this.refreshIntervalId = setInterval(() => this.load(), intervalMs);
+    this.clockIntervalId = setInterval(() => {
+      this.now.set(Date.now());
+      this.notifyActiveReminders(this.todos());
+    }, 15000);
   }
 
   stopPolling() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
+    if (this.refreshIntervalId) {
+      clearInterval(this.refreshIntervalId);
+      this.refreshIntervalId = null;
+    }
+    if (this.clockIntervalId) {
+      clearInterval(this.clockIntervalId);
+      this.clockIntervalId = null;
     }
   }
 

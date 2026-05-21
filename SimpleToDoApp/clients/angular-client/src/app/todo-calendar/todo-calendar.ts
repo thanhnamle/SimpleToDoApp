@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TodoService } from '../services/todo.service';
 import { NotificationService } from '../services/notification.service';
+import { ReminderService } from '../services/reminder.service';
 import { CreateTodoRequest, Todo, UpdateTodoRequest } from '../models/todo';
 import { TodoModal } from '../todo-modal/todo-modal';
 import {
@@ -36,6 +37,7 @@ import {
 export class TodoCalendar implements OnInit {
   private readonly todoService = inject(TodoService);
   private readonly notificationService = inject(NotificationService);
+  private readonly reminderService = inject(ReminderService);
 
   todos = signal<Todo[]>([]);
   loading = signal<boolean>(true);
@@ -161,6 +163,7 @@ export class TodoCalendar implements OnInit {
       this.todoService.update(this.selectedTodo.id, payload as UpdateTodoRequest).subscribe({
         next: () => {
           this.notificationService.showToast('Task updated successfully.', 'success');
+          this.reminderService.load();
           this.fetchCalendarTodos();
         },
         error: (err) => {
@@ -172,6 +175,7 @@ export class TodoCalendar implements OnInit {
       this.todoService.create(payload as CreateTodoRequest).subscribe({
         next: () => {
           this.notificationService.showToast('Task created successfully.', 'success');
+          this.reminderService.load();
           this.fetchCalendarTodos();
         },
         error: (err) => {
