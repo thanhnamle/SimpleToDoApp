@@ -40,13 +40,23 @@ export class AuthService {
     this.loading.set(true);
     return this.http.post<AuthResponse>(`${this.baseUrl}/register`, data).pipe(
       tap({
-        next: (res) => {
-          this.setSession(res);
-        },
-        error: () => this.clearSession(),
         finalize: () => this.loading.set(false)
       })
     );
+  }
+
+  verifyEmail(token: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/verify-email`, {
+      params: { token }
+    });
+  }
+
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/forgot-password`, { email });
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/reset-password`, { token, newPassword });
   }
 
   getMe(): Observable<User> {

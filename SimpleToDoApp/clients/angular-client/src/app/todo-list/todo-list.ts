@@ -16,7 +16,13 @@ import {
   LucideClock,
   LucideTag,
   LucideLoader2,
-  LucideAlertCircle
+  LucideAlertCircle,
+  LucideEye,
+  LucideX,
+  LucideCalendar,
+  LucideBell,
+  LucideAlertTriangle,
+  LucideInfo
 } from '@lucide/angular';
 
 @Component({
@@ -35,7 +41,13 @@ import {
     LucideClock,
     LucideTag,
     LucideLoader2,
-    LucideAlertCircle
+    LucideAlertCircle,
+    LucideEye,
+    LucideX,
+    LucideCalendar,
+    LucideBell,
+    LucideAlertTriangle,
+    LucideInfo
   ],
   templateUrl: './todo-list.html'
 })
@@ -58,6 +70,10 @@ export class TodoList implements OnInit {
   // Modal control
   modalOpen = false;
   selectedTodo: Todo | null = null;
+
+  // Detail panel
+  detailOpen = false;
+  detailTodo: Todo | null = null;
 
   ngOnInit() {
     this.fetchTodos();
@@ -187,6 +203,16 @@ export class TodoList implements OnInit {
     this.modalOpen = true;
   }
 
+  openDetailPanel(todo: Todo) {
+    this.detailTodo = todo;
+    this.detailOpen = true;
+  }
+
+  closeDetailPanel() {
+    this.detailOpen = false;
+    this.detailTodo = null;
+  }
+
   getPriorityStyle(p: string): string {
     switch (p) {
       case 'High':
@@ -213,5 +239,28 @@ export class TodoList implements OnInit {
     if (!dateStr) return '';
     const date = new Date(dateStr);
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  formatDetailDate(dateStr: string): string {
+    if (!dateStr) return 'N/A';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return 'N/A';
+    return date.toLocaleString(undefined, {
+      weekday: 'short', year: 'numeric', month: 'short',
+      day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+  }
+
+  isOverdue(todo: Todo): boolean {
+    if (todo.status === 'Done' || !todo.dueDate) return false;
+    return new Date(todo.dueDate) < new Date();
+  }
+
+  formatReminderLabel(minutes: number): string {
+    if (!minutes) return 'None';
+    if (minutes < 60) return `${minutes} min before`;
+    if (minutes === 60) return '1 hour before';
+    if (minutes < 1440) return `${minutes / 60} hours before`;
+    return '1 day before';
   }
 }

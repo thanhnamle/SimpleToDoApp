@@ -71,19 +71,35 @@
               <div 
                 draggable="true"
                 (dragstart)="onDragStart(todo)"
-                class="group flex flex-col justify-between rounded-xl border border-slate-200 bg-white dark:border-slate-800/80 dark:bg-slate-950/40 p-4 shadow-sm hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 cursor-grab active:cursor-grabbing hover:shadow-md"
+                class="group flex flex-col justify-between rounded-xl border bg-white dark:bg-slate-950/40 p-4 shadow-sm transition-all duration-200 cursor-grab active:cursor-grabbing hover:shadow-md"
+                [class.border-red-400]="isOverdue(todo)"
+                [class.dark:border-red-950]="isOverdue(todo)"
+                [class.hover:border-red-500]="isOverdue(todo)"
+                [class.dark:hover:border-red-800]="isOverdue(todo)"
+                [class.border-slate-200]="!isOverdue(todo)"
+                [class.dark:border-slate-800/80]="!isOverdue(todo)"
+                [class.hover:border-slate-300]="!isOverdue(todo)"
+                [class.dark:hover:border-slate-700/80]="!isOverdue(todo)"
               >
                 <div>
                   <div class="flex items-start justify-between gap-2">
                     <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200 line-clamp-1" [class.line-through]="todo.status === 'Done'" [class.text-slate-400]="todo.status === 'Done'" [class.dark:text-slate-500]="todo.status === 'Done'">
                       {{ todo.title }}
                     </h4>
-                    <span
-                      class="text-[8px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0"
-                      [class]="getPriorityStyle(todo.priority)"
-                    >
-                      {{ todo.priority }}
-                    </span>
+                    <div class="flex items-center gap-1 shrink-0">
+                      @if (isOverdue(todo)) {
+                        <span class="text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase bg-red-500 text-white flex items-center gap-0.5 animate-pulse">
+                          <svg lucideAlertTriangle class="h-2 w-2"></svg>
+                          Overdue
+                        </span>
+                      }
+                      <span
+                        class="text-[8px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider"
+                        [class]="getPriorityStyle(todo.priority)"
+                      >
+                        {{ todo.priority }}
+                      </span>
+                    </div>
                   </div>
                   <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 line-clamp-2" [class.text-slate-400]="todo.status === 'Done'" [class.dark:text-slate-600]="todo.status === 'Done'">
                     {{ todo.description || 'No description provided.' }}
@@ -98,8 +114,14 @@
                       </span>
                     }
                     @if (todo.dueDate) {
-                      <span class="flex items-center gap-1 text-[9px] font-medium text-slate-400 dark:text-slate-500">
-                        <svg lucideClock class="h-2.5 w-2.5 text-slate-300 dark:text-slate-600"></svg>
+                      <span 
+                        class="flex items-center gap-1 text-[9px] font-medium transition-colors"
+                        [class.text-red-500]="isOverdue(todo)"
+                        [class.dark:text-red-400]="isOverdue(todo)"
+                        [class.text-slate-400]="!isOverdue(todo)"
+                        [class.dark:text-slate-500]="!isOverdue(todo)"
+                      >
+                        <svg lucideClock class="h-2.5 w-2.5" [class.text-red-400]="isOverdue(todo)" [class.dark:text-red-500]="isOverdue(todo)" [class.text-slate-300]="!isOverdue(todo)" [class.dark:text-slate-600]="!isOverdue(todo)"></svg>
                         {{ formatDisplayDate(todo.dueDate) }}
                       </span>
                     }

@@ -34,7 +34,10 @@ namespace SimpleToDoApp.Tests
             var mockJwt = new Mock<IJwtTokenService>();
             mockJwt.Setup(j => j.GenerateToken(It.IsAny<Account>())).Returns(("fake_token", DateTime.UtcNow.AddDays(1)));
 
-            var authService = new AuthService(context, mockHasher.Object, mockJwt.Object);
+            var mockEmail = new Mock<IEmailService>();
+            mockEmail.Setup(e => e.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+
+            var authService = new AuthService(context, mockHasher.Object, mockJwt.Object, mockEmail.Object);
 
             var request = new RegisterRequest
             {
@@ -44,13 +47,14 @@ namespace SimpleToDoApp.Tests
             };
 
             // Act
-            var response = await authService.RegisterAsync(request);
+            var response = await authService.RegisterAsync(request, "http://localhost:4200");
 
             // Assert
             Assert.NotNull(response);
             Assert.Equal("newuser", response.User.Username);
-            Assert.Equal("fake_token", response.Token);
+            Assert.Equal(string.Empty, response.Token); // Token should be empty on registration until verified
             Assert.True(await context.Accounts.AnyAsync(a => a.Username == "newuser"));
+            mockEmail.Verify(e => e.SendEmailAsync("new@test.com", It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [Fact]
@@ -61,7 +65,8 @@ namespace SimpleToDoApp.Tests
             context.Accounts.Add(new Account { UserId = 1, Username = "existing", Email = "old@test.com", Password = "pwd" });
             await context.SaveChangesAsync();
 
-            var authService = new AuthService(context, new Mock<IPasswordHasher>().Object, new Mock<IJwtTokenService>().Object);
+            var mockEmail = new Mock<IEmailService>();
+            var authService = new AuthService(context, new Mock<IPasswordHasher>().Object, new Mock<IJwtTokenService>().Object, mockEmail.Object);
 
             var request = new RegisterRequest
             {
@@ -71,7 +76,7 @@ namespace SimpleToDoApp.Tests
             };
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => authService.RegisterAsync(request));
+            await Assert.ThrowsAsync<ArgumentException>(() => authService.RegisterAsync(request, "http://localhost:4200"));
         }
 
         [Fact]
@@ -79,7 +84,7 @@ namespace SimpleToDoApp.Tests
         {
             // Arrange
             var context = CreateDbContext();
-            context.Accounts.Add(new Account { UserId = 1, Username = "user", Email = "user@test.com", Password = "hashed_password" });
+            context.Accounts.Add(new Account { UserId = 1, Username = "user", Email = "user@test.com", Password = "hashed_password", IsEmailVerified = true });
             await context.SaveChangesAsync();
 
             var mockHasher = new Mock<IPasswordHasher>();
@@ -88,7 +93,8 @@ namespace SimpleToDoApp.Tests
             var mockJwt = new Mock<IJwtTokenService>();
             mockJwt.Setup(j => j.GenerateToken(It.IsAny<Account>())).Returns(("valid_jwt", DateTime.UtcNow.AddDays(1)));
 
-            var authService = new AuthService(context, mockHasher.Object, mockJwt.Object);
+            var mockEmail = new Mock<IEmailService>();
+            var authService = new AuthService(context, mockHasher.Object, mockJwt.Object, mockEmail.Object);
 
             var request = new LoginRequest
             {
@@ -109,13 +115,14 @@ namespace SimpleToDoApp.Tests
         {
             // Arrange
             var context = CreateDbContext();
-            context.Accounts.Add(new Account { UserId = 1, Username = "user", Email = "user@test.com", Password = "hashed_password" });
+            context.Accounts.Add(new Account { UserId = 1, Username = "user", Email = "user@test.com", Password = "hashed_password", IsEmailVerified = true });
             await context.SaveChangesAsync();
 
             var mockHasher = new Mock<IPasswordHasher>();
             mockHasher.Setup(h => h.VerifyPassword("wrong_password", "hashed_password")).Returns(false);
 
-            var authService = new AuthService(context, mockHasher.Object, new Mock<IJwtTokenService>().Object);
+            var mockEmail = new Mock<IEmailService>();
+            var authService = new AuthService(context, mockHasher.Object, new Mock<IJwtTokenService>().Object, mockEmail.Object);
 
             var request = new LoginRequest
             {
@@ -125,6 +132,31 @@ namespace SimpleToDoApp.Tests
 
             // Act & Assert
             await Assert.ThrowsAsync<UnauthorizedAccessException>(() => authService.LoginAsync(request));
+        }
+
+        [Fact]
+        public async Task LoginAsync_UnverifiedEmail_ThrowsUnauthorizedAccessException()
+        {
+            // Arrange
+            var context = CreateDbContext();
+            context.Accounts.Add(new Account { UserId = 1, Username = "user", Email = "user@test.com", Password = "hashed_password", IsEmailVerified = false });
+            await context.SaveChangesAsync();
+
+            var mockHasher = new Mock<IPasswordHasher>();
+            mockHasher.Setup(h => h.VerifyPassword("plain_password", "hashed_password")).Returns(true);
+
+            var mockEmail = new Mock<IEmailService>();
+            var authService = new AuthService(context, mockHasher.Object, new Mock<IJwtTokenService>().Object, mockEmail.Object);
+
+            var request = new LoginRequest
+            {
+                UsernameOrEmail = "user",
+                Password = "plain_password"
+            };
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<UnauthorizedAccessException>(() => authService.LoginAsync(request));
+            Assert.Equal("Please verify your email before logging in.", ex.Message);
         }
     }
 }

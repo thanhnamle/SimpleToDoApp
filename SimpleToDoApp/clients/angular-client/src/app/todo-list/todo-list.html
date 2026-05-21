@@ -178,12 +178,30 @@
 
           <!-- Task Footer / Controls -->
           <div class="flex items-center justify-between border-t border-slate-100 dark:border-slate-900/60 pt-4 mt-5">
-            <div class="flex items-center gap-1.5 text-slate-500 text-[11px] font-medium">
-              <svg lucideClock class="h-3.5 w-3.5 text-slate-400 dark:text-slate-600"></svg>
-              <span>Due: {{ formatDisplayDate(todo.dueDate) }}</span>
+            <div class="flex items-center gap-1.5 text-[11px] font-medium"
+              [class.text-red-500]="isOverdue(todo)"
+              [class.dark:text-red-400]="isOverdue(todo)"
+              [class.text-slate-500]="!isOverdue(todo)"
+            >
+              <svg lucideClock class="h-3.5 w-3.5"
+                [class.text-red-400]="isOverdue(todo)"
+                [class.text-slate-400]="!isOverdue(todo)"
+                [class.dark:text-slate-600]="!isOverdue(todo)"
+              ></svg>
+              <span>
+                @if (isOverdue(todo)) { ⚠ Overdue: } @else { Due: }
+                {{ formatDisplayDate(todo.dueDate) }}
+              </span>
             </div>
 
             <div class="flex items-center gap-1.5">
+              <button
+                (click)="openDetailPanel(todo)"
+                title="View details"
+                class="rounded-lg p-1.5 text-slate-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer"
+              >
+                <svg lucideEye class="h-4.5 w-4.5"></svg>
+              </button>
               <button
                 (click)="openEditModal(todo)"
                 class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
@@ -211,3 +229,135 @@
   (close)="modalOpen = false"
   (submit)="handleCreateOrUpdate($event)"
 ></app-todo-modal>
+
+<!-- Detail Side Panel -->
+@if (detailOpen && detailTodo) {
+  <!-- Backdrop -->
+  <div (click)="closeDetailPanel()" class="fixed inset-0 z-40 bg-slate-950/40 dark:bg-slate-950/60 backdrop-blur-sm"></div>
+
+  <!-- Slide-in panel -->
+  <div class="fixed right-0 top-0 h-full z-50 w-full max-w-md bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden">
+    <!-- Panel Header -->
+    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-6 py-4 shrink-0">
+      <div class="flex items-center gap-2">
+        <svg lucideInfo class="h-5 w-5 text-indigo-500"></svg>
+        <h2 class="text-base font-bold text-slate-900 dark:text-white">Task Details</h2>
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          (click)="openEditModal(detailTodo); closeDetailPanel()"
+          class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors cursor-pointer"
+        >
+          <svg lucideEdit3 class="h-3.5 w-3.5"></svg> Edit
+        </button>
+        <button (click)="closeDetailPanel()" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
+          <svg lucideX class="h-5 w-5"></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Panel Content -->
+    <div class="flex-1 overflow-y-auto p-6 space-y-5">
+      <!-- Title & Status -->
+      <div>
+        <h3 class="text-xl font-extrabold text-slate-900 dark:text-white leading-snug"
+          [class.line-through]="detailTodo.status === 'Done'"
+          [class.text-slate-400]="detailTodo.status === 'Done'"
+        >{{ detailTodo.title }}</h3>
+
+        <div class="flex flex-wrap gap-2 mt-3">
+          <span class="text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider" [class]="getPriorityStyle(detailTodo.priority)">
+            {{ detailTodo.priority }}
+          </span>
+          <span class="text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider" [class]="getStatusStyle(detailTodo.status)">
+            {{ detailTodo.status === 'InProgress' ? 'In Progress' : detailTodo.status }}
+          </span>
+          @if (detailTodo.isAllDay) {
+            <span class="text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider bg-violet-500/10 text-violet-500 dark:text-violet-400">
+              All Day
+            </span>
+          }
+          @if (isOverdue(detailTodo)) {
+            <span class="flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider bg-red-500/10 text-red-500 dark:text-red-400">
+              <svg lucideAlertTriangle class="h-3 w-3"></svg> Overdue
+            </span>
+          }
+        </div>
+      </div>
+
+      <!-- Description -->
+      @if (detailTodo.description) {
+        <div class="rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 p-4">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Description</p>
+          <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{{ detailTodo.description }}</p>
+        </div>
+      }
+
+      <!-- Meta grid -->
+      <div class="grid grid-cols-2 gap-3">
+        <!-- Category -->
+        <div class="rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 p-3">
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Category</p>
+          <div class="flex items-center gap-1.5">
+            <svg lucideTag class="h-3.5 w-3.5 text-slate-400 dark:text-slate-500"></svg>
+            <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ detailTodo.category || '—' }}</span>
+          </div>
+        </div>
+
+        <!-- Reminder -->
+        <div class="rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 p-3">
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Reminder</p>
+          <div class="flex items-center gap-1.5">
+            <svg lucideBell class="h-3.5 w-3.5 text-slate-400 dark:text-slate-500"></svg>
+            <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ formatReminderLabel(detailTodo.reminderMinutes) }}</span>
+          </div>
+        </div>
+
+        <!-- Start Date -->
+        <div class="rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 p-3">
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Start Date</p>
+          <div class="flex items-center gap-1.5">
+            <svg lucideCalendar class="h-3.5 w-3.5 text-slate-400 dark:text-slate-500"></svg>
+            <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">{{ formatDetailDate(detailTodo.startDate) }}</span>
+          </div>
+        </div>
+
+        <!-- Due Date -->
+        <div class="rounded-xl border p-3"
+          [class.bg-red-50]="isOverdue(detailTodo)"
+          [class.dark:bg-red-900/10]="isOverdue(detailTodo)"
+          [class.border-red-300]="isOverdue(detailTodo)"
+          [class.dark:border-red-800/50]="isOverdue(detailTodo)"
+          [class.bg-slate-50]="!isOverdue(detailTodo)"
+          [class.dark:bg-slate-800/40]="!isOverdue(detailTodo)"
+          [class.border-slate-200]="!isOverdue(detailTodo)"
+          [class.dark:border-slate-800]="!isOverdue(detailTodo)"
+        >
+          <p class="text-[10px] font-semibold uppercase tracking-wider mb-1"
+            [class.text-red-500]="isOverdue(detailTodo)"
+            [class.dark:text-red-400]="isOverdue(detailTodo)"
+            [class.text-slate-400]="!isOverdue(detailTodo)"
+          >Due Date @if (isOverdue(detailTodo)) { ⚠ }</p>
+          <div class="flex items-center gap-1.5">
+            <svg lucideClock class="h-3.5 w-3.5"
+              [class.text-red-400]="isOverdue(detailTodo)"
+              [class.text-slate-400]="!isOverdue(detailTodo)"
+              [class.dark:text-slate-500]="!isOverdue(detailTodo)"
+            ></svg>
+            <span class="text-xs font-semibold"
+              [class.text-red-600]="isOverdue(detailTodo)"
+              [class.dark:text-red-400]="isOverdue(detailTodo)"
+              [class.text-slate-700]="!isOverdue(detailTodo)"
+              [class.dark:text-slate-200]="!isOverdue(detailTodo)"
+            >{{ formatDetailDate(detailTodo.dueDate) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Created date -->
+      <p class="text-[10px] text-slate-400 dark:text-slate-600 text-center">
+        Created: {{ formatDetailDate(detailTodo.createdAt) }}
+      </p>
+    </div>
+  </div>
+}

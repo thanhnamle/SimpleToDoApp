@@ -92,6 +92,8 @@
                 @for (todo of getTodosForDay(day).slice(0, 3); track todo.id) {
                   <div
                     (click)="handleTodoClick($event, todo)"
+                    (mouseenter)="onTodoMouseEnter($event, todo)"
+                    (mouseleave)="onTodoMouseLeave()"
                     class="text-[9px] font-medium truncate px-2 py-0.5 rounded border cursor-pointer transition-all"
                     [class.bg-slate-50]="todo.status === 'Done'"
                     [class.dark:bg-slate-900]="todo.status === 'Done'"
@@ -127,3 +129,59 @@
   (close)="modalOpen = false"
   (submit)="handleCreateOrUpdate($event)"
 ></app-todo-modal>
+
+<!-- Hover Tooltip -->
+@if (hoveredTodo) {
+  <div 
+    class="fixed z-50 pointer-events-none w-72 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md p-4 shadow-xl transition-all duration-150 flex flex-col space-y-3"
+    [style.left.px]="tooltipPos.x"
+    [style.top.px]="tooltipPos.y"
+  >
+    <!-- Tooltip Header -->
+    <div class="flex items-start justify-between gap-2 border-b border-slate-100 dark:border-slate-900 pb-2">
+      <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 line-clamp-1" [class.line-through]="hoveredTodo.status === 'Done'" [class.text-slate-400]="hoveredTodo.status === 'Done'">
+        {{ hoveredTodo.title }}
+      </h4>
+      <span
+        class="text-[8px] font-semibold px-1.5 py-0.5 rounded-full uppercase tracking-wider shrink-0"
+        [class]="getPriorityColor(hoveredTodo.priority)"
+      >
+        {{ hoveredTodo.priority }}
+      </span>
+    </div>
+
+    <!-- Description -->
+    @if (hoveredTodo.description) {
+      <p class="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2">
+        {{ hoveredTodo.description }}
+      </p>
+    }
+
+    <!-- Meta Details Grid -->
+    <div class="grid grid-cols-2 gap-2 text-[9px] text-slate-500 dark:text-slate-400">
+      <div class="flex items-center gap-1.5">
+        <svg lucideTag class="h-3 w-3 text-slate-400 dark:text-slate-500"></svg>
+        <span class="truncate">{{ hoveredTodo.category || 'No Category' }}</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <svg lucideAlertCircle class="h-3 w-3 text-slate-400 dark:text-slate-500"></svg>
+        <span>{{ hoveredTodo.status }}</span>
+      </div>
+      <div class="flex items-center gap-1.5 col-span-2">
+        <svg lucideBell class="h-3 w-3 text-slate-400 dark:text-slate-500"></svg>
+        <span>{{ formatReminderLabel(hoveredTodo.reminderMinutes) }}</span>
+      </div>
+      <div class="flex items-center gap-1.5 col-span-2" [class.text-red-500]="isOverdue(hoveredTodo)" [class.dark:text-red-400]="isOverdue(hoveredTodo)">
+        @if (isOverdue(hoveredTodo)) {
+          <svg lucideAlertTriangle class="h-3 w-3 text-red-500 dark:text-red-400 animate-pulse"></svg>
+          <span class="font-bold flex items-center gap-1">
+            Overdue: {{ formatTooltipDate(hoveredTodo.dueDate) }}
+          </span>
+        } @else if (hoveredTodo.dueDate) {
+          <svg lucideClock class="h-3 w-3 text-slate-400 dark:text-slate-500"></svg>
+          <span>Due: {{ formatTooltipDate(hoveredTodo.dueDate) }}</span>
+        }
+      </div>
+    </div>
+  </div>
+}

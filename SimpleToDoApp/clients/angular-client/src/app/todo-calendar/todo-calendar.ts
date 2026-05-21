@@ -9,7 +9,11 @@ import {
   LucideChevronRight,
   LucidePlus,
   LucideLoader2,
-  LucideAlertCircle
+  LucideAlertCircle,
+  LucideAlertTriangle,
+  LucideClock,
+  LucideBell,
+  LucideTag
 } from '@lucide/angular';
 
 @Component({
@@ -21,7 +25,11 @@ import {
     LucideChevronRight,
     LucidePlus,
     LucideLoader2,
-    LucideAlertCircle
+    LucideAlertCircle,
+    LucideAlertTriangle,
+    LucideClock,
+    LucideBell,
+    LucideTag
   ],
   templateUrl: './todo-calendar.html'
 })
@@ -185,5 +193,47 @@ export class TodoCalendar implements OnInit {
       case 'Medium': return 'bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30';
       default: return 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30';
     }
+  }
+
+  // Tooltip & Overdue States
+  hoveredTodo: Todo | null = null;
+  tooltipPos = { x: 0, y: 0 };
+
+  onTodoMouseEnter(e: MouseEvent, todo: Todo) {
+    this.hoveredTodo = todo;
+    this.tooltipPos = {
+      x: e.clientX + 15,
+      y: e.clientY + 15
+    };
+  }
+
+  onTodoMouseLeave() {
+    this.hoveredTodo = null;
+  }
+
+  isOverdue(todo: Todo): boolean {
+    if (!todo.dueDate || todo.status === 'Done') return false;
+    const due = new Date(todo.dueDate);
+    return !isNaN(due.getTime()) && due < new Date();
+  }
+
+  formatTooltipDate(dateStr: string): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleString(undefined, { 
+      weekday: 'short', 
+      month: 'short', 
+      day: 'numeric', 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  }
+
+  formatReminderLabel(minutes: number): string {
+    if (!minutes) return 'No reminder';
+    if (minutes === 1440) return '1 day before';
+    if (minutes >= 60) return `${minutes / 60} hour${minutes / 60 > 1 ? 's' : ''} before`;
+    return `${minutes} minutes before`;
   }
 }

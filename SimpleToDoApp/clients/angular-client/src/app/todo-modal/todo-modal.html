@@ -4,9 +4,9 @@
     <div (click)="onClose()" class="fixed inset-0 bg-slate-950/60 dark:bg-slate-950/80 backdrop-blur-sm transition-opacity"></div>
 
     <!-- Modal body -->
-    <div class="z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl transition-all">
+    <div class="z-10 w-full max-w-lg overflow-y-auto max-h-[92vh] rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl transition-all">
       <!-- Header -->
-      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-900 bg-slate-50 dark:bg-slate-950/40 px-6 py-4">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-900 bg-slate-50 dark:bg-slate-950/40 px-6 py-4 sticky top-0 z-10">
         <h3 class="text-lg font-bold text-slate-950 dark:text-white">
           {{ isEditMode ? 'Edit Task' : 'Create New Task' }}
         </h3>
@@ -44,7 +44,7 @@
 
         <!-- Description -->
         <div>
-          <label for="modal-desc" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Description</label>
+          <label for="modal-desc" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Description *</label>
           <textarea
             id="modal-desc"
             name="description"
@@ -58,7 +58,7 @@
         <!-- Category & Priority Grid -->
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label for="modal-category" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Category</label>
+            <label for="modal-category" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Category *</label>
             <input
               id="modal-category"
               type="text"
@@ -100,45 +100,124 @@
             </select>
           </div>
 
+          <!-- All Day toggle -->
           <div class="flex items-center justify-between pt-5">
-            <label for="modal-allday" class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">All Day Event</label>
-            <input
+            <label for="modal-allday" class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 cursor-pointer">All Day Event</label>
+            <button
+              type="button"
               id="modal-allday"
-              type="checkbox"
-              name="isAllDay"
-              class="h-4.5 w-4.5 rounded border-slate-300 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-              [(ngModel)]="formData.isAllDay"
-            />
+              (click)="formData.isAllDay = !formData.isAllDay; onAllDayChange()"
+              class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none cursor-pointer"
+              [class.bg-indigo-500]="formData.isAllDay"
+              [class.bg-slate-200]="!formData.isAllDay"
+              [class.dark:bg-slate-700]="!formData.isAllDay"
+            >
+              <span
+                class="inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-200"
+                [class.translate-x-6]="formData.isAllDay"
+                [class.translate-x-1]="!formData.isAllDay"
+              ></span>
+            </button>
           </div>
         </div>
 
         <!-- Dates Grid -->
         <div class="grid grid-cols-2 gap-4">
+          <!-- Start Date -->
           <div>
             <label for="modal-start" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Start Date</label>
-            <input
-              id="modal-start"
-              type="datetime-local"
-              name="startDate"
-              class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3 py-2 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all"
-              [(ngModel)]="formData.startDate"
-            />
+            @if (formData.isAllDay) {
+              <input
+                id="modal-start"
+                type="date"
+                name="startDate"
+                class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3 py-2 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all"
+                [(ngModel)]="formData.startDate"
+              />
+            } @else {
+              <input
+                id="modal-start"
+                type="datetime-local"
+                name="startDate"
+                class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3 py-2 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all"
+                [(ngModel)]="formData.startDate"
+              />
+            }
           </div>
 
+          <!-- Due Date with overdue highlight -->
           <div>
-            <label for="modal-due" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Due Date</label>
-            <input
-              id="modal-due"
-              type="datetime-local"
-              name="dueDate"
-              class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3 py-2 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all"
-              [(ngModel)]="formData.dueDate"
-            />
+            <label for="modal-due" class="block text-xs font-semibold uppercase tracking-wider"
+              [class.text-red-500]="isDueDateOverdue"
+              [class.text-slate-500]="!isDueDateOverdue"
+              [class.dark:text-red-400]="isDueDateOverdue"
+              [class.dark:text-slate-400]="!isDueDateOverdue"
+            >
+              Due Date @if (isDueDateOverdue) { <span class="normal-case font-normal">(overdue!)</span> }
+            </label>
+            @if (formData.isAllDay) {
+              <input
+                id="modal-due"
+                type="date"
+                name="dueDate"
+                class="mt-1.5 w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all bg-slate-50 dark:bg-slate-950/60"
+                [class.border-red-400]="isDueDateOverdue"
+                [class.focus:border-red-500]="isDueDateOverdue"
+                [class.border-slate-200]="!isDueDateOverdue"
+                [class.dark:border-slate-800]="!isDueDateOverdue"
+                [class.text-red-600]="isDueDateOverdue"
+                [class.dark:text-red-400]="isDueDateOverdue"
+                [class.text-slate-800]="!isDueDateOverdue"
+                [class.dark:text-slate-300]="!isDueDateOverdue"
+                [(ngModel)]="formData.dueDate"
+              />
+            } @else {
+              <input
+                id="modal-due"
+                type="datetime-local"
+                name="dueDate"
+                class="mt-1.5 w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all bg-slate-50 dark:bg-slate-950/60"
+                [class.border-red-400]="isDueDateOverdue"
+                [class.border-slate-200]="!isDueDateOverdue"
+                [class.dark:border-slate-800]="!isDueDateOverdue"
+                [class.text-red-600]="isDueDateOverdue"
+                [class.dark:text-red-400]="isDueDateOverdue"
+                [class.text-slate-800]="!isDueDateOverdue"
+                [class.dark:text-slate-300]="!isDueDateOverdue"
+                [(ngModel)]="formData.dueDate"
+              />
+            }
+            @if (isDueDateOverdue) {
+              <p class="mt-1 text-[10px] text-red-500 dark:text-red-400">⚠ This task is past its due date.</p>
+            }
           </div>
         </div>
 
+        <!-- Reminder Minutes -->
+        <div>
+          <label for="modal-reminder" class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <svg lucideBell class="h-3.5 w-3.5"></svg>
+            Reminder
+          </label>
+          <select
+            id="modal-reminder"
+            name="reminderMinutes"
+            class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3 py-2 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer"
+            [(ngModel)]="formData.reminderMinutes"
+          >
+            <option [value]="0">No reminder</option>
+            <option [value]="5">5 minutes before</option>
+            <option [value]="10">10 minutes before</option>
+            <option [value]="15">15 minutes before</option>
+            <option [value]="30">30 minutes before</option>
+            <option [value]="60">1 hour before</option>
+            <option [value]="120">2 hours before</option>
+            <option [value]="1440">1 day before</option>
+          </select>
+        </div>
+
         <!-- Footer / Actions -->
-        <div class="flex items-center justify-end gap-3 border-t border-slate-200 dark:border-slate-900 pt-5 mt-6">
+        <div class="flex items-center justify-end gap-3 border-t border-slate-200 dark:border-slate-900 pt-5 mt-2">
           <button
             type="button"
             (click)="onClose()"

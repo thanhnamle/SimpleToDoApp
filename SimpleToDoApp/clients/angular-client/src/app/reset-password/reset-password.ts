@@ -1,5 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
@@ -11,11 +11,11 @@ import {
   LucideArrowRight,
   LucideSun,
   LucideMoon,
-  LucideMail
+  LucideCheckCircle
 } from '@lucide/angular';
 
 @Component({
-  selector: 'app-register',
+  selector: 'app-reset-password',
   imports: [
     CommonModule,
     FormsModule,
@@ -26,22 +26,29 @@ import {
     LucideArrowRight,
     LucideSun,
     LucideMoon,
-    LucideMail
+    LucideCheckCircle
   ],
-  templateUrl: './register.html'
+  templateUrl: './reset-password.html'
 })
-export class Register {
+export class ResetPassword implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly themeService = inject(ThemeService);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
-  username = '';
-  email = '';
-  password = '';
+  token = '';
+  newPassword = '';
   confirmPassword = '';
   error = signal<string | null>(null);
   isSubmitting = signal<boolean>(false);
-  isRegistered = signal<boolean>(false);
+  isSubmitted = signal<boolean>(false);
+
+  ngOnInit() {
+    this.token = this.route.snapshot.queryParamMap.get('token') || '';
+    if (!this.token) {
+      this.error.set('Invalid or missing password reset token.');
+    }
+  }
 
   toggleTheme() {
     this.themeService.toggleTheme();
@@ -52,45 +59,40 @@ export class Register {
   }
 
   onSubmit() {
-    if (!this.username.trim() || !this.email.trim() || !this.password.trim() || !this.confirmPassword.trim()) {
+    if (!this.token) {
+      this.error.set('No reset token found. Please request a new link.');
+      return;
+    }
+
+    if (!this.newPassword.trim() || !this.confirmPassword.trim()) {
       this.error.set('Please fill in all fields.');
       return;
     }
 
-    if (this.password !== this.confirmPassword) {
+    if (this.newPassword !== this.confirmPassword) {
       this.error.set('Passwords do not match.');
+      return;
+    }
+
+    // Password validation: 8-15 characters, at least 1 uppercase, 1 lowercase, 1 number
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,15}$/;
+    if (!passwordRegex.test(this.newPassword)) {
+      this.error.set('Password must be 8-15 characters long, contain at least one uppercase letter, one lowercase letter, and one number.');
       return;
     }
 
     this.error.set(null);
     this.isSubmitting.set(true);
 
-    this.authService.register({
-      username: this.username,
-      email: this.email,
-      password: this.password
-    }).subscribe({
+    this.authService.resetPassword(this.token, this.newPassword).subscribe({
       next: () => {
-        this.isRegistered.set(true);
+        this.isSubmitted.set(true);
       },
       error: (err) => {
-        let msg = 'Registration failed.';
+        let msg = 'Failed to reset password. The token may be invalid or expired.';
         if (err.error) {
-          if (err.error.details) {
-            msg = err.error.details;
-          } else if (err.error.message) {
+          if (err.error.message) {
             msg = err.error.message;
-          } else if (err.error.errors) {
-            // Extract the first validation error
-            const errorKeys = Object.keys(err.error.errors);
-            if (errorKeys.length > 0) {
-              const messages = err.error.errors[errorKeys[0]];
-              if (Array.isArray(messages) && messages.length > 0) {
-                msg = messages[0];
-              } else {
-                msg = String(messages);
-              }
-            }
           } else {
             msg = err.error.title || msg;
           }
