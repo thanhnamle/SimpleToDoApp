@@ -54,6 +54,73 @@ export class TodoModal implements OnChanges {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   }
 
+  get minStartDate(): string {
+    if (this.isEditMode && this.todo) {
+      return this.formData.isAllDay
+        ? this.formatDateOnlyForInput(this.todo.startDate)
+        : this.formatDateForInput(this.todo.startDate);
+    }
+    const now = new Date();
+    return this.formData.isAllDay
+      ? this.formatDateOnlyForInput(now.toISOString())
+      : this.formatDateForInput(now.toISOString());
+  }
+
+  get minDueDate(): string {
+    return this.formData.startDate;
+  }
+
+  get minStartDateDate(): string {
+    if (this.isEditMode && this.todo) {
+      return this.formatDateOnlyForInput(this.todo.startDate);
+    }
+    return this.todayStr;
+  }
+
+  get minDueDateDate(): string {
+    return this.startDateDate || this.todayStr;
+  }
+
+  get startDateDate(): string {
+    if (!this.formData.startDate) return '';
+    return this.formData.startDate.substring(0, 10);
+  }
+  set startDateDate(val: string) {
+    if (!val) return;
+    const time = this.startDateTime || '09:00';
+    this.formData.startDate = this.formData.isAllDay ? val : `${val}T${time}`;
+  }
+
+  get startDateTime(): string {
+    if (!this.formData.startDate || this.formData.startDate.length < 16) return '09:00';
+    return this.formData.startDate.substring(11, 16);
+  }
+  set startDateTime(val: string) {
+    const date = this.startDateDate || this.todayStr;
+    const time = val || '09:00';
+    this.formData.startDate = `${date}T${time}`;
+  }
+
+  get dueDateDate(): string {
+    if (!this.formData.dueDate) return '';
+    return this.formData.dueDate.substring(0, 10);
+  }
+  set dueDateDate(val: string) {
+    if (!val) return;
+    const time = this.dueDateTime || '18:00';
+    this.formData.dueDate = this.formData.isAllDay ? val : `${val}T${time}`;
+  }
+
+  get dueDateTime(): string {
+    if (!this.formData.dueDate || this.formData.dueDate.length < 16) return '18:00';
+    return this.formData.dueDate.substring(11, 16);
+  }
+  set dueDateTime(val: string) {
+    const date = this.dueDateDate || this.todayStr;
+    const time = val || '18:00';
+    this.formData.dueDate = `${date}T${time}`;
+  }
+
   get isDueDateOverdue(): boolean {
     if (!this.formData.dueDate || this.formData.status === 'Done') return false;
     const due = new Date(this.formData.dueDate);

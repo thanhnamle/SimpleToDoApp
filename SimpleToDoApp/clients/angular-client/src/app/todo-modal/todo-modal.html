@@ -121,8 +121,8 @@
           </div>
         </div>
 
-        <!-- Dates Grid -->
-        <div class="grid grid-cols-2 gap-4">
+        <!-- Dates Section (Stacked Vertically) -->
+        <div class="space-y-4">
           <!-- Start Date -->
           <div>
             <label for="modal-start" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Start Date</label>
@@ -130,18 +130,28 @@
               <input
                 id="modal-start"
                 type="date"
-                name="startDate"
-                class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3 py-2 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all"
-                [(ngModel)]="formData.startDate"
+                name="startDateDate"
+                [min]="minStartDateDate"
+                class="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all"
+                [(ngModel)]="startDateDate"
               />
             } @else {
-              <input
-                id="modal-start"
-                type="datetime-local"
-                name="startDate"
-                class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3 py-2 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all"
-                [(ngModel)]="formData.startDate"
-              />
+              <div class="flex gap-3 mt-1.5">
+                <input
+                  id="modal-start"
+                  type="date"
+                  name="startDateDate"
+                  [min]="minStartDateDate"
+                  class="flex-grow rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all"
+                  [(ngModel)]="startDateDate"
+                />
+                <input
+                  type="time"
+                  name="startDateTime"
+                  class="w-36 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all"
+                  [(ngModel)]="startDateTime"
+                />
+              </div>
             }
           </div>
 
@@ -159,33 +169,55 @@
               <input
                 id="modal-due"
                 type="date"
-                name="dueDate"
-                class="mt-1.5 w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all bg-slate-50 dark:bg-slate-950/60"
+                name="dueDateDate"
+                [min]="minDueDateDate"
+                class="mt-1.5 w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition-all bg-slate-50 dark:bg-slate-950/60"
                 [class.border-red-400]="isDueDateOverdue"
                 [class.focus:border-red-500]="isDueDateOverdue"
+                [class.focus:ring-red-500/10]="isDueDateOverdue"
                 [class.border-slate-200]="!isDueDateOverdue"
                 [class.dark:border-slate-800]="!isDueDateOverdue"
                 [class.text-red-600]="isDueDateOverdue"
                 [class.dark:text-red-400]="isDueDateOverdue"
                 [class.text-slate-800]="!isDueDateOverdue"
                 [class.dark:text-slate-300]="!isDueDateOverdue"
-                [(ngModel)]="formData.dueDate"
+                [(ngModel)]="dueDateDate"
               />
             } @else {
-              <input
-                id="modal-due"
-                type="datetime-local"
-                name="dueDate"
-                class="mt-1.5 w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all bg-slate-50 dark:bg-slate-950/60"
-                [class.border-red-400]="isDueDateOverdue"
-                [class.border-slate-200]="!isDueDateOverdue"
-                [class.dark:border-slate-800]="!isDueDateOverdue"
-                [class.text-red-600]="isDueDateOverdue"
-                [class.dark:text-red-400]="isDueDateOverdue"
-                [class.text-slate-800]="!isDueDateOverdue"
-                [class.dark:text-slate-300]="!isDueDateOverdue"
-                [(ngModel)]="formData.dueDate"
-              />
+              <div class="flex gap-3 mt-1.5">
+                <input
+                  id="modal-due"
+                  type="date"
+                  name="dueDateDate"
+                  [min]="minDueDateDate"
+                  class="flex-grow rounded-xl border px-4 py-2.5 text-sm outline-none transition-all bg-slate-50 dark:bg-slate-950/60"
+                  [class.border-red-400]="isDueDateOverdue"
+                  [class.focus:border-red-500]="isDueDateOverdue"
+                  [class.focus:ring-red-500/10]="isDueDateOverdue"
+                  [class.border-slate-200]="!isDueDateOverdue"
+                  [class.dark:border-slate-800]="!isDueDateOverdue"
+                  [class.text-red-600]="isDueDateOverdue"
+                  [class.dark:text-red-400]="isDueDateOverdue"
+                  [class.text-slate-800]="!isDueDateOverdue"
+                  [class.dark:text-slate-300]="!isDueDateOverdue"
+                  [(ngModel)]="dueDateDate"
+                />
+                <input
+                  type="time"
+                  name="dueDateTime"
+                  class="w-36 rounded-xl border px-4 py-2.5 text-sm outline-none transition-all bg-slate-50 dark:bg-slate-950/60"
+                  [class.border-red-400]="isDueDateOverdue"
+                  [class.focus:border-red-500]="isDueDateOverdue"
+                  [class.focus:ring-red-500/10]="isDueDateOverdue"
+                  [class.border-slate-200]="!isDueDateOverdue"
+                  [class.dark:border-slate-800]="!isDueDateOverdue"
+                  [class.text-red-600]="isDueDateOverdue"
+                  [class.dark:text-red-400]="isDueDateOverdue"
+                  [class.text-slate-800]="!isDueDateOverdue"
+                  [class.dark:text-slate-300]="!isDueDateOverdue"
+                  [(ngModel)]="dueDateTime"
+                />
+              </div>
             }
             @if (isDueDateOverdue) {
               <p class="mt-1 text-[10px] text-red-500 dark:text-red-400">⚠ This task is past its due date.</p>

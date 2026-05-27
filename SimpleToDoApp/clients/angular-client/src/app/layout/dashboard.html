@@ -153,7 +153,7 @@
                           [class.bg-amber-500/10]="reminder.minutesLeft >= 30"
                           [class.text-amber-600]="reminder.minutesLeft >= 30"
                           [class.dark:text-amber-400]="reminder.minutesLeft >= 30">
-                          {{ reminderService.formatTimeLeft(reminder.minutesLeft) }}
+                          {{ reminderService.formatReminderSetting(reminder.todo.reminderMinutes) }}
                         </span>
                       </div>
                     </div>
