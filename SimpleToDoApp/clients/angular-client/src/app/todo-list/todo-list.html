@@ -112,7 +112,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
       @for (todo of filteredTodos(); track todo.id) {
         <div
-          class="group flex flex-col justify-between rounded-2xl border bg-white dark:bg-slate-900/30 p-5 backdrop-blur-xl shadow hover:shadow-lg dark:hover:shadow-indigo-500/5 transition-all duration-200"
+          class="group flex flex-col justify-between rounded-2xl border bg-white dark:bg-slate-900/30 p-5 backdrop-blur-xl shadow hover:shadow-lg dark:hover:shadow-indigo-500/5 hover-lift transition-all duration-200"
           [class.border-slate-200\/60]="todo.status === 'Done'"
           [class.opacity-70]="todo.status === 'Done'"
           [class.border-slate-200]="todo.status !== 'Done'"
@@ -128,7 +128,7 @@
                 class="mt-0.5 rounded-full text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors outline-none shrink-0 cursor-pointer"
               >
                 @if (todo.status === 'Done') {
-                  <svg lucideCheckCircle2 class="h-5 w-5 text-indigo-500 fill-indigo-500/10"></svg>
+                  <svg lucideCheckCircle2 class="h-5 w-5 text-indigo-500 fill-indigo-500/10 animate-checkbox-pop"></svg>
                 } @else {
                   <svg lucideCircle class="h-5 w-5 text-slate-300 dark:text-slate-600 hover:text-slate-400"></svg>
                 }
@@ -233,10 +233,10 @@
 <!-- Detail Side Panel -->
 @if (detailOpen && detailTodo) {
   <!-- Backdrop -->
-  <div (click)="closeDetailPanel()" class="fixed inset-0 z-40 bg-slate-950/40 dark:bg-slate-950/60 backdrop-blur-sm"></div>
+  <div (click)="closeDetailPanel()" class="fixed inset-0 z-40 bg-slate-950/40 dark:bg-slate-950/60 backdrop-blur-sm animate-fade-in"></div>
 
   <!-- Slide-in panel -->
-  <div class="fixed right-0 top-0 h-full z-50 w-full max-w-md bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden">
+  <div class="fixed right-0 top-0 h-full z-50 w-full max-w-md bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden animate-slide-in-right">
     <!-- Panel Header -->
     <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-6 py-4 shrink-0">
       <div class="flex items-center gap-2">

@@ -210,9 +210,25 @@ export class TodoCalendar implements OnInit {
 
   onTodoMouseEnter(e: MouseEvent, todo: Todo) {
     this.hoveredTodo = todo;
+    const tooltipWidth = 288; // w-72 is 18rem = 288px
+    const tooltipHeight = 180; // approximate maximum height
+    
+    let x = e.clientX + 15;
+    let y = e.clientY + 15;
+    
+    // Check if overflowing the right edge
+    if (x + tooltipWidth > window.innerWidth) {
+      x = e.clientX - tooltipWidth - 15;
+    }
+    
+    // Check if overflowing the bottom edge
+    if (y + tooltipHeight > window.innerHeight) {
+      y = e.clientY - tooltipHeight - 15;
+    }
+    
     this.tooltipPos = {
-      x: e.clientX + 15,
-      y: e.clientY + 15
+      x: Math.max(10, x),
+      y: Math.max(10, y)
     };
   }
 

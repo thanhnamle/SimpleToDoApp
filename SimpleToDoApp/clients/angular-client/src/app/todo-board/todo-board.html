@@ -71,7 +71,7 @@
               <div 
                 draggable="true"
                 (dragstart)="onDragStart(todo)"
-                class="group flex flex-col justify-between rounded-xl border bg-white dark:bg-slate-950/40 p-4 shadow-sm transition-all duration-200 cursor-grab active:cursor-grabbing hover:shadow-md"
+                class="group flex flex-col justify-between rounded-xl border bg-white dark:bg-slate-950/40 p-4 shadow-sm hover-lift transition-all duration-200 cursor-grab active:cursor-grabbing hover:shadow-md"
                 [class.border-red-400]="isOverdue(todo)"
                 [class.dark:border-red-950]="isOverdue(todo)"
                 [class.hover:border-red-500]="isOverdue(todo)"

@@ -21,13 +21,17 @@ namespace SimpleToDoApp.Infrastructure.Services
                 Port = int.TryParse(configuration["EmailSettings:Port"], out var port) ? port : 587,
                 SenderEmail = configuration["EmailSettings:SenderEmail"] ?? "",
                 SenderName = configuration["EmailSettings:SenderName"] ?? "ZenTodo App",
-                Password = configuration["EmailSettings:Password"] ?? ""
+                Password = NormalizePassword(
+                    configuration["EmailSettings:Provider"] ?? "Gmail",
+                    configuration["EmailSettings:Password"] ?? ""),
+                Enabled = bool.TryParse(configuration["EmailSettings:Enabled"], out var enabled) && enabled
             };
         }
 
         public async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
         {
-            if (string.IsNullOrWhiteSpace(_emailSettings.SenderEmail) || 
+            if (!_emailSettings.Enabled ||
+                string.IsNullOrWhiteSpace(_emailSettings.SenderEmail) || 
                 string.IsNullOrWhiteSpace(_emailSettings.Password) ||
                 _emailSettings.SenderEmail == "YOUR_EMAIL@gmail.com")
             {
@@ -42,7 +46,7 @@ namespace SimpleToDoApp.Infrastructure.Services
 
             try
             {
-                var message = new MailMessage
+                using var message = new MailMessage
                 {
                     From = new MailAddress(_emailSettings.SenderEmail, _emailSettings.SenderName),
                     Subject = subject,
@@ -54,6 +58,7 @@ namespace SimpleToDoApp.Infrastructure.Services
                 using (var client = new SmtpClient(_emailSettings.Host, _emailSettings.Port))
                 {
                     client.EnableSsl = true;
+                    client.DeliveryMethod = SmtpDeliveryMethod.Network;
                     client.UseDefaultCredentials = false;
                     client.Credentials = new NetworkCredential(_emailSettings.SenderEmail, _emailSettings.Password);
 
@@ -69,6 +74,18 @@ namespace SimpleToDoApp.Infrastructure.Services
                 Console.WriteLine("=========================================================================");
                 throw;
             }
+        }
+
+        private static string NormalizePassword(string provider, string password)
+        {
+            var normalized = password.Trim();
+
+            if (provider.Equals("Gmail", StringComparison.OrdinalIgnoreCase))
+            {
+                normalized = normalized.Replace(" ", string.Empty);
+            }
+
+            return normalized;
         }
     }
 }

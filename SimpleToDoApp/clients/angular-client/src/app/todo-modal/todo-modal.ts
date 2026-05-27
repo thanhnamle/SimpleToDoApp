@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CreateTodoRequest, Todo, UpdateTodoRequest } from '../models/todo';
-import { LucideX, LucideAlertTriangle, LucideBell } from '@lucide/angular';
+import { LucideX, LucideAlertTriangle, LucideBell, LucideCalendar, LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideClock } from '@lucide/angular';
 
 @Component({
   selector: 'app-todo-modal',
@@ -11,7 +11,12 @@ import { LucideX, LucideAlertTriangle, LucideBell } from '@lucide/angular';
     FormsModule,
     LucideX,
     LucideAlertTriangle,
-    LucideBell
+    LucideBell,
+    LucideCalendar,
+    LucideChevronDown,
+    LucideChevronLeft,
+    LucideChevronRight,
+    LucideClock
   ],
   templateUrl: './todo-modal.html'
 })
@@ -23,6 +28,17 @@ export class TodoModal implements OnChanges {
 
   isEditMode = false;
   error: string | null = null;
+
+  showStartPicker = false;
+  showDuePicker = false;
+  startCalendarMonth = 0;
+  startCalendarYear = 2026;
+  dueCalendarMonth = 0;
+  dueCalendarYear = 2026;
+
+  monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  hoursList = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+  minutesList = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
 
   formData = {
     title: '',
@@ -130,8 +146,8 @@ export class TodoModal implements OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     if (changes['todo'] || changes['isOpen']) {
       if (this.isOpen) {
-        if (this.todo && this.todo.id !== 0) {
-          this.isEditMode = true;
+        this.isEditMode = this.todo && this.todo.id !== 0 ? true : false;
+        if (this.isEditMode && this.todo) {
           this.formData = {
             title: this.todo.title,
             description: this.todo.description,
@@ -148,7 +164,6 @@ export class TodoModal implements OnChanges {
             reminderMinutes: this.todo.reminderMinutes
           };
         } else {
-          this.isEditMode = false;
           const isAllDay = this.todo?.isAllDay || false;
           this.formData = {
             title: this.todo?.title || '',
@@ -166,6 +181,17 @@ export class TodoModal implements OnChanges {
             reminderMinutes: this.todo?.reminderMinutes || 0
           };
         }
+        
+        const startInitDate = new Date(this.formData.startDate);
+        const dueInitDate = new Date(this.formData.dueDate);
+        
+        this.startCalendarMonth = isNaN(startInitDate.getTime()) ? new Date().getMonth() : startInitDate.getMonth();
+        this.startCalendarYear = isNaN(startInitDate.getTime()) ? new Date().getFullYear() : startInitDate.getFullYear();
+        this.dueCalendarMonth = isNaN(dueInitDate.getTime()) ? new Date().getMonth() : dueInitDate.getMonth();
+        this.dueCalendarYear = isNaN(dueInitDate.getTime()) ? new Date().getFullYear() : dueInitDate.getFullYear();
+
+        this.showStartPicker = false;
+        this.showDuePicker = false;
         this.error = null;
       }
     }
@@ -269,5 +295,155 @@ export class TodoModal implements OnChanges {
     const mm = pad(date.getMinutes());
     const ss = pad(date.getSeconds());
     return `${yyyy}-${MM}-${dd}T${hh}:${mm}:${ss}`;
+  }
+
+  get startDateTimeHour(): string {
+    return this.startDateTime.substring(0, 2);
+  }
+  set startDateTimeHour(val: string) {
+    this.startDateTime = `${val}:${this.startDateTimeMinute}`;
+  }
+
+  get startDateTimeMinute(): string {
+    return this.startDateTime.substring(3, 5);
+  }
+  set startDateTimeMinute(val: string) {
+    this.startDateTime = `${this.startDateTimeHour}:${val}`;
+  }
+
+  get dueDateTimeHour(): string {
+    return this.dueDateTime.substring(0, 2);
+  }
+  set dueDateTimeHour(val: string) {
+    this.dueDateTime = `${val}:${this.dueDateTimeMinute}`;
+  }
+
+  get dueDateTimeMinute(): string {
+    return this.dueDateTime.substring(3, 5);
+  }
+  set dueDateTimeMinute(val: string) {
+    this.dueDateTime = `${this.dueDateTimeHour}:${val}`;
+  }
+
+  prevStartMonth() {
+    if (this.startCalendarMonth === 0) {
+      this.startCalendarMonth = 11;
+      this.startCalendarYear--;
+    } else {
+      this.startCalendarMonth--;
+    }
+  }
+
+  nextStartMonth() {
+    if (this.startCalendarMonth === 11) {
+      this.startCalendarMonth = 0;
+      this.startCalendarYear++;
+    } else {
+      this.startCalendarMonth++;
+    }
+  }
+
+  prevDueMonth() {
+    if (this.dueCalendarMonth === 0) {
+      this.dueCalendarMonth = 11;
+      this.dueCalendarYear--;
+    } else {
+      this.dueCalendarMonth--;
+    }
+  }
+
+  nextDueMonth() {
+    if (this.dueCalendarMonth === 11) {
+      this.dueCalendarMonth = 0;
+      this.dueCalendarYear++;
+    } else {
+      this.dueCalendarMonth++;
+    }
+  }
+
+  selectStartDate(cell: any) {
+    this.startDateDate = cell.dateString;
+  }
+
+  selectDueDate(cell: any) {
+    this.dueDateDate = cell.dateString;
+  }
+
+  formatDisplayDate(dateStr: string): string {
+    if (!dateStr) return 'Select Date';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return 'Select Date';
+    if (this.formData.isAllDay) {
+      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    return date.toLocaleDateString(undefined, {
+      month: 'short', day: 'numeric', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  }
+
+  getCalendarDays(year: number, month: number) {
+    const firstDayIndex = new Date(year, month, 1).getDay(); // 0 = Sunday, 1 = Monday
+    const startOffset = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+    const days: Array<{ day: number; month: number; year: number; isCurrentMonth: boolean; dateString: string; isPast: boolean }> = [];
+
+    // Prev month padding
+    for (let i = startOffset - 1; i >= 0; i--) {
+      const prevDay = daysInPrevMonth - i;
+      const prevMonth = month === 0 ? 11 : month - 1;
+      const prevYear = month === 0 ? year - 1 : year;
+      const dateString = `${prevYear}-${(prevMonth + 1).toString().padStart(2, '0')}-${prevDay.toString().padStart(2, '0')}`;
+      days.push({
+        day: prevDay,
+        month: prevMonth,
+        year: prevYear,
+        isCurrentMonth: false,
+        dateString,
+        isPast: this.isDateStringPast(dateString)
+      });
+    }
+
+    // Current month
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateString = `${year}-${(month + 1).toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
+      days.push({
+        day: d,
+        month,
+        year,
+        isCurrentMonth: true,
+        dateString,
+        isPast: this.isDateStringPast(dateString)
+      });
+    }
+
+    // Next month padding
+    const totalCells = 42;
+    const remaining = totalCells - days.length;
+    for (let n = 1; n <= remaining; n++) {
+      const nextMonth = month === 11 ? 0 : month + 1;
+      const nextYear = month === 11 ? year + 1 : year;
+      const dateString = `${nextYear}-${(nextMonth + 1).toString().padStart(2, '0')}-${n.toString().padStart(2, '0')}`;
+      days.push({
+        day: n,
+        month: nextMonth,
+        year: nextYear,
+        isCurrentMonth: false,
+        dateString,
+        isPast: this.isDateStringPast(dateString)
+      });
+    }
+
+    return days;
+  }
+
+  private isDateStringPast(dateStr: string): boolean {
+    const d = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return d < today;
   }
 }
