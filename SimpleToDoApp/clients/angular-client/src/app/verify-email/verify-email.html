@@ -1,0 +1,91 @@
+<div class="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950 px-4 py-12 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-200">
+  <!-- Theme Toggler (Top Right) -->
+  <div class="absolute top-6 right-6 z-20">
+    <button
+      (click)="toggleTheme()"
+      type="button"
+      class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 shadow-sm transition-all hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+      [title]="isDark() ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+    >
+      @if (isDark()) {
+        <svg lucideSun class="h-5 w-5 text-amber-400"></svg>
+      } @else {
+        <svg lucideMoon class="h-5 w-5 text-indigo-600"></svg>
+      }
+    </button>
+  </div>
+
+  <!-- Background blobs -->
+  <div class="absolute top-1/4 left-1/4 h-72 w-72 rounded-full bg-violet-600/5 dark:bg-violet-600/10 blur-[120px]"></div>
+  <div class="absolute bottom-1/4 right-1/4 h-72 w-72 rounded-full bg-indigo-600/5 dark:bg-indigo-600/10 blur-[120px]"></div>
+
+  <div class="z-10 w-full max-w-md space-y-8 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 p-8 shadow-xl dark:shadow-2xl backdrop-blur-xl transition-all duration-200">
+    @if (status() === 'loading') {
+      <div class="flex flex-col items-center justify-center text-center space-y-6 py-8">
+        <svg lucideLoader2 class="h-12 w-12 animate-spin text-indigo-600 dark:text-indigo-400"></svg>
+        <div class="space-y-2">
+          <h2 class="text-2xl font-bold tracking-tight text-slate-950 dark:text-white">
+            Verifying your email
+          </h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400">
+            Please wait while we confirm your email address...
+          </p>
+        </div>
+      </div>
+    }
+
+    @if (status() === 'success') {
+      <div class="flex flex-col items-center justify-center text-center space-y-6 py-6">
+        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500 shadow-inner">
+          <svg lucideMailCheck class="h-8 w-8"></svg>
+        </div>
+        <div class="space-y-2">
+          <h2 class="text-2xl font-bold tracking-tight text-slate-950 dark:text-white">
+            Verification Successful!
+          </h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400 max-w-sm">
+            Thank you. Your email address has been verified. You can now log into your ZenTodo account.
+          </p>
+        </div>
+        <div class="w-full pt-4">
+          <a
+            routerLink="/login"
+            class="flex w-full justify-center rounded-lg bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/10 transition-all hover:from-indigo-600 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 cursor-pointer"
+          >
+            Sign In Now
+          </a>
+        </div>
+      </div>
+    }
+
+    @if (status() === 'error') {
+      <div class="flex flex-col items-center justify-center text-center space-y-6 py-6">
+        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10 text-red-500 shadow-inner">
+          <svg lucideAlertCircle class="h-8 w-8"></svg>
+        </div>
+        <div class="space-y-2">
+          <h2 class="text-2xl font-bold tracking-tight text-slate-950 dark:text-white">
+            Verification Failed
+          </h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400 max-w-sm">
+            {{ errorMessage() }}
+          </p>
+        </div>
+        <div class="w-full pt-4 space-y-3 text-center">
+          <a
+            routerLink="/register"
+            class="flex w-full justify-center rounded-lg bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/10 transition-all hover:from-indigo-600 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 cursor-pointer"
+          >
+            Create a New Account
+          </a>
+          <a
+            routerLink="/login"
+            class="inline-block text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 mt-2"
+          >
+            Back to Sign In
+          </a>
+        </div>
+      </div>
+    }
+  </div>
+</div>

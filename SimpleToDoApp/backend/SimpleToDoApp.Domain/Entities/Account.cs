@@ -1,0 +1,38 @@
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using SimpleToDoApp.Domain.Enums;
+
+namespace SimpleToDoApp.Domain.Entities
+{
+    public class Account
+    {
+        [Key]
+        [ForeignKey("UserId")]
+        public int UserId { get; set; }
+
+        [Required]
+        [MaxLength(255)]
+        public required string Username { get; set; }
+
+        [Required]
+        [RegularExpression(@"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}")]
+        [MaxLength(255)]
+        public required string Email { get; set; }
+
+        [Required]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,15}$")]
+        public required string Password { get; set; }
+
+        public bool IsEmailVerified { get; set; } = false;
+        public string? EmailVerificationToken { get; set; }
+        public DateTime? EmailVerificationTokenExpiry { get; set; }
+        public string? PasswordResetToken { get; set; }
+        public DateTime? PasswordResetTokenExpiry { get; set; }
+
+        public int? DepartmentId { get; set; }
+        public Department? Department { get; set; }
+
+        public UserRole Role { get; set; } = UserRole.Employee;
+    }
+}

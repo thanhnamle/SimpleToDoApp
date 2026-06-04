@@ -1,3 +1,7 @@
 <Solution>
-  <Project Path="SimpleToDoApp/SimpleToDoApp.csproj" />
+  <Project Path="SimpleToDoApp/backend/SimpleToDoApp.Api/SimpleToDoApp.Api.csproj" />
+  <Project Path="SimpleToDoApp/backend/SimpleToDoApp.Application/SimpleToDoApp.Application.csproj" />
+  <Project Path="SimpleToDoApp/backend/SimpleToDoApp.Domain/SimpleToDoApp.Domain.csproj" />
+  <Project Path="SimpleToDoApp/backend/SimpleToDoApp.Infrastructure/SimpleToDoApp.Infrastructure.csproj" />
+  <Project Path="SimpleToDoApp/backend/SimpleToDoApp.Tests/SimpleToDoApp.Tests.csproj" />
 </Solution>

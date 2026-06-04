@@ -1,0 +1,156 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div>
+    <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+      @if (isDepartmentHead()) { Global Dashboard } @else { Department Dashboard }
+    </h1>
+    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Monitor tasks distribution, progress, and team performance.</p>
+  </div>
+
+  @if (loading()) {
+    <div class="flex h-64 items-center justify-center">
+      <svg lucideLoader2 class="h-10 w-10 animate-spin text-indigo-500"></svg>
+    </div>
+  } @else if (error()) {
+    <div class="flex flex-col items-center justify-center h-64 text-center rounded-2xl border border-red-500/10 bg-red-500/5 p-6">
+      <svg lucideAlertCircle class="h-12 w-12 text-red-400 mb-3"></svg>
+      <h3 class="text-lg font-bold text-slate-950 dark:text-white">Failed to load department data</h3>
+      <p class="text-slate-500 dark:text-slate-400 text-sm mt-1 mb-4">{{ error() }}</p>
+      <button
+        (click)="fetchData()"
+        class="rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white cursor-pointer shadow-sm"
+      >
+        Try Again
+      </button>
+    </div>
+  } @else {
+    <!-- Stats Cards Grid -->
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <!-- Total Tasks -->
+      <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 p-5 shadow-sm backdrop-blur-xl flex items-center gap-4">
+        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-500">
+          <svg lucideActivity class="h-6 w-6"></svg>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Tasks</p>
+          <h3 class="text-2xl font-black text-slate-900 dark:text-white mt-0.5">{{ totalTasks() }}</h3>
+        </div>
+      </div>
+
+      <!-- Pending Tasks -->
+      <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 p-5 shadow-sm backdrop-blur-xl flex items-center gap-4">
+        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+          <svg lucideClock class="h-6 w-6"></svg>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Pending</p>
+          <h3 class="text-2xl font-black text-slate-900 dark:text-white mt-0.5">{{ pendingTasks() + inProgressTasks() }}</h3>
+        </div>
+      </div>
+
+      <!-- Completed Tasks -->
+      <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 p-5 shadow-sm backdrop-blur-xl flex items-center gap-4">
+        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
+          <svg lucideCheckCircle2 class="h-6 w-6"></svg>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Completed</p>
+          <h3 class="text-2xl font-black text-slate-900 dark:text-white mt-0.5">{{ completedTasks() }}</h3>
+        </div>
+      </div>
+
+      <!-- Completion Rate -->
+      <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 p-5 shadow-sm backdrop-blur-xl flex items-center gap-4">
+        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-500/10 text-violet-500">
+          <svg lucideUsers class="h-6 w-6"></svg>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Completion Rate</p>
+          <h3 class="text-2xl font-black text-slate-900 dark:text-white mt-0.5">{{ completionRate() }}%</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Split Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left side: Team members list -->
+      <div class="lg:col-span-2 rounded-2xl border border-slate-200 dark:border-slate-900 bg-white dark:bg-slate-900/20 p-6 shadow-sm backdrop-blur-xl space-y-6">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white">
+          @if (isDepartmentHead()) { All Members } @else { Department Members }
+        </h2>
+        
+        <div class="divide-y divide-slate-100 dark:divide-slate-800/60">
+          @for (member of members(); track member.userId) {
+            <div class="flex items-center justify-between py-4 first:pt-0 last:pb-0 gap-4">
+              <!-- Member profile info -->
+              <div class="flex items-center gap-3.5 min-w-0">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                  {{ member.username.slice(0, 2).toUpperCase() }}
+                </div>
+                <div class="min-w-0">
+                  <p class="text-sm font-bold text-slate-800 dark:text-slate-200 truncate flex items-center gap-2">
+                    {{ member.username }}
+                    @if (member.role === 'DepartmentHead') {
+                      <span class="rounded bg-indigo-500/10 px-1.5 py-0.5 text-[9px] font-bold text-indigo-500">Head</span>
+                    }
+                  </p>
+                  <p class="text-xs text-slate-400 dark:text-slate-500 truncate">{{ member.email }}</p>
+                </div>
+              </div>
+
+              <!-- Task summary metrics -->
+              <div class="flex items-center gap-6 shrink-0 text-right">
+                <div>
+                  <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Tasks</p>
+                  <p class="text-sm font-bold text-slate-700 dark:text-slate-300">
+                    {{ getMemberTasksCount(member.userId) }}
+                  </p>
+                </div>
+                
+                <div class="hidden sm:block">
+                  <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Completion</p>
+                  <p class="text-sm font-bold text-slate-700 dark:text-slate-300">
+                    {{ getMemberTasksCompletionRate(member.userId) }}%
+                  </p>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Right side: Quick Department Insights -->
+      <div class="rounded-2xl border border-slate-200 dark:border-slate-900 bg-white dark:bg-slate-900/20 p-6 shadow-sm backdrop-blur-xl space-y-6">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Quick Insights</h2>
+        
+        <div class="space-y-4">
+          <!-- Total Members count -->
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800">
+            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Staff</span>
+            <span class="text-sm font-bold text-slate-900 dark:text-white">{{ members().length }}</span>
+          </div>
+
+          <!-- Total active Tasks -->
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800">
+            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Uncompleted Tasks</span>
+            <span class="text-sm font-bold text-slate-900 dark:text-white">{{ pendingTasks() + inProgressTasks() }}</span>
+          </div>
+
+          <!-- Completion Progress bar -->
+          <div class="space-y-2 pt-2">
+            <div class="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
+              <span>Overall Progress</span>
+              <span>{{ completionRate() }}%</span>
+            </div>
+            <div class="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div 
+                class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-600 transition-all duration-500"
+                [style.width.%]="completionRate()"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
