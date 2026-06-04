@@ -29,5 +29,7 @@ namespace SimpleToDoApp.Application.DTOs.Todos
         public DateTime DueDate { get; set; }
 
         public int ReminderMinutes { get; set; }
+
+        public int? AssignedUserId { get; set; }
     }
 }

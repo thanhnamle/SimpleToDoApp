@@ -24,6 +24,14 @@ namespace SimpleToDoApp.Tests
         }
 
         [Fact]
+        public void VerifySeededPasswordHash()
+        {
+            var hash = "$2a$11$hm8JAwHl9M3D7omt2EM/PebH.cKJHZSUAqxAdCv/ILOTvYA25tbwe";
+            var matches = BCrypt.Net.BCrypt.Verify("Password@123", hash);
+            Assert.True(matches);
+        }
+
+        [Fact]
         public async Task RegisterAsync_ValidRequest_RegistersUser()
         {
             // Arrange

@@ -10,7 +10,9 @@ import {
   LucideLoader2, 
   LucideArrowRight,
   LucideSun,
-  LucideMoon
+  LucideMoon,
+  LucideEye,
+  LucideEyeOff
 } from '@lucide/angular';
 
 @Component({
@@ -24,7 +26,9 @@ import {
     LucideLoader2,
     LucideArrowRight,
     LucideSun,
-    LucideMoon
+    LucideMoon,
+    LucideEye,
+    LucideEyeOff
   ],
   templateUrl: './login.html'
 })
@@ -35,6 +39,7 @@ export class Login {
 
   usernameOrEmail = '';
   password = '';
+  showPassword = false;
   error = signal<string | null>(null);
   isSubmitting = signal<boolean>(false);
 

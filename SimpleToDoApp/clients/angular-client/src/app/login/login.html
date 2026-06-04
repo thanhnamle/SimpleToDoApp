@@ -66,16 +66,29 @@
               Forgot password?
             </a>
           </div>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/60 px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none ring-offset-white dark:ring-offset-slate-900 transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:ring-offset-2"
-            placeholder="Enter your password"
-            [(ngModel)]="password"
-            [disabled]="isSubmitting()"
-          />
+          <div class="relative mt-1.5">
+            <input
+              id="password"
+              name="password"
+              [type]="showPassword ? 'text' : 'password'"
+              required
+              class="w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/60 pl-4 pr-12 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none ring-offset-white dark:ring-offset-slate-900 transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:ring-offset-2"
+              placeholder="Enter your password"
+              [(ngModel)]="password"
+              [disabled]="isSubmitting()"
+            />
+            <button
+              type="button"
+              (click)="showPassword = !showPassword"
+              class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
+            >
+              @if (showPassword) {
+                <svg lucideEyeOff class="h-5 w-5"></svg>
+              } @else {
+                <svg lucideEye class="h-5 w-5"></svg>
+              }
+            </button>
+          </div>
         </div>
       </div>
 

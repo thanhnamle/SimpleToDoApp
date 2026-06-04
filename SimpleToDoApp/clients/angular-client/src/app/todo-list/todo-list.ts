@@ -1,7 +1,8 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TodoService } from '../services/todo.service';
+import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../services/notification.service';
 import { ReminderService } from '../services/reminder.service';
 import { CreateTodoRequest, Todo, UpdateTodoRequest } from '../models/todo';
@@ -23,7 +24,8 @@ import {
   LucideCalendar,
   LucideBell,
   LucideAlertTriangle,
-  LucideInfo
+  LucideInfo,
+  LucideUser
 } from '@lucide/angular';
 
 @Component({
@@ -48,14 +50,18 @@ import {
     LucideCalendar,
     LucideBell,
     LucideAlertTriangle,
-    LucideInfo
+    LucideInfo,
+    LucideUser
   ],
   templateUrl: './todo-list.html'
 })
 export class TodoList implements OnInit {
   private readonly todoService = inject(TodoService);
+  private readonly authService = inject(AuthService);
   private readonly notificationService = inject(NotificationService);
   private readonly reminderService = inject(ReminderService);
+
+  isEmployee = computed(() => this.authService.currentUser()?.role === 'Employee');
 
   todos = signal<Todo[]>([]);
   filteredTodos = signal<Todo[]>([]);
@@ -264,7 +270,21 @@ export class TodoList implements OnInit {
 
   isOverdue(todo: Todo): boolean {
     if (todo.status === 'Done' || !todo.dueDate) return false;
-    return new Date(todo.dueDate) < new Date();
+    const due = new Date(todo.dueDate);
+    if (isNaN(due.getTime())) return false;
+    if (todo.isAllDay) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const match = todo.dueDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (match) {
+        const year = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10) - 1;
+        const day = parseInt(match[3], 10);
+        const dueDateLocal = new Date(year, month, day);
+        return dueDateLocal < today;
+      }
+    }
+    return due < new Date();
   }
 
   formatReminderLabel(minutes: number): string {

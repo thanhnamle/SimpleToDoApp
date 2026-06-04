@@ -12,5 +12,7 @@ namespace SimpleToDoApp.Application.DTOs.Auth
         public int UserId { get; set; }
         public required string Username { get; set; }
         public required string Email { get; set; }
+        public SimpleToDoApp.Domain.Enums.UserRole Role { get; set; }
+        public int? DepartmentId { get; set; }
     }
 }

@@ -59,6 +59,14 @@ export class AuthService {
     return this.http.post<any>(`${this.baseUrl}/reset-password`, { token, newPassword });
   }
 
+  getDepartments(): Observable<any[]> {
+    return this.http.get<any[]>(`http://localhost:59444/api/departments`);
+  }
+
+  getDepartmentMembers(): Observable<User[]> {
+    return this.http.get<User[]>(`http://localhost:59444/api/departments/members`);
+  }
+
   getMe(): Observable<User> {
     return this.http.get<User>(`${this.baseUrl}/me`).pipe(
       tap({

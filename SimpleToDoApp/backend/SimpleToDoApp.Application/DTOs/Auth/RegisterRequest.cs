@@ -18,5 +18,9 @@ namespace SimpleToDoApp.Application.DTOs.Auth
         [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,15}$",
             ErrorMessage = "Password must be 8-15 characters long, contain at least one uppercase letter, one lowercase letter, and one number.")]
         public string Password { get; set; } = string.Empty;
+
+        public int? DepartmentId { get; set; }
+
+        public SimpleToDoApp.Domain.Enums.UserRole Role { get; set; } = SimpleToDoApp.Domain.Enums.UserRole.Employee;
     }
 }

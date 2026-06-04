@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -11,7 +11,9 @@ import {
   LucideArrowRight,
   LucideSun,
   LucideMoon,
-  LucideMail
+  LucideMail,
+  LucideEye,
+  LucideEyeOff
 } from '@lucide/angular';
 
 @Component({
@@ -26,11 +28,13 @@ import {
     LucideArrowRight,
     LucideSun,
     LucideMoon,
-    LucideMail
+    LucideMail,
+    LucideEye,
+    LucideEyeOff
   ],
   templateUrl: './register.html'
 })
-export class Register {
+export class Register implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly themeService = inject(ThemeService);
   private readonly router = inject(Router);
@@ -39,9 +43,26 @@ export class Register {
   email = '';
   password = '';
   confirmPassword = '';
+  selectedDepartmentId: number | null = null;
+  selectedRole = 'Employee';
+  departments = signal<any[]>([]);
+  showPassword = false;
+  showConfirmPassword = false;
   error = signal<string | null>(null);
   isSubmitting = signal<boolean>(false);
   isRegistered = signal<boolean>(false);
+
+  ngOnInit() {
+    this.authService.getDepartments().subscribe({
+      next: (depts) => {
+        this.departments.set(depts);
+        if (depts.length > 0) {
+          this.selectedDepartmentId = depts[0].id;
+        }
+      },
+      error: (err) => console.error('Failed to load departments', err)
+    });
+  }
 
   toggleTheme() {
     this.themeService.toggleTheme();
@@ -52,7 +73,7 @@ export class Register {
   }
 
   onSubmit() {
-    if (!this.username.trim() || !this.email.trim() || !this.password.trim() || !this.confirmPassword.trim()) {
+    if (!this.username.trim() || !this.email.trim() || !this.password.trim() || !this.confirmPassword.trim() || this.selectedDepartmentId === null) {
       this.error.set('Please fill in all fields.');
       return;
     }
@@ -68,7 +89,9 @@ export class Register {
     this.authService.register({
       username: this.username,
       email: this.email,
-      password: this.password
+      password: this.password,
+      departmentId: this.selectedDepartmentId,
+      role: this.selectedRole
     }).subscribe({
       next: () => {
         this.isRegistered.set(true);

@@ -17,7 +17,8 @@ import {
   LucideBell,
   LucideClock,
   LucideCheckCircle2,
-  LucideAlertTriangle
+  LucideAlertTriangle,
+  LucideUsers
 } from '@lucide/angular';
 
 @Component({
@@ -39,7 +40,8 @@ import {
     LucideBell,
     LucideClock,
     LucideCheckCircle2,
-    LucideAlertTriangle
+    LucideAlertTriangle,
+    LucideUsers
   ],
   templateUrl: './dashboard.html'
 })
@@ -51,6 +53,10 @@ export class Dashboard implements OnInit, OnDestroy {
 
   isSidebarOpen = signal(false);
   isBellOpen = signal(false);
+
+  isEmployee = computed(() => this.authService.currentUser()?.role === 'Employee');
+  isLeader = computed(() => this.authService.currentUser()?.role === 'Leader');
+  isDepartmentHead = computed(() => this.authService.currentUser()?.role === 'DepartmentHead');
 
   username = computed(() => this.authService.currentUser()?.username || 'User');
   email = computed(() => this.authService.currentUser()?.email || '');

@@ -8,6 +8,7 @@ import { Dashboard } from './layout/dashboard';
 import { TodoList } from './todo-list/todo-list';
 import { TodoBoard } from './todo-board/todo-board';
 import { TodoCalendar } from './todo-calendar/todo-calendar';
+import { TodoDepartment } from './todo-department/todo-department';
 import { authGuard } from './core/auth.guard';
 
 export const routes: Routes = [
@@ -23,7 +24,8 @@ export const routes: Routes = [
     children: [
       { path: '', component: TodoList },
       { path: 'board', component: TodoBoard },
-      { path: 'calendar', component: TodoCalendar }
+      { path: 'calendar', component: TodoCalendar },
+      { path: 'department', component: TodoDepartment }
     ]
   },
   { path: '', redirectTo: 'todos', pathMatch: 'full' },

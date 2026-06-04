@@ -113,6 +113,12 @@
                         {{ todo.category }}
                       </span>
                     }
+                    @if (todo.assignedUsername) {
+                      <span class="flex items-center gap-1 text-[9px] font-medium text-slate-500 dark:text-slate-400 bg-slate-50 border border-slate-200 dark:bg-slate-900 dark:border-slate-800/80 px-2 py-0.5 rounded-full">
+                        <svg lucideUser class="h-2 w-2 text-slate-400 dark:text-slate-500"></svg>
+                        {{ todo.assignedUsername }}
+                      </span>
+                    }
                     @if (todo.dueDate) {
                       <span 
                         class="flex items-center gap-1 text-[9px] font-medium transition-colors"

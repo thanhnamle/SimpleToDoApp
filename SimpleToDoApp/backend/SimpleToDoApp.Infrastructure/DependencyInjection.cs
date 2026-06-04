@@ -18,6 +18,7 @@ namespace SimpleToDoApp.Infrastructure
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ITodoService, TodoService>();
+            services.AddScoped<IDepartmentService, DepartmentService>();
             services.AddScoped<ITodoDbContext>(provider => provider.GetRequiredService<TodoDbContext>());
 
             return services;

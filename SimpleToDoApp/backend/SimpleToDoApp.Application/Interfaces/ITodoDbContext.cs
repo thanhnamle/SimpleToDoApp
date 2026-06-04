@@ -9,6 +9,7 @@ namespace SimpleToDoApp.Application.Interfaces
     {
         DbSet<Todo> Todos { get; }
         DbSet<Account> Accounts { get; }
+        DbSet<Department> Departments { get; }
         Microsoft.EntityFrameworkCore.Infrastructure.DatabaseFacade Database { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

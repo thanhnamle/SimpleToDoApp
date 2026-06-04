@@ -1,7 +1,9 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CreateTodoRequest, Todo, UpdateTodoRequest } from '../models/todo';
+import { AuthService } from '../services/auth.service';
+import { User } from '../models/auth';
 import { LucideX, LucideAlertTriangle, LucideBell, LucideCalendar, LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideClock } from '@lucide/angular';
 
 @Component({
@@ -26,6 +28,8 @@ export class TodoModal implements OnChanges {
   @Output() close = new EventEmitter<void>();
   @Output() save = new EventEmitter<CreateTodoRequest | UpdateTodoRequest>();
 
+  private readonly authService = inject(AuthService);
+
   isEditMode = false;
   error: string | null = null;
 
@@ -40,6 +44,9 @@ export class TodoModal implements OnChanges {
   hoursList = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
   minutesList = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
 
+  currentUser = this.authService.currentUser;
+  members = signal<User[]>([]);
+
   formData = {
     title: '',
     description: '',
@@ -49,7 +56,8 @@ export class TodoModal implements OnChanges {
     isAllDay: false,
     startDate: '',
     dueDate: '',
-    reminderMinutes: 0
+    reminderMinutes: 0,
+    assignedUserId: undefined as number | undefined
   };
 
   private formatDateOnlyForInput(dateStr: string): string {
@@ -140,12 +148,38 @@ export class TodoModal implements OnChanges {
   get isDueDateOverdue(): boolean {
     if (!this.formData.dueDate || this.formData.status === 'Done') return false;
     const due = new Date(this.formData.dueDate);
-    return !isNaN(due.getTime()) && due < new Date();
+    if (isNaN(due.getTime())) return false;
+    if (this.formData.isAllDay) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const match = this.formData.dueDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (match) {
+        const year = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10) - 1;
+        const day = parseInt(match[3], 10);
+        const dueDateLocal = new Date(year, month, day);
+        return dueDateLocal < today;
+      }
+    }
+    return due < new Date();
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['todo'] || changes['isOpen']) {
       if (this.isOpen) {
+        if (this.currentUser()?.role === 'DepartmentHead' || this.currentUser()?.role === 'Leader') {
+          this.authService.getDepartmentMembers().subscribe({
+            next: (users) => {
+              this.members.set(users);
+              // Set default assignee if not set
+              if (!this.formData.assignedUserId && users.length > 0) {
+                this.formData.assignedUserId = this.currentUser()?.userId;
+              }
+            },
+            error: (err) => console.error('Failed to load department members', err)
+          });
+        }
+
         this.isEditMode = this.todo && this.todo.id !== 0 ? true : false;
         if (this.isEditMode && this.todo) {
           this.formData = {
@@ -161,7 +195,8 @@ export class TodoModal implements OnChanges {
             dueDate: this.todo.isAllDay
               ? this.formatDateOnlyForInput(this.todo.dueDate)
               : this.formatDateForInput(this.todo.dueDate),
-            reminderMinutes: this.todo.reminderMinutes
+            reminderMinutes: this.todo.reminderMinutes,
+            assignedUserId: this.todo.assignedUserId
           };
         } else {
           const isAllDay = this.todo?.isAllDay || false;
@@ -178,7 +213,8 @@ export class TodoModal implements OnChanges {
             dueDate: isAllDay
               ? this.formatDateOnlyForInput(this.todo?.dueDate || new Date(Date.now() + 3600000).toISOString())
               : this.formatDateForInput(this.todo?.dueDate || new Date(Date.now() + 3600000).toISOString()),
-            reminderMinutes: this.todo?.reminderMinutes || 0
+            reminderMinutes: this.todo?.reminderMinutes || 0,
+            assignedUserId: this.currentUser()?.userId
           };
         }
         
@@ -252,7 +288,8 @@ export class TodoModal implements OnChanges {
       isAllDay: this.formData.isAllDay,
       reminderMinutes: Number(this.formData.reminderMinutes) || 0,
       startDate,
-      dueDate
+      dueDate,
+      assignedUserId: this.formData.assignedUserId
     };
 
     this.save.emit(payload);

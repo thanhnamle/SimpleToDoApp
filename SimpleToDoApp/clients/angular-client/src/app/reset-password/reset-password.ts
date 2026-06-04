@@ -11,7 +11,9 @@ import {
   LucideArrowRight,
   LucideSun,
   LucideMoon,
-  LucideCheckCircle
+  LucideCheckCircle,
+  LucideEye,
+  LucideEyeOff
 } from '@lucide/angular';
 
 @Component({
@@ -26,7 +28,9 @@ import {
     LucideArrowRight,
     LucideSun,
     LucideMoon,
-    LucideCheckCircle
+    LucideCheckCircle,
+    LucideEye,
+    LucideEyeOff
   ],
   templateUrl: './reset-password.html'
 })
@@ -39,6 +43,8 @@ export class ResetPassword implements OnInit {
   token = '';
   newPassword = '';
   confirmPassword = '';
+  showNewPassword = false;
+  showConfirmPassword = false;
   error = signal<string | null>(null);
   isSubmitting = signal<boolean>(false);
   isSubmitted = signal<boolean>(false);

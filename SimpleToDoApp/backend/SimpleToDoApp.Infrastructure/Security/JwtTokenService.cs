@@ -33,12 +33,20 @@ namespace SimpleToDoApp.Infrastructure.Security
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyStr));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
+            var claimsList = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, account.UserId.ToString()),
                 new Claim(ClaimTypes.Name, account.Username),
-                new Claim(ClaimTypes.Email, account.Email)
+                new Claim(ClaimTypes.Email, account.Email),
+                new Claim(ClaimTypes.Role, account.Role.ToString())
             };
+
+            if (account.DepartmentId.HasValue)
+            {
+                claimsList.Add(new Claim("DepartmentId", account.DepartmentId.Value.ToString()));
+            }
+
+            var claims = claimsList.ToArray();
 
             var expiresAt = DateTime.UtcNow.AddMinutes(expiresMinutes);
 

@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using SimpleToDoApp.Domain.Enums;
 
 namespace SimpleToDoApp.Domain.Entities
 {
@@ -28,5 +29,10 @@ namespace SimpleToDoApp.Domain.Entities
         public DateTime? EmailVerificationTokenExpiry { get; set; }
         public string? PasswordResetToken { get; set; }
         public DateTime? PasswordResetTokenExpiry { get; set; }
+
+        public int? DepartmentId { get; set; }
+        public Department? Department { get; set; }
+
+        public UserRole Role { get; set; } = UserRole.Employee;
     }
 }

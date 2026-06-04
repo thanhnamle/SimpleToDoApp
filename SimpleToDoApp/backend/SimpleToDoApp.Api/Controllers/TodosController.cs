@@ -20,39 +20,52 @@ namespace SimpleToDoApp.Api.Controllers
             _todoService = todoService;
         }
 
-        private int? GetUserId()
+        private (int UserId, SimpleToDoApp.Domain.Enums.UserRole Role, int? DepartmentId)? GetUserContext()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return int.TryParse(userIdClaim, out var userId) ? userId : null;
+            var roleClaim = User.FindFirst(ClaimTypes.Role)?.Value;
+            var deptClaim = User.FindFirst("DepartmentId")?.Value;
+
+            if (int.TryParse(userIdClaim, out var userId) &&
+                Enum.TryParse<SimpleToDoApp.Domain.Enums.UserRole>(roleClaim, out var role))
+            {
+                int? deptId = null;
+                if (int.TryParse(deptClaim, out var parsedDeptId))
+                {
+                    deptId = parsedDeptId;
+                }
+                return (userId, role, deptId);
+            }
+            return null;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var userId = GetUserId();
-            if (userId == null) return Unauthorized(new { message = "Unauthorized access." });
+            var ctx = GetUserContext();
+            if (ctx == null) return Unauthorized(new { message = "Unauthorized access." });
 
-            var todos = await _todoService.GetUserTodosAsync(userId.Value);
+            var todos = await _todoService.GetUserTodosAsync(ctx.Value.UserId, ctx.Value.Role, ctx.Value.DepartmentId);
             return Ok(todos);
         }
 
         [HttpGet("calendar")]
         public async Task<IActionResult> GetCalendar()
         {
-            var userId = GetUserId();
-            if (userId == null) return Unauthorized(new { message = "Unauthorized access." });
+            var ctx = GetUserContext();
+            if (ctx == null) return Unauthorized(new { message = "Unauthorized access." });
 
-            var todos = await _todoService.GetUserCalendarTodosAsync(userId.Value);
+            var todos = await _todoService.GetUserCalendarTodosAsync(ctx.Value.UserId, ctx.Value.Role, ctx.Value.DepartmentId);
             return Ok(todos);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var userId = GetUserId();
-            if (userId == null) return Unauthorized(new { message = "Unauthorized access." });
+            var ctx = GetUserContext();
+            if (ctx == null) return Unauthorized(new { message = "Unauthorized access." });
 
-            var todo = await _todoService.GetTodoByIdAsync(id, userId.Value);
+            var todo = await _todoService.GetTodoByIdAsync(id, ctx.Value.UserId, ctx.Value.Role, ctx.Value.DepartmentId);
             if (todo == null)
             {
                 return NotFound(new { message = $"Todo with ID {id} not found." });
@@ -64,12 +77,12 @@ namespace SimpleToDoApp.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateTodoRequest request)
         {
-            var userId = GetUserId();
-            if (userId == null) return Unauthorized(new { message = "Unauthorized access." });
+            var ctx = GetUserContext();
+            if (ctx == null) return Unauthorized(new { message = "Unauthorized access." });
 
             try
             {
-                var todo = await _todoService.CreateTodoAsync(request, userId.Value);
+                var todo = await _todoService.CreateTodoAsync(request, ctx.Value.UserId, ctx.Value.Role, ctx.Value.DepartmentId);
                 return CreatedAtAction(nameof(GetById), new { id = todo.Id }, todo);
             }
             catch (ArgumentException ex)
@@ -85,12 +98,12 @@ namespace SimpleToDoApp.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateTodoRequest request)
         {
-            var userId = GetUserId();
-            if (userId == null) return Unauthorized(new { message = "Unauthorized access." });
+            var ctx = GetUserContext();
+            if (ctx == null) return Unauthorized(new { message = "Unauthorized access." });
 
             try
             {
-                var todo = await _todoService.UpdateTodoAsync(id, request, userId.Value);
+                var todo = await _todoService.UpdateTodoAsync(id, request, ctx.Value.UserId, ctx.Value.Role, ctx.Value.DepartmentId);
                 if (todo == null)
                 {
                     return NotFound(new { message = $"Todo with ID {id} not found." });
@@ -111,12 +124,12 @@ namespace SimpleToDoApp.Api.Controllers
         [HttpPatch("{id}/status")]
         public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateTodoStatusRequest request)
         {
-            var userId = GetUserId();
-            if (userId == null) return Unauthorized(new { message = "Unauthorized access." });
+            var ctx = GetUserContext();
+            if (ctx == null) return Unauthorized(new { message = "Unauthorized access." });
 
             try
             {
-                var todo = await _todoService.UpdateTodoStatusAsync(id, request, userId.Value);
+                var todo = await _todoService.UpdateTodoStatusAsync(id, request, ctx.Value.UserId, ctx.Value.Role, ctx.Value.DepartmentId);
                 if (todo == null)
                 {
                     return NotFound(new { message = $"Todo with ID {id} not found." });
@@ -137,10 +150,10 @@ namespace SimpleToDoApp.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var userId = GetUserId();
-            if (userId == null) return Unauthorized(new { message = "Unauthorized access." });
+            var ctx = GetUserContext();
+            if (ctx == null) return Unauthorized(new { message = "Unauthorized access." });
 
-            var success = await _todoService.DeleteTodoAsync(id, userId.Value);
+            var success = await _todoService.DeleteTodoAsync(id, ctx.Value.UserId, ctx.Value.Role, ctx.Value.DepartmentId);
             if (!success)
             {
                 return NotFound(new { message = $"Todo with ID {id} not found." });

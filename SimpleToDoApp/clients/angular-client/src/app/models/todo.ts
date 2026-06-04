@@ -14,6 +14,9 @@ export interface Todo {
   startDate: string;
   dueDate: string;
   reminderMinutes: number;
+  assignedUserId?: number;
+  assignedUsername?: string;
+  assignedEmail?: string;
 }
 
 export interface CreateTodoRequest {
@@ -26,6 +29,7 @@ export interface CreateTodoRequest {
   startDate: string;
   dueDate: string;
   reminderMinutes: number;
+  assignedUserId?: number;
 }
 
 export interface UpdateTodoRequest {
@@ -39,4 +43,5 @@ export interface UpdateTodoRequest {
   startDate: string;
   dueDate: string;
   reminderMinutes: number;
+  assignedUserId?: number;
 }

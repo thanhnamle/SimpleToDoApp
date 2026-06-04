@@ -15,7 +15,8 @@ import {
   LucideTag,
   LucideLoader2,
   LucideAlertCircle,
-  LucideAlertTriangle
+  LucideAlertTriangle,
+  LucideUser
 } from '@lucide/angular';
 
 @Component({
@@ -32,7 +33,8 @@ import {
     LucideTag,
     LucideLoader2,
     LucideAlertCircle,
-    LucideAlertTriangle
+    LucideAlertTriangle,
+    LucideUser
   ],
   templateUrl: './todo-board.html'
 })
@@ -261,6 +263,19 @@ export class TodoBoard implements OnInit {
   isOverdue(todo: Todo): boolean {
     if (!todo.dueDate || todo.status === 'Done') return false;
     const due = new Date(todo.dueDate);
-    return !isNaN(due.getTime()) && due < new Date();
+    if (isNaN(due.getTime())) return false;
+    if (todo.isAllDay) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const match = todo.dueDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (match) {
+        const year = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10) - 1;
+        const day = parseInt(match[3], 10);
+        const dueDateLocal = new Date(year, month, day);
+        return dueDateLocal < today;
+      }
+    }
+    return due < new Date();
   }
 }

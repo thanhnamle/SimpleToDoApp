@@ -37,13 +37,25 @@ namespace SimpleToDoApp.Application.Services
                 throw new ArgumentException("Email is already registered.");
             }
 
+            // Check if department exists (if provided)
+            if (request.DepartmentId.HasValue)
+            {
+                var departmentExists = await _context.Departments.AnyAsync(d => d.Id == request.DepartmentId.Value);
+                if (!departmentExists)
+                {
+                    throw new ArgumentException("Selected department does not exist.");
+                }
+            }
+
             var hashedPassword = _passwordHasher.HashPassword(request.Password);
             var account = new Account
             {
                 Username = request.Username,
                 Email = request.Email,
                 Password = hashedPassword,
-                IsEmailVerified = false
+                IsEmailVerified = false,
+                DepartmentId = request.DepartmentId,
+                Role = request.Role
             };
 
             using var transaction = await _context.Database.BeginTransactionAsync();
@@ -71,7 +83,9 @@ namespace SimpleToDoApp.Application.Services
                 {
                     UserId = account.UserId,
                     Username = account.Username,
-                    Email = account.Email
+                    Email = account.Email,
+                    Role = account.Role,
+                    DepartmentId = account.DepartmentId
                 }
             };
         }
@@ -101,7 +115,9 @@ namespace SimpleToDoApp.Application.Services
                 {
                     UserId = account.UserId,
                     Username = account.Username,
-                    Email = account.Email
+                    Email = account.Email,
+                    Role = account.Role,
+                    DepartmentId = account.DepartmentId
                 }
             };
         }
@@ -118,7 +134,9 @@ namespace SimpleToDoApp.Application.Services
             {
                 UserId = account.UserId,
                 Username = account.Username,
-                Email = account.Email
+                Email = account.Email,
+                Role = account.Role,
+                DepartmentId = account.DepartmentId
             };
         }
 

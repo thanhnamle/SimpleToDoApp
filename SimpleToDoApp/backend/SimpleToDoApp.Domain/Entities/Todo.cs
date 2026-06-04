@@ -52,5 +52,7 @@ namespace SimpleToDoApp.Domain.Entities
 
         [Required]
         public int UserId { get; set; }
+
+        public Account? Account { get; set; }
     }
 }

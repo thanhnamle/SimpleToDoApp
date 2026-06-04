@@ -19,25 +19,47 @@ namespace SimpleToDoApp.Application.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<TodoDto>> GetUserTodosAsync(int userId)
+        public async Task<IEnumerable<TodoDto>> GetUserTodosAsync(int userId, UserRole role, int? departmentId)
         {
-            var todos = await _context.Todos
-                .Where(t => t.UserId == userId)
+            IQueryable<Todo> query = _context.Todos.Include(t => t.Account);
+            if (role == UserRole.Employee)
+            {
+                query = query.Where(t => t.UserId == userId);
+            }
+            else if (role == UserRole.Leader)
+            {
+                query = query.Where(t => t.Account != null && t.Account.DepartmentId == departmentId);
+            }
+            // DepartmentHead can see all, so no filter needed
+
+            var todos = await query
                 .OrderByDescending(t => t.CreatedAt)
                 .ToListAsync();
 
             return todos.Select(MapToDto);
         }
 
-        public async Task<TodoDto?> GetTodoByIdAsync(int id, int userId)
+        public async Task<TodoDto?> GetTodoByIdAsync(int id, int userId, UserRole role, int? departmentId)
         {
-            var todo = await _context.Todos
-                .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+            IQueryable<Todo> query = _context.Todos.Include(t => t.Account);
+            if (role == UserRole.Employee)
+            {
+                query = query.Where(t => t.Id == id && t.UserId == userId);
+            }
+            else if (role == UserRole.Leader)
+            {
+                query = query.Where(t => t.Id == id && t.Account != null && t.Account.DepartmentId == departmentId);
+            }
+            else if (role == UserRole.DepartmentHead)
+            {
+                query = query.Where(t => t.Id == id);
+            }
 
+            var todo = await query.FirstOrDefaultAsync();
             return todo == null ? null : MapToDto(todo);
         }
 
-        public async Task<TodoDto> CreateTodoAsync(CreateTodoRequest request, int userId)
+        public async Task<TodoDto> CreateTodoAsync(CreateTodoRequest request, int userId, UserRole role, int? departmentId)
         {
             if (!Enum.TryParse<TodoPriority>(request.Priority, true, out var priority))
             {
@@ -47,6 +69,23 @@ namespace SimpleToDoApp.Application.Services
             if (!Enum.TryParse<TodoStatus>(request.Status, true, out var status))
             {
                 throw new ArgumentException($"Invalid status value: {request.Status}. Allowed values: Pending, InProgress, Done.");
+            }
+
+            var assignedUserId = userId;
+            if (request.AssignedUserId.HasValue)
+            {
+                var assignedUser = await _context.Accounts.FirstOrDefaultAsync(a => a.UserId == request.AssignedUserId.Value);
+                if (assignedUser == null)
+                {
+                    throw new ArgumentException("Assigned user does not exist.");
+                }
+
+                if (role == UserRole.Leader && assignedUser.DepartmentId != departmentId)
+                {
+                    throw new ArgumentException("Cannot assign task to a user who is not in your department.");
+                }
+                
+                assignedUserId = request.AssignedUserId.Value;
             }
 
             var todo = new Todo
@@ -61,21 +100,34 @@ namespace SimpleToDoApp.Application.Services
                 StartDate = request.StartDate,
                 DueDate = request.DueDate,
                 ReminderMinutes = request.ReminderMinutes,
-                UserId = userId,
+                UserId = assignedUserId,
                 CreatedAt = DateTime.Now
             };
 
             _context.Todos.Add(todo);
             await _context.SaveChangesAsync();
 
+            todo.Account = await _context.Accounts.FirstOrDefaultAsync(a => a.UserId == assignedUserId);
             return MapToDto(todo);
         }
 
-        public async Task<TodoDto?> UpdateTodoAsync(int id, UpdateTodoRequest request, int userId)
+        public async Task<TodoDto?> UpdateTodoAsync(int id, UpdateTodoRequest request, int userId, UserRole role, int? departmentId)
         {
-            var todo = await _context.Todos
-                .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+            IQueryable<Todo> query = _context.Todos.Include(t => t.Account);
+            if (role == UserRole.Employee)
+            {
+                query = query.Where(t => t.Id == id && t.UserId == userId);
+            }
+            else if (role == UserRole.Leader)
+            {
+                query = query.Where(t => t.Id == id && t.Account != null && t.Account.DepartmentId == departmentId);
+            }
+            else if (role == UserRole.DepartmentHead)
+            {
+                query = query.Where(t => t.Id == id);
+            }
 
+            var todo = await query.FirstOrDefaultAsync();
             if (todo == null)
             {
                 return null;
@@ -91,19 +143,33 @@ namespace SimpleToDoApp.Application.Services
                 throw new ArgumentException($"Invalid status value: {request.Status}. Allowed values: Pending, InProgress, Done.");
             }
 
+            if (request.AssignedUserId.HasValue && request.AssignedUserId.Value != todo.UserId)
+            {
+                var assignedUser = await _context.Accounts.FirstOrDefaultAsync(a => a.UserId == request.AssignedUserId.Value);
+                if (assignedUser == null)
+                {
+                    throw new ArgumentException("Assigned user does not exist.");
+                }
+
+                if (role == UserRole.Leader && assignedUser.DepartmentId != departmentId)
+                {
+                    throw new ArgumentException("Cannot assign task to a user who is not in your department.");
+                }
+                
+                todo.UserId = request.AssignedUserId.Value;
+                todo.Account = assignedUser;
+            }
+
             todo.Title = request.Title;
             todo.Description = request.Description;
             todo.Category = request.Category;
             todo.Priority = priority;
             todo.Status = status;
-            // Update IsCompleted in sync with status if they match, or respect request
             todo.IsCompleted = request.IsCompleted || (status == TodoStatus.Done);
-            // If status is Done, IsCompleted must be true.
             if (status == TodoStatus.Done)
             {
                 todo.IsCompleted = true;
             }
-            // If they marked IsCompleted as false but status is Done, revert status to InProgress/Pending
             else if (!request.IsCompleted && todo.Status == TodoStatus.Done)
             {
                 todo.Status = TodoStatus.InProgress;
@@ -119,11 +185,23 @@ namespace SimpleToDoApp.Application.Services
             return MapToDto(todo);
         }
 
-        public async Task<TodoDto?> UpdateTodoStatusAsync(int id, UpdateTodoStatusRequest request, int userId)
+        public async Task<TodoDto?> UpdateTodoStatusAsync(int id, UpdateTodoStatusRequest request, int userId, UserRole role, int? departmentId)
         {
-            var todo = await _context.Todos
-                .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+            IQueryable<Todo> query = _context.Todos.Include(t => t.Account);
+            if (role == UserRole.Employee)
+            {
+                query = query.Where(t => t.Id == id && t.UserId == userId);
+            }
+            else if (role == UserRole.Leader)
+            {
+                query = query.Where(t => t.Id == id && t.Account != null && t.Account.DepartmentId == departmentId);
+            }
+            else if (role == UserRole.DepartmentHead)
+            {
+                query = query.Where(t => t.Id == id);
+            }
 
+            var todo = await query.FirstOrDefaultAsync();
             if (todo == null)
             {
                 return null;
@@ -142,11 +220,23 @@ namespace SimpleToDoApp.Application.Services
             return MapToDto(todo);
         }
 
-        public async Task<bool> DeleteTodoAsync(int id, int userId)
+        public async Task<bool> DeleteTodoAsync(int id, int userId, UserRole role, int? departmentId)
         {
-            var todo = await _context.Todos
-                .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+            IQueryable<Todo> query = _context.Todos;
+            if (role == UserRole.Employee)
+            {
+                query = query.Where(t => t.Id == id && t.UserId == userId);
+            }
+            else if (role == UserRole.Leader)
+            {
+                query = query.Include(t => t.Account).Where(t => t.Id == id && t.Account != null && t.Account.DepartmentId == departmentId);
+            }
+            else if (role == UserRole.DepartmentHead)
+            {
+                query = query.Where(t => t.Id == id);
+            }
 
+            var todo = await query.FirstOrDefaultAsync();
             if (todo == null)
             {
                 return false;
@@ -157,11 +247,20 @@ namespace SimpleToDoApp.Application.Services
             return true;
         }
 
-        public async Task<IEnumerable<TodoDto>> GetUserCalendarTodosAsync(int userId)
+        public async Task<IEnumerable<TodoDto>> GetUserCalendarTodosAsync(int userId, UserRole role, int? departmentId)
         {
-            // For calendar, we fetch all user tasks that have start/due dates
-            var todos = await _context.Todos
-                .Where(t => t.UserId == userId)
+            IQueryable<Todo> query = _context.Todos.Include(t => t.Account);
+            if (role == UserRole.Employee)
+            {
+                query = query.Where(t => t.UserId == userId);
+            }
+            else if (role == UserRole.Leader)
+            {
+                query = query.Where(t => t.Account != null && t.Account.DepartmentId == departmentId);
+            }
+            // DepartmentHead can see all, so no filter needed
+
+            var todos = await query
                 .OrderBy(t => t.StartDate)
                 .ToListAsync();
 
@@ -183,7 +282,10 @@ namespace SimpleToDoApp.Application.Services
                 CreatedAt = todo.CreatedAt,
                 StartDate = todo.StartDate,
                 DueDate = todo.DueDate,
-                ReminderMinutes = todo.ReminderMinutes
+                ReminderMinutes = todo.ReminderMinutes,
+                AssignedUserId = todo.UserId,
+                AssignedUsername = todo.Account?.Username,
+                AssignedEmail = todo.Account?.Email
             };
         }
     }
