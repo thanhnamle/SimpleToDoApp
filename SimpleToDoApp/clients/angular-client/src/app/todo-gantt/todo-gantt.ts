@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { TodoService } from '../services/todo.service';
 import { SignalRService } from '../services/signalr.service';
 import { NotificationService } from '../services/notification.service';
@@ -24,6 +25,7 @@ interface GanttTask extends Todo {
   selector: 'app-todo-gantt',
   imports: [
     CommonModule,
+    FormsModule,
     LucideBarChart,
     LucideLoader2,
     LucideAlertCircle,
@@ -192,16 +194,18 @@ export class TodoGantt implements OnInit, OnDestroy {
     this.generateTimeline();
   }
 
-  zoomIn() {
-    if (this.daysToView > 7) {
-      this.daysToView = 7;
+  onDaysChange(event: any) {
+    const val = event.target.value;
+    if (val !== 'custom') {
+      this.daysToView = parseInt(val, 10);
       this.generateTimeline();
     }
   }
 
-  zoomOut() {
-    if (this.daysToView < 30) {
-      this.daysToView = 30;
+  onCustomDaysChange(event: any) {
+    const val = parseInt(event.target.value, 10);
+    if (!isNaN(val) && val > 0) {
+      this.daysToView = val;
       this.generateTimeline();
     }
   }
@@ -232,6 +236,11 @@ export class TodoGantt implements OnInit, OnDestroy {
     this.dragOriginalEnd = task.dueDate ? new Date(task.dueDate) : new Date(this.dragOriginalStart.getTime() + 24 * 60 * 60 * 1000);
   }
 
+  toLocalISOString(date: Date): string {
+    const tzOffset = date.getTimezoneOffset() * 60000;
+    return (new Date(date.getTime() - tzOffset)).toISOString().slice(0, 19);
+  }
+
   @HostListener('window:mousemove', ['$event'])
   onMouseMove(event: MouseEvent) {
     if (this.hoveredTask && !this.isDragging) {
@@ -245,7 +254,7 @@ export class TodoGantt implements OnInit, OnDestroy {
     
     const deltaX = event.clientX - this.dragStartX;
     // Calculate how many milliseconds per pixel based on current view
-    const containerWidth = window.innerWidth - 300; // rough estimate of available width
+    const containerWidth = this.daysToView * 60; // 60px per day matches the CSS min-width
     const msPerPixel = (this.daysToView * 24 * 60 * 60 * 1000) / containerWidth;
     
     const deltaMs = deltaX * msPerPixel;
@@ -258,8 +267,9 @@ export class TodoGantt implements OnInit, OnDestroy {
     this.todos.update(current => {
       const idx = current.findIndex(t => t.id === this.draggedTaskId);
       if (idx > -1) {
-        current[idx].startDate = newStart.toISOString();
-        current[idx].dueDate = newEnd.toISOString();
+        const t = current[idx];
+        t.startDate = t.isAllDay ? this.toLocalISOString(newStart).substring(0, 10) : this.toLocalISOString(newStart);
+        t.dueDate = t.isAllDay ? this.toLocalISOString(newEnd).substring(0, 10) : this.toLocalISOString(newEnd);
       }
       return [...current];
     });

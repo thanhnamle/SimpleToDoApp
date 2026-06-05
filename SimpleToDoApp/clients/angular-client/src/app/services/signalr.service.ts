@@ -20,7 +20,13 @@ export class SignalRService {
       return; // Already connected
     }
 
-    const hubUrl = environment.apiUrl.replace('/api', '/hubs/todo');
+    const baseUrl = environment.apiUrl.endsWith('/') 
+      ? environment.apiUrl.slice(0, -1) 
+      : environment.apiUrl;
+      
+    const hubUrl = baseUrl.endsWith('/api')
+      ? baseUrl.replace(/\/api$/, '/hubs/todo')
+      : `${baseUrl}/hubs/todo`;
 
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl, {
@@ -29,11 +35,12 @@ export class SignalRService {
       .withAutomaticReconnect()
       .build();
 
+    this.registerEvents();
+
     this.hubConnection
       .start()
       .then(() => {
         this.isConnected.set(true);
-        this.registerEvents();
       })
       .catch(err => console.error('Error while starting SignalR connection: ' + err));
       
