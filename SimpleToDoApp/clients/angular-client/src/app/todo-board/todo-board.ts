@@ -1,8 +1,10 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, HostListener, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TodoService } from '../services/todo.service';
 import { NotificationService } from '../services/notification.service';
 import { ReminderService } from '../services/reminder.service';
+import { SignalRService } from '../services/signalr.service';
+import { Subscription } from 'rxjs';
 import { CreateTodoRequest, Todo, TodoStatus, UpdateTodoRequest } from '../models/todo';
 import { TodoModal } from '../todo-modal/todo-modal';
 import {
@@ -42,6 +44,9 @@ export class TodoBoard implements OnInit {
   private readonly todoService = inject(TodoService);
   private readonly notificationService = inject(NotificationService);
   private readonly reminderService = inject(ReminderService);
+  private readonly signalRService = inject(SignalRService);
+
+  private signalRSub?: Subscription;
 
   todos = signal<Todo[]>([]);
   loading = signal<boolean>(true);
@@ -63,6 +68,15 @@ export class TodoBoard implements OnInit {
 
   ngOnInit() {
     this.fetchTodos();
+    this.signalRSub = this.signalRService.todoUpdated$.subscribe(() => {
+      this.fetchTodos();
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.signalRSub) {
+      this.signalRSub.unsubscribe();
+    }
   }
 
   fetchTodos() {

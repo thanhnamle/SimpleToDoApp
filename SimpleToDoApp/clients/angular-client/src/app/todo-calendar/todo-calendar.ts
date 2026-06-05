@@ -1,8 +1,10 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TodoService } from '../services/todo.service';
 import { NotificationService } from '../services/notification.service';
 import { ReminderService } from '../services/reminder.service';
+import { SignalRService } from '../services/signalr.service';
+import { Subscription, interval } from 'rxjs';
 import { CreateTodoRequest, Todo, UpdateTodoRequest } from '../models/todo';
 import { TodoModal } from '../todo-modal/todo-modal';
 import {
@@ -14,7 +16,9 @@ import {
   LucideAlertTriangle,
   LucideClock,
   LucideBell,
-  LucideTag
+  LucideTag,
+  LucideList,
+  LucideCalendarDays
 } from '@lucide/angular';
 
 @Component({
@@ -30,7 +34,9 @@ import {
     LucideAlertTriangle,
     LucideClock,
     LucideBell,
-    LucideTag
+    LucideTag,
+    LucideList,
+    LucideCalendarDays
   ],
   templateUrl: './todo-calendar.html'
 })
@@ -38,10 +44,20 @@ export class TodoCalendar implements OnInit {
   private readonly todoService = inject(TodoService);
   private readonly notificationService = inject(NotificationService);
   private readonly reminderService = inject(ReminderService);
+  private readonly signalRService = inject(SignalRService);
+
+  private signalRSub?: Subscription;
+  private clockSub?: Subscription;
 
   todos = signal<Todo[]>([]);
   loading = signal<boolean>(true);
   error = signal<string | null>(null);
+
+  // Digital Clock
+  currentTime = signal<Date>(new Date());
+
+  // View Mode
+  viewMode = signal<'month' | 'timeline'>('month');
 
   // Calendar State
   currentDate = new Date();
@@ -62,6 +78,21 @@ export class TodoCalendar implements OnInit {
   ngOnInit() {
     this.fetchCalendarTodos();
     this.generateCalendarGrid();
+    this.signalRSub = this.signalRService.todoUpdated$.subscribe(() => {
+      this.fetchCalendarTodos();
+    });
+    this.clockSub = interval(1000).subscribe(() => {
+      this.currentTime.set(new Date());
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.signalRSub) {
+      this.signalRSub.unsubscribe();
+    }
+    if (this.clockSub) {
+      this.clockSub.unsubscribe();
+    }
   }
 
   fetchCalendarTodos() {
@@ -133,6 +164,63 @@ export class TodoCalendar implements OnInit {
     });
   }
 
+  // Timeline specific helpers
+  hours = Array.from({ length: 24 }, (_, i) => i);
+
+  getTodosForTimelineDate(): Todo[] {
+    // Uses the currently selected year, month, and today's day (or 1st if month is different)
+    // Wait, the timeline view should show the timeline for a specific day. 
+    // Let's assume it shows the timeline for the 'currentDate'
+    return this.todos().filter(todo => {
+      if (todo.isAllDay) return false;
+      const start = new Date(todo.startDate);
+      return start.getDate() === this.currentDate.getDate() && 
+             start.getMonth() === this.currentDate.getMonth() && 
+             start.getFullYear() === this.currentDate.getFullYear();
+    });
+  }
+
+  getAllDayTodosForTimelineDate(): Todo[] {
+    return this.todos().filter(todo => {
+      if (!todo.isAllDay) return false;
+      const start = new Date(todo.startDate);
+      return start.getDate() === this.currentDate.getDate() && 
+             start.getMonth() === this.currentDate.getMonth() && 
+             start.getFullYear() === this.currentDate.getFullYear();
+    });
+  }
+
+  getTopPosition(dateStr: string): string {
+    const d = new Date(dateStr);
+    const minutes = d.getHours() * 60 + d.getMinutes();
+    const totalMinutes = 24 * 60;
+    return `${(minutes / totalMinutes) * 100}%`;
+  }
+
+  getHeight(startStr: string, endStr: string): string {
+    const start = new Date(startStr);
+    const end = endStr ? new Date(endStr) : new Date(start.getTime() + 60 * 60 * 1000); // default 1h
+    const diffMins = (end.getTime() - start.getTime()) / (1000 * 60);
+    const totalMinutes = 24 * 60;
+    return `${Math.max((diffMins / totalMinutes) * 100, 2)}%`; // min 2% height
+  }
+
+  formatTimelineHour(h: number): string {
+    if (h === 0) return '12 AM';
+    if (h === 12) return '12 PM';
+    if (h > 12) return `${h - 12} PM`;
+    return `${h} AM`;
+  }
+
+  toggleViewMode() {
+    this.viewMode.update(v => v === 'month' ? 'timeline' : 'month');
+  }
+
+  switchToTimeline(dayNum: number) {
+    this.currentDate = new Date(this.year, this.month, dayNum);
+    this.viewMode.set('timeline');
+  }
+
   handleDayClick(dayNum: number) {
     const clickedDate = new Date(this.year, this.month, dayNum, 9, 0, 0);
     this.selectedTodo = {
@@ -147,6 +235,25 @@ export class TodoCalendar implements OnInit {
       createdAt: '',
       startDate: clickedDate.toISOString(),
       dueDate: new Date(this.year, this.month, dayNum, 10, 0, 0).toISOString(),
+      reminderMinutes: 0
+    };
+    this.modalOpen = true;
+  }
+
+  handleTimelineTimeClick(hour: number) {
+    const clickedDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), this.currentDate.getDate(), hour, 0, 0);
+    this.selectedTodo = {
+      id: 0,
+      title: '',
+      description: '',
+      isCompleted: false,
+      category: '',
+      priority: 'Medium',
+      status: 'Pending',
+      isAllDay: false,
+      createdAt: '',
+      startDate: clickedDate.toISOString(),
+      dueDate: new Date(clickedDate.getTime() + 3600000).toISOString(),
       reminderMinutes: 0
     };
     this.modalOpen = true;

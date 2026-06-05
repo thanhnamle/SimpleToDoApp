@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, inject, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, inject, signal, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CreateTodoRequest, Todo, UpdateTodoRequest } from '../models/todo';
@@ -27,6 +27,13 @@ export class TodoModal implements OnChanges {
   @Input() todo: Todo | null = null;
   @Output() close = new EventEmitter<void>();
   @Output() save = new EventEmitter<CreateTodoRequest | UpdateTodoRequest>();
+
+  @HostListener('window:keydown.esc')
+  onEsc() {
+    if (this.isOpen) {
+      this.close.emit();
+    }
+  }
 
   private readonly authService = inject(AuthService);
 

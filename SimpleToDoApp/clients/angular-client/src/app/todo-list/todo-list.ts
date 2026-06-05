@@ -1,10 +1,12 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { TodoService } from '../services/todo.service';
 import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../services/notification.service';
 import { ReminderService } from '../services/reminder.service';
+import { SignalRService } from '../services/signalr.service';
 import { CreateTodoRequest, Todo, UpdateTodoRequest } from '../models/todo';
 import { TodoModal } from '../todo-modal/todo-modal';
 import {
@@ -55,11 +57,14 @@ import {
   ],
   templateUrl: './todo-list.html'
 })
-export class TodoList implements OnInit {
+export class TodoList implements OnInit, OnDestroy {
   private readonly todoService = inject(TodoService);
   private readonly authService = inject(AuthService);
   private readonly notificationService = inject(NotificationService);
   private readonly reminderService = inject(ReminderService);
+  private readonly signalRService = inject(SignalRService);
+
+  private signalRSub?: Subscription;
 
   isEmployee = computed(() => this.authService.currentUser()?.role === 'Employee');
 
@@ -85,6 +90,15 @@ export class TodoList implements OnInit {
 
   ngOnInit() {
     this.fetchTodos();
+    this.signalRSub = this.signalRService.todoUpdated$.subscribe(() => {
+      this.fetchTodos();
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.signalRSub) {
+      this.signalRSub.unsubscribe();
+    }
   }
 
   fetchTodos() {

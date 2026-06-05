@@ -17,6 +17,7 @@ namespace SimpleToDoApp.Infrastructure
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<ITodoService, TodoService>();
             services.AddScoped<IDepartmentService, DepartmentService>();
             services.AddScoped<ITodoDbContext>(provider => provider.GetRequiredService<TodoDbContext>());

@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using SimpleToDoApp.Api.Extensions;
 using SimpleToDoApp.Infrastructure;
@@ -13,11 +15,14 @@ builder.Services.AddControllers()
 builder.Services.AddCustomCors();
 builder.Services.AddCustomAuthentication(builder.Configuration);
 builder.Services.AddCustomSwagger();
+builder.Services.AddSignalR();
 
 builder.Services.AddDbContext<TodoDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("LocalDbCS")));
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
+
+builder.Services.AddScoped<SimpleToDoApp.Application.Interfaces.ITodoNotificationService, SimpleToDoApp.Api.Services.TodoNotificationService>();
 
 var app = builder.Build();
 
@@ -49,5 +54,28 @@ app.MapGet("/api/health", () => Results.Ok(new
 }));
 
 app.MapControllers();
+app.MapHub<SimpleToDoApp.Api.Hubs.TodoHub>("/hubs/todo");
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<TodoDbContext>();
+    // Ensure the database is created
+    context.Database.EnsureCreated();
+
+    // Check if the default admin exists
+    if (!context.Accounts.Any(a => a.Email == "admin@company.com"))
+    {
+        var admin = new SimpleToDoApp.Domain.Entities.Account
+        {
+            Username = "admin_head",
+            Email = "admin@company.com",
+            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/PebH.cKJHZSUAqxAdCv/ILOTvYA25tbwe",
+            Role = SimpleToDoApp.Domain.Enums.UserRole.DepartmentHead,
+            IsEmailVerified = true
+        };
+        context.Accounts.Add(admin);
+        context.SaveChanges();
+    }
+}
 
 app.Run();

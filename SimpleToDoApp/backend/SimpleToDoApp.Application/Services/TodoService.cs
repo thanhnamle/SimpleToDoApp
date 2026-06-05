@@ -13,10 +13,12 @@ namespace SimpleToDoApp.Application.Services
     public class TodoService : ITodoService
     {
         private readonly ITodoDbContext _context;
+        private readonly ITodoNotificationService _notificationService;
 
-        public TodoService(ITodoDbContext context)
+        public TodoService(ITodoDbContext context, ITodoNotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         public async Task<IEnumerable<TodoDto>> GetUserTodosAsync(int userId, UserRole role, int? departmentId)
@@ -108,7 +110,11 @@ namespace SimpleToDoApp.Application.Services
             await _context.SaveChangesAsync();
 
             todo.Account = await _context.Accounts.FirstOrDefaultAsync(a => a.UserId == assignedUserId);
-            return MapToDto(todo);
+            var dto = MapToDto(todo);
+
+            await _notificationService.NotifyTodoUpdatedAsync(dto);
+
+            return dto;
         }
 
         public async Task<TodoDto?> UpdateTodoAsync(int id, UpdateTodoRequest request, int userId, UserRole role, int? departmentId)
@@ -182,7 +188,10 @@ namespace SimpleToDoApp.Application.Services
 
             await _context.SaveChangesAsync();
 
-            return MapToDto(todo);
+            var dto = MapToDto(todo);
+            await _notificationService.NotifyTodoUpdatedAsync(dto);
+
+            return dto;
         }
 
         public async Task<TodoDto?> UpdateTodoStatusAsync(int id, UpdateTodoStatusRequest request, int userId, UserRole role, int? departmentId)
@@ -217,7 +226,10 @@ namespace SimpleToDoApp.Application.Services
 
             await _context.SaveChangesAsync();
 
-            return MapToDto(todo);
+            var dto = MapToDto(todo);
+            await _notificationService.NotifyTodoUpdatedAsync(dto);
+
+            return dto;
         }
 
         public async Task<bool> DeleteTodoAsync(int id, int userId, UserRole role, int? departmentId)
@@ -244,6 +256,9 @@ namespace SimpleToDoApp.Application.Services
 
             _context.Todos.Remove(todo);
             await _context.SaveChangesAsync();
+
+            await _notificationService.NotifyTodoUpdatedAsync(null!); // broadcast that something changed
+
             return true;
         }
 

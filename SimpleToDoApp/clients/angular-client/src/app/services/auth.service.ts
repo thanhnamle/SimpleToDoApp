@@ -63,6 +63,19 @@ export class AuthService {
     return this.http.get<any[]>(`http://localhost:59444/api/departments`);
   }
 
+  // Account CRUD for DepartmentHead
+  createAccount(data: any): Observable<User> {
+    return this.http.post<User>(`http://localhost:59444/api/accounts`, data);
+  }
+
+  updateAccount(id: number, data: any): Observable<User> {
+    return this.http.put<User>(`http://localhost:59444/api/accounts/${id}`, data);
+  }
+
+  deleteAccount(id: number): Observable<any> {
+    return this.http.delete<any>(`http://localhost:59444/api/accounts/${id}`);
+  }
+
   getDepartmentMembers(): Observable<User[]> {
     return this.http.get<User[]>(`http://localhost:59444/api/departments/members`);
   }
