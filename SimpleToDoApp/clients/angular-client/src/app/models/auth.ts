@@ -4,6 +4,7 @@ export interface User {
   email: string;
   role: string;
   departmentId: number | null;
+  departmentName: string | null;
 }
 
 export interface AuthResponse {

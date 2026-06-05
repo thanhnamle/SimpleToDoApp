@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 import { ThemeService } from '../services/theme.service';
 import { ReminderService } from '../services/reminder.service';
+import { SignalRService } from '../services/signalr.service';
 import {
   LucideCheckSquare,
   LucideX,
@@ -50,6 +51,7 @@ export class Dashboard implements OnInit, OnDestroy {
   private readonly themeService = inject(ThemeService);
   readonly reminderService = inject(ReminderService);
   private readonly router = inject(Router);
+  private readonly signalRService = inject(SignalRService);
 
   isSidebarOpen = signal(false);
   isBellOpen = signal(false);
@@ -67,10 +69,15 @@ export class Dashboard implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.reminderService.startPolling(60000);
+    const token = this.authService.currentToken();
+    if (token) {
+      this.signalRService.startConnection(token);
+    }
   }
 
   ngOnDestroy() {
     this.reminderService.stopPolling();
+    this.signalRService.stopConnection();
   }
 
   toggleSidebar() {

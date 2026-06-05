@@ -19,7 +19,7 @@ namespace SimpleToDoApp.Application.Services
 
         public async Task<IEnumerable<UserDto>> GetDepartmentMembersAsync(int? departmentId)
         {
-            var query = _context.Accounts.AsQueryable();
+            var query = _context.Accounts.Include(a => a.Department).AsQueryable();
             if (departmentId.HasValue)
             {
                 query = query.Where(a => a.DepartmentId == departmentId.Value);
@@ -35,7 +35,8 @@ namespace SimpleToDoApp.Application.Services
                 Username = a.Username,
                 Email = a.Email,
                 Role = a.Role,
-                DepartmentId = a.DepartmentId
+                DepartmentId = a.DepartmentId,
+                DepartmentName = a.Department?.Name
             });
         }
 

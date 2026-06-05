@@ -33,20 +33,27 @@
         <svg lucideListTodo class="h-5 w-5"></svg>
         Tasks List
       </a>
+      <a routerLink="/todos/calendar"
+        routerLinkActive="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-l-4 border-indigo-500"
+        (click)="closeSidebarOnMobile()"
+        class="flex items-center gap-3.5 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-500 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/60 hover:text-slate-900 dark:hover:text-slate-200">
+        <svg lucideCalendar class="h-5 w-5"></svg>
+        Calendar
+      </a>
       @if (!isEmployee()) {
+        <a routerLink="/todos/gantt"
+          routerLinkActive="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-l-4 border-indigo-500"
+          (click)="closeSidebarOnMobile()"
+          class="flex items-center gap-3.5 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-500 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/60 hover:text-slate-900 dark:hover:text-slate-200">
+          <svg lucideKanban class="h-5 w-5"></svg>
+          Gantt Chart
+        </a>
         <a routerLink="/todos/board"
           routerLinkActive="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-l-4 border-indigo-500"
           (click)="closeSidebarOnMobile()"
           class="flex items-center gap-3.5 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-500 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/60 hover:text-slate-900 dark:hover:text-slate-200">
           <svg lucideKanban class="h-5 w-5"></svg>
           Kanban Board
-        </a>
-        <a routerLink="/todos/calendar"
-          routerLinkActive="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-l-4 border-indigo-500"
-          (click)="closeSidebarOnMobile()"
-          class="flex items-center gap-3.5 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-500 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/60 hover:text-slate-900 dark:hover:text-slate-200">
-          <svg lucideCalendar class="h-5 w-5"></svg>
-          Calendar
         </a>
         <a routerLink="/todos/department"
           routerLinkActive="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-l-4 border-indigo-500"

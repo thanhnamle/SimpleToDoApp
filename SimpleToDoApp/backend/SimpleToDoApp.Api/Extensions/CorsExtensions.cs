@@ -10,9 +10,10 @@ namespace SimpleToDoApp.Api.Extensions
             {
                 options.AddPolicy("AllowAll", builder =>
                 {
-                    builder.AllowAnyOrigin()
+                    builder.SetIsOriginAllowed(origin => true) // Allow any origin
                            .AllowAnyMethod()
-                           .AllowAnyHeader();
+                           .AllowAnyHeader()
+                           .AllowCredentials(); // SignalR needs credentials
                 });
             });
 

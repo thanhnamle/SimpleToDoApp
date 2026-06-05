@@ -3,12 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Todo, CreateTodoRequest, UpdateTodoRequest } from '../models/todo';
 
+import { environment } from '../../environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
 export class TodoService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:59444/api/todos';
+  private readonly baseUrl = `${environment.apiUrl.endsWith('/') ? environment.apiUrl.slice(0, -1) : environment.apiUrl}/api/todos`;
 
   getAll(): Observable<Todo[]> {
     return this.http.get<Todo[]>(this.baseUrl);

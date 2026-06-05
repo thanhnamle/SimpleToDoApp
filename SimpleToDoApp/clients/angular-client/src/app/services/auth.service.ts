@@ -2,13 +2,16 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { User, AuthResponse, LoginRequest, RegisterRequest } from '../models/auth';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:59444/api/auth';
+  private readonly baseUrl = `${environment.apiUrl.endsWith('/') ? environment.apiUrl.slice(0, -1) : environment.apiUrl}/api/auth`;
+  private readonly departmentUrl = `${environment.apiUrl.endsWith('/') ? environment.apiUrl.slice(0, -1) : environment.apiUrl}/api/departments`;
+  private readonly accountsUrl = `${environment.apiUrl.endsWith('/') ? environment.apiUrl.slice(0, -1) : environment.apiUrl}/api/accounts`;
 
   readonly currentUser = signal<User | null>(this.getStoredUser());
   readonly currentToken = signal<string | null>(this.getStoredToken());
@@ -60,11 +63,24 @@ export class AuthService {
   }
 
   getDepartments(): Observable<any[]> {
-    return this.http.get<any[]>(`http://localhost:59444/api/departments`);
+    return this.http.get<any[]>(this.departmentUrl);
+  }
+
+  // Account CRUD for DepartmentHead
+  createAccount(data: any): Observable<User> {
+    return this.http.post<User>(this.accountsUrl, data);
+  }
+
+  updateAccount(id: number, data: any): Observable<User> {
+    return this.http.put<User>(`${this.accountsUrl}/${id}`, data);
+  }
+
+  deleteAccount(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.accountsUrl}/${id}`);
   }
 
   getDepartmentMembers(): Observable<User[]> {
-    return this.http.get<User[]>(`http://localhost:59444/api/departments/members`);
+    return this.http.get<User[]>(`${this.departmentUrl}/members`);
   }
 
   getMe(): Observable<User> {

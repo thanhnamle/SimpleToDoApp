@@ -9,6 +9,7 @@ import { TodoList } from './todo-list/todo-list';
 import { TodoBoard } from './todo-board/todo-board';
 import { TodoCalendar } from './todo-calendar/todo-calendar';
 import { TodoDepartment } from './todo-department/todo-department';
+import { TodoGantt } from './todo-gantt/todo-gantt';
 import { authGuard } from './core/auth.guard';
 
 export const routes: Routes = [
@@ -25,6 +26,7 @@ export const routes: Routes = [
       { path: '', component: TodoList },
       { path: 'board', component: TodoBoard },
       { path: 'calendar', component: TodoCalendar },
+      { path: 'gantt', component: TodoGantt },
       { path: 'department', component: TodoDepartment }
     ]
   },
