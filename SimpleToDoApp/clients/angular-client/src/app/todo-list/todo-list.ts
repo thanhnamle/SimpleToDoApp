@@ -7,8 +7,12 @@ import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../services/notification.service';
 import { ReminderService } from '../services/reminder.service';
 import { SignalRService } from '../services/signalr.service';
+import { TodoUiService } from '../services/todo-ui.service';
 import { CreateTodoRequest, Todo, UpdateTodoRequest } from '../models/todo';
 import { TodoModal } from '../todo-modal/todo-modal';
+import { RippleDirective } from '../core/ripple.directive';
+import { MagneticDirective } from '../core/magnetic.directive';
+import { AudioService } from '../services/audio.service';
 import {
   LucidePlus,
   LucideSearch,
@@ -36,6 +40,8 @@ import {
     CommonModule,
     FormsModule,
     TodoModal,
+    RippleDirective,
+    MagneticDirective,
     LucidePlus,
     LucideSearch,
     LucideListTodo,
@@ -63,13 +69,17 @@ export class TodoList implements OnInit, OnDestroy {
   private readonly notificationService = inject(NotificationService);
   private readonly reminderService = inject(ReminderService);
   private readonly signalRService = inject(SignalRService);
+  public readonly uiService = inject(TodoUiService);
+  private readonly audioService = inject(AudioService);
 
   private signalRSub?: Subscription;
 
   isEmployee = computed(() => this.authService.currentUser()?.role === 'Employee');
+  isDepartmentHead = computed(() => this.authService.currentUser()?.role === 'DepartmentHead');
 
   todos = signal<Todo[]>([]);
   filteredTodos = signal<Todo[]>([]);
+  departments = signal<any[]>([]);
   loading = signal<boolean>(true);
   error = signal<string | null>(null);
 
@@ -78,6 +88,8 @@ export class TodoList implements OnInit, OnDestroy {
   statusFilter = 'All';
   priorityFilter = 'All';
   categoryFilter = 'All';
+  sortFilter = 'Default';
+  departmentFilter = 'All';
   categories: string[] = ['All'];
 
   // Modal control
@@ -90,6 +102,9 @@ export class TodoList implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.fetchTodos();
+    if (this.isDepartmentHead()) {
+      this.authService.getDepartments().subscribe(d => this.departments.set(d));
+    }
     this.signalRSub = this.signalRService.todoUpdated$.subscribe(() => {
       this.fetchTodos();
     });
@@ -133,15 +148,44 @@ export class TodoList implements OnInit, OnDestroy {
       const matchesStatus = this.statusFilter === 'All' || todo.status === this.statusFilter;
       const matchesPriority = this.priorityFilter === 'All' || todo.priority === this.priorityFilter;
       const matchesCategory = this.categoryFilter === 'All' || todo.category === this.categoryFilter;
+      const matchesDepartment = this.departmentFilter === 'All' || todo.departmentId?.toString() === this.departmentFilter;
 
-      return matchesSearch && matchesStatus && matchesPriority && matchesCategory;
+      return matchesSearch && matchesStatus && matchesPriority && matchesCategory && matchesDepartment;
     });
+
+    if (this.sortFilter === 'DueDateAsc') {
+      filtered.sort((a, b) => {
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      });
+    } else if (this.sortFilter === 'DueDateDesc') {
+      filtered.sort((a, b) => {
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime();
+      });
+    }
 
     this.filteredTodos.set(filtered);
   }
 
   handleToggleComplete(todo: Todo) {
     const nextStatus = todo.status === 'Done' ? 'Pending' : 'Done';
+    
+    if (nextStatus === 'Done') {
+      this.audioService.playSuccess();
+      import('canvas-confetti').then((confetti) => {
+        confetti.default({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#4f46e5', '#3b82f6', '#10b981', '#f59e0b', '#ec4899'],
+          zIndex: 9999
+        });
+      });
+    }
+
     // Optimistic update
     this.todos.update(prev => 
       prev.map(t => t.id === todo.id ? { ...t, status: nextStatus, isCompleted: nextStatus === 'Done' } : t)
@@ -172,9 +216,18 @@ export class TodoList implements OnInit, OnDestroy {
     ).then((confirmed) => {
       if (!confirmed) return;
 
-      // Optimistic delete
-      this.todos.update(prev => prev.filter(t => t.id !== id));
-      this.applyFilters();
+      this.audioService.playDelete();
+
+      const el = document.getElementById('task-' + id);
+      if (el) {
+        el.classList.add('animate-destroy');
+      }
+
+      setTimeout(() => {
+        // Optimistic delete
+        this.todos.update(prev => prev.filter(t => t.id !== id));
+        this.applyFilters();
+      }, 400);
 
       this.todoService.delete(id).subscribe({
         next: () => {
@@ -219,6 +272,34 @@ export class TodoList implements OnInit, OnDestroy {
     }
   }
 
+  startTask(todo: Todo) {
+    const payload: UpdateTodoRequest = {
+      title: todo.title,
+      description: todo.description,
+      isCompleted: todo.isCompleted,
+      category: todo.category,
+      priority: todo.priority,
+      status: 'InProgress',
+      isAllDay: todo.isAllDay,
+      startDate: todo.startDate,
+      dueDate: todo.dueDate,
+      reminderMinutes: todo.reminderMinutes,
+      assignedUserId: todo.assignedUserId
+    };
+
+    this.todoService.update(todo.id, payload).subscribe({
+      next: () => {
+        this.notificationService.showToast('Task started successfully.', 'success');
+        this.reminderService.load();
+        this.fetchTodos();
+      },
+      error: (err) => {
+        const errorMsg = this.notificationService.parseApiError(err, 'Failed to start task.');
+        this.notificationService.showToast(errorMsg, 'error');
+      }
+    });
+  }
+
   openCreateModal() {
     this.selectedTodo = null;
     this.modalOpen = true;
@@ -244,28 +325,6 @@ export class TodoList implements OnInit, OnDestroy {
     this.detailTodo = null;
   }
 
-  getPriorityStyle(p: string): string {
-    switch (p) {
-      case 'High':
-        return 'bg-red-500/10 text-red-400 border border-red-500/20';
-      case 'Medium':
-        return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
-      default:
-        return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
-    }
-  }
-
-  getStatusStyle(s: string): string {
-    switch (s) {
-      case 'Done':
-        return 'bg-emerald-500/10 text-emerald-400';
-      case 'InProgress':
-        return 'bg-sky-500/10 text-sky-400';
-      default:
-        return 'bg-slate-500/10 text-slate-400';
-    }
-  }
-
   formatDisplayDate(dateStr: string): string {
     if (!dateStr) return '';
     const date = new Date(dateStr);
@@ -280,25 +339,6 @@ export class TodoList implements OnInit, OnDestroy {
       weekday: 'short', year: 'numeric', month: 'short',
       day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
-  }
-
-  isOverdue(todo: Todo): boolean {
-    if (todo.status === 'Done' || !todo.dueDate) return false;
-    const due = new Date(todo.dueDate);
-    if (isNaN(due.getTime())) return false;
-    if (todo.isAllDay) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const match = todo.dueDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
-      if (match) {
-        const year = parseInt(match[1], 10);
-        const month = parseInt(match[2], 10) - 1;
-        const day = parseInt(match[3], 10);
-        const dueDateLocal = new Date(year, month, day);
-        return dueDateLocal < today;
-      }
-    }
-    return due < new Date();
   }
 
   formatReminderLabel(minutes: number): string {

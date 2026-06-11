@@ -1,0 +1,311 @@
+<div class="relative min-h-screen w-full overflow-x-hidden bg-slate-50 dark:bg-slate-950 transition-colors duration-300 font-sans">
+  
+  <!-- Navbar (Sticky) -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-lg border-b border-slate-200 dark:border-slate-800 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        <!-- Logo -->
+        <div class="shrink-0 flex items-center gap-3 cursor-pointer">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary dark:bg-primary-dark text-slate-800 dark:text-white shadow-md shadow-primary/20">
+            <svg lucideCheckSquare class="h-6 w-6"></svg>
+          </div>
+          <span class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">ZenTodo</span>
+        </div>
+
+        <!-- Desktop Menu -->
+        <div class="hidden md:flex items-center space-x-8">
+          <a (click)="scrollTo('features')" class="relative overflow-hidden text-sm font-semibold text-slate-600 dark:text-slate-300 group flex flex-col h-5 cursor-pointer">
+            <span class="transition-transform duration-300 group-hover:-translate-y-full h-5 flex items-center shrink-0">Features</span>
+            <span class="transition-transform duration-300 group-hover:-translate-y-full h-5 flex items-center shrink-0 text-primary dark:text-primary-dark">Features</span>
+          </a>
+          <a (click)="scrollTo('about')" class="relative overflow-hidden text-sm font-semibold text-slate-600 dark:text-slate-300 group flex flex-col h-5 cursor-pointer">
+            <span class="transition-transform duration-300 group-hover:-translate-y-full h-5 flex items-center shrink-0">About Us</span>
+            <span class="transition-transform duration-300 group-hover:-translate-y-full h-5 flex items-center shrink-0 text-primary dark:text-primary-dark">About Us</span>
+          </a>
+          <a (click)="scrollTo('feedback')" class="relative overflow-hidden text-sm font-semibold text-slate-600 dark:text-slate-300 group flex flex-col h-5 cursor-pointer">
+            <span class="transition-transform duration-300 group-hover:-translate-y-full h-5 flex items-center shrink-0">Feedback</span>
+            <span class="transition-transform duration-300 group-hover:-translate-y-full h-5 flex items-center shrink-0 text-primary dark:text-primary-dark">Feedback</span>
+          </a>
+        </div>
+
+        <!-- CTA & Theme Toggle (Desktop) -->
+        <div class="hidden md:flex items-center space-x-4">
+          <button (click)="toggleTheme()" class="rounded-full p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors">
+            @if (isDark) {
+              <svg lucideSun class="h-5 w-5 text-amber-400"></svg>
+            } @else {
+              <svg lucideMoon class="h-5 w-5"></svg>
+            }
+          </button>
+          
+          @if (isLoggedIn) {
+            <a routerLink="/todos" class="group relative overflow-hidden inline-flex flex-col h-10 items-center justify-start rounded-xl bg-primary dark:bg-primary-dark px-5 text-sm font-bold text-slate-900 dark:text-white shadow-md transition-all active:scale-95 cursor-pointer hover:shadow-lg hover:shadow-primary/30 hover:brightness-105">
+              <span class="transition-transform duration-300 group-hover:-translate-y-full h-10 flex items-center justify-center shrink-0">Dashboard</span>
+              <span class="transition-transform duration-300 group-hover:-translate-y-full h-10 flex items-center justify-center shrink-0">Dashboard</span>
+            </a>
+          } @else {
+            <a routerLink="/login" class="group relative overflow-hidden inline-flex flex-col h-10 items-center justify-start rounded-xl bg-primary dark:bg-primary-dark px-5 text-sm font-bold text-slate-900 dark:text-white shadow-md transition-all active:scale-95 cursor-pointer hover:shadow-lg hover:shadow-primary/30 hover:brightness-105">
+              <span class="transition-transform duration-300 group-hover:-translate-y-full h-10 flex items-center justify-center shrink-0">Get Started</span>
+              <span class="transition-transform duration-300 group-hover:-translate-y-full h-10 flex items-center justify-center shrink-0">Get Started</span>
+            </a>
+          }
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <div class="md:hidden flex items-center gap-4">
+          <button (click)="toggleTheme()" class="rounded-full p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors">
+            @if (isDark) {
+              <svg lucideSun class="h-5 w-5 text-amber-400"></svg>
+            } @else {
+              <svg lucideMoon class="h-5 w-5"></svg>
+            }
+          </button>
+          <button (click)="toggleMobileMenu()" class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary-dark p-2">
+            @if (isMobileMenuOpen) {
+              <svg lucideX class="h-6 w-6"></svg>
+            } @else {
+              <svg lucideMenu class="h-6 w-6"></svg>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Menu Dropdown -->
+    @if (isMobileMenuOpen) {
+      <div class="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 pt-2 pb-6 space-y-4 shadow-xl animate-slide-down">
+        <a (click)="scrollTo('features'); toggleMobileMenu()" class="block px-3 py-2 rounded-md text-base font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer">Features</a>
+        <a (click)="scrollTo('about'); toggleMobileMenu()" class="block px-3 py-2 rounded-md text-base font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer">About Us</a>
+        <a (click)="scrollTo('feedback'); toggleMobileMenu()" class="block px-3 py-2 rounded-md text-base font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer">Feedback</a>
+        <div class="pt-4 border-t border-slate-100 dark:border-slate-800">
+          @if (isLoggedIn) {
+            <a routerLink="/todos" class="block w-full text-center rounded-xl bg-primary dark:bg-primary-dark px-5 py-3 text-base font-bold text-slate-900 dark:text-white shadow-md">Dashboard</a>
+          } @else {
+            <a routerLink="/login" class="block w-full text-center rounded-xl bg-primary dark:bg-primary-dark px-5 py-3 text-base font-bold text-slate-900 dark:text-white shadow-md mb-3">Login</a>
+            <a routerLink="/register" class="block w-full text-center rounded-xl border-2 border-slate-200 dark:border-slate-800 px-5 py-3 text-base font-bold text-slate-700 dark:text-slate-300">Sign Up</a>
+          }
+        </div>
+      </div>
+    }
+  </nav>
+
+  <!-- Decorative Playful Background Shapes -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none z-0 mt-20">
+    <div class="absolute -top-20 -left-20 h-64 w-64 rounded-full bg-primary/20 dark:bg-primary-dark/40 blur-3xl animate-[pulse_6s_ease-in-out_infinite]"></div>
+    <div class="absolute top-1/3 -right-32 h-80 w-80 rounded-full bg-amber-400/10 dark:bg-amber-500/10 blur-3xl animate-[pulse_8s_ease-in-out_infinite_1s]"></div>
+  </div>
+
+  <!-- Hero Section -->
+  <section id="hero" class="relative z-10 pt-32 pb-20 lg:pt-48 lg:pb-32 px-4 sm:px-6 lg:px-8 text-center" appScrollReveal [delay]="0">
+    <!-- Floating 3D-like Icon Cards (Pure CSS) -->
+    <div class="relative mx-auto w-full max-w-3xl h-32 mb-8 hidden md:block">
+      <div class="absolute top-0 left-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-400 text-white shadow-xl shadow-amber-400/20 transform -rotate-12 animate-[bounce_4s_ease-in-out_infinite]">
+        <svg lucideCalendar class="h-8 w-8"></svg>
+      </div>
+      <div class="absolute top-12 right-10 flex h-20 w-20 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-xl shadow-emerald-500/20 transform rotate-12 animate-[bounce_5s_ease-in-out_infinite_0.5s]">
+        <svg lucideCheckCircle2 class="h-10 w-10"></svg>
+      </div>
+      <div class="absolute -top-6 right-1/4 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-500 text-white shadow-xl shadow-rose-500/20 transform rotate-6 animate-[bounce_3.5s_ease-in-out_infinite_1s]">
+        <svg lucideListTodo class="h-7 w-7"></svg>
+      </div>
+    </div>
+
+    <!-- Hero Typography -->
+    <h1 class="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-950 dark:text-white mb-6">
+      Conquer your day with <br class="hidden sm:block" />
+      <span class="text-primary-dark dark:text-primary relative inline-block">
+        ZenTodo
+        <svg class="absolute w-full h-4 -bottom-1 left-0 text-amber-400" viewBox="0 0 100 10" preserveAspectRatio="none">
+          <path d="M0 5 Q 50 10 100 5" stroke="currentColor" stroke-width="3" fill="transparent" stroke-linecap="round"/>
+        </svg>
+      </span>
+    </h1>
+
+    <p class="mx-auto max-w-2xl text-lg sm:text-xl text-slate-600 dark:text-slate-400 mb-10 leading-relaxed font-medium">
+      A simple, playful, and dynamic way to manage tasks, coordinate with your department, and get things done.
+    </p>
+
+    <!-- Call to Action Buttons -->
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md mx-auto">
+      @if (isLoggedIn) {
+        <a routerLink="/todos" class="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-primary dark:bg-primary-dark px-8 py-4 text-lg font-bold text-slate-900 dark:text-white shadow-xl shadow-primary/20 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/30 hover:brightness-105 cursor-pointer">
+          Go to Dashboard
+          <svg lucideArrowRight class="h-5 w-5 transition-transform group-hover:translate-x-1"></svg>
+        </a>
+      } @else {
+        <a routerLink="/login" class="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-primary dark:bg-primary-dark px-8 py-4 text-lg font-bold text-slate-900 dark:text-white shadow-xl shadow-primary/20 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/30 hover:brightness-105 cursor-pointer">
+          Get Started
+          <svg lucideArrowRight class="h-5 w-5 transition-transform group-hover:translate-x-1"></svg>
+        </a>
+        <a (click)="scrollTo('features')" class="flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm px-8 py-4 text-lg font-bold text-slate-700 dark:text-slate-300 transition-all hover:-translate-y-1 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+          Learn More
+        </a>
+      }
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-20 bg-slate-100/50 dark:bg-slate-900/30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16" appScrollReveal>
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">Everything you need, nothing you don't</h2>
+        <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">ZenTodo packs powerful organizational tools into an interface that feels like a game.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="flex flex-col items-center text-center p-8 rounded-3xl bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 transition-transform hover:-translate-y-2 hover:shadow-2xl hover:shadow-indigo-500/10" appScrollReveal [delay]="100">
+          <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 mb-6 transform transition-transform hover:scale-110 hover:rotate-12">
+            <svg lucideZap class="h-8 w-8"></svg>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-3">Lightning Fast</h3>
+          <p class="text-slate-600 dark:text-slate-400">Optimized for speed. Tasks update instantly across all your devices without refreshing.</p>
+        </div>
+
+        <div class="flex flex-col items-center text-center p-8 rounded-3xl bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 transition-transform hover:-translate-y-2 hover:shadow-2xl hover:shadow-amber-500/10" appScrollReveal [delay]="200">
+          <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 mb-6 transform transition-transform hover:scale-110 hover:rotate-12">
+            <svg lucideKanban class="h-8 w-8"></svg>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-3">Visual Boards</h3>
+          <p class="text-slate-600 dark:text-slate-400">Visualize your workflow with drag-and-drop Kanban boards and interactive Gantt charts.</p>
+        </div>
+
+        <div class="flex flex-col items-center text-center p-8 rounded-3xl bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 transition-transform hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10" appScrollReveal [delay]="300">
+          <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 mb-6 transform transition-transform hover:scale-110 hover:rotate-12">
+            <svg lucideUsers class="h-8 w-8"></svg>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-3">Team Sync</h3>
+          <p class="text-slate-600 dark:text-slate-400">Built for departments. Assign tasks, track progress, and celebrate team wins together.</p>
+        </div>
+      </div>
+
+      <!-- Feature Zig-Zag -->
+      <div class="mt-32 space-y-32">
+        <!-- Zig 1 -->
+        <div class="flex flex-col md:flex-row items-center gap-12" appScrollReveal>
+          <div class="flex-1 space-y-6">
+            <div class="inline-flex items-center rounded-full bg-rose-100 dark:bg-rose-500/20 px-4 py-1.5 text-sm font-semibold text-rose-600 dark:text-rose-400">
+              Gamification
+            </div>
+            <h3 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">Make productivity genuinely fun</h3>
+            <p class="text-lg text-slate-600 dark:text-slate-400">We replaced boring checklists with satisfying interactions. Enjoy magnetic buttons, 3D hover effects, destruction physics on deletion, and a burst of confetti when you complete a task.</p>
+            <ul class="space-y-4 pt-4">
+              <li class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                <svg lucideCheck class="h-5 w-5 text-emerald-500"></svg> Immersive Sound Effects
+              </li>
+              <li class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                <svg lucideCheck class="h-5 w-5 text-emerald-500"></svg> Physics-based animations
+              </li>
+              <li class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                <svg lucideCheck class="h-5 w-5 text-emerald-500"></svg> Custom cursor tracking
+              </li>
+            </ul>
+          </div>
+          <div class="flex-1 w-full">
+            <div class="relative w-full aspect-video rounded-3xl bg-linear-to-tr from-rose-400 to-orange-400 p-8 shadow-2xl overflow-hidden group">
+              <!-- Decorative Mock UI -->
+              <div class="w-full h-full bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 relative transform transition-transform group-hover:scale-105">
+                <div class="h-4 w-1/3 bg-slate-200 dark:bg-slate-800 rounded mb-6"></div>
+                <div class="space-y-4">
+                  <div class="h-12 w-full bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center px-4">
+                    <div class="h-5 w-5 rounded-full border-2 border-emerald-500 mr-4"></div>
+                    <div class="h-3 w-1/2 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                  </div>
+                  <div class="h-12 w-full bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center px-4">
+                    <div class="h-5 w-5 rounded-full border-2 border-slate-300 dark:border-slate-600 mr-4"></div>
+                    <div class="h-3 w-2/3 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                  </div>
+                </div>
+                <!-- Confetti simulation -->
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div class="absolute top-0 left-4 w-2 h-2 bg-rose-500 rounded-full animate-bounce"></div>
+                  <div class="absolute top-8 right-2 w-3 h-3 bg-amber-400 rounded-sm animate-spin"></div>
+                  <div class="absolute bottom-4 left-10 w-2 h-2 bg-indigo-500 rounded-full animate-ping"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Us Section -->
+  <section id="about" class="py-24 relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center" appScrollReveal>
+      <div class="inline-flex items-center rounded-full bg-indigo-100 dark:bg-indigo-500/20 px-4 py-1.5 text-sm font-semibold text-indigo-600 dark:text-indigo-400 mb-6">
+        Our Mission
+      </div>
+      <h2 class="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-8">Finding Zen in the chaos.</h2>
+      <p class="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
+        We built ZenTodo because enterprise task managers were too rigid, and personal to-do apps weren't powerful enough. We wanted a tool that respects your focus, delights your senses, and actually helps teams get work done without feeling like "work".
+      </p>
+    </div>
+  </section>
+
+  <!-- Feedback / Testimonials -->
+  <section id="feedback" class="py-20 bg-slate-100/50 dark:bg-slate-900/30 border-y border-slate-200 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16" appScrollReveal>
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">Loved by productive teams</h2>
+        <p class="text-lg text-slate-600 dark:text-slate-400">Don't just take our word for it.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        @for (review of testimonials; track review.name; let i = $index) {
+          <div class="bg-white dark:bg-slate-950 p-8 rounded-3xl shadow-lg border border-slate-100 dark:border-slate-800 relative" appScrollReveal [delay]="i * 150">
+            <svg lucideQuote class="absolute top-6 right-6 h-8 w-8 text-slate-200 dark:text-slate-800"></svg>
+            <div class="flex gap-1 mb-6">
+              @for (star of [1,2,3,4,5]; track star) {
+                <svg lucideStar class="h-5 w-5 text-amber-400 fill-amber-400"></svg>
+              }
+            </div>
+            <p class="text-slate-700 dark:text-slate-300 mb-8 font-medium leading-relaxed">"{{ review.content }}"</p>
+            <div class="flex items-center gap-4">
+              <img [src]="review.avatar" [alt]="review.name" class="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-800">
+              <div>
+                <h4 class="font-bold text-slate-900 dark:text-white">{{ review.name }}</h4>
+                <p class="text-sm text-slate-500 dark:text-slate-400">{{ review.role }}, {{ review.company }}</p>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-white dark:bg-slate-950 py-12 border-t border-slate-200 dark:border-slate-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-2">
+        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary dark:bg-primary-dark text-slate-800 dark:text-white">
+          <svg lucideCheckSquare class="h-4 w-4"></svg>
+        </div>
+        <span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">ZenTodo</span>
+      </div>
+      
+      <p class="text-slate-500 dark:text-slate-400 text-sm text-center">
+        © 2026 ZenTodo. Built for productivity and delight.
+      </p>
+
+      <div class="flex items-center gap-4">
+        <a href="#" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+          <svg lucideTwitter class="h-5 w-5"></svg>
+        </a>
+        <a href="#" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+          <svg lucideGithub class="h-5 w-5"></svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll to Top Button -->
+  @if (showScrollUpButton) {
+    <button
+      (click)="scrollToTop()"
+      class="fixed bottom-8 right-8 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-primary dark:bg-primary-dark text-slate-900 dark:text-white shadow-xl shadow-primary/20 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/30 hover:brightness-105 active:scale-95 animate-slide-up-fade cursor-pointer"
+      title="Scroll to Top"
+    >
+      <svg lucideArrowUp class="h-6 w-6"></svg>
+    </button>
+  }
+</div>

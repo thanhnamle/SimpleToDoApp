@@ -1,11 +1,14 @@
-import { Component, OnInit, OnDestroy, inject, signal, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TodoService } from '../services/todo.service';
 import { SignalRService } from '../services/signalr.service';
+import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../services/notification.service';
+import { TodoUiService } from '../services/todo-ui.service';
 import { Subscription } from 'rxjs';
-import { Todo, TodoStatus } from '../models/todo';
+import { Todo, TodoStatus, CreateTodoRequest, UpdateTodoRequest } from '../models/todo';
+import { TodoModal } from '../todo-modal/todo-modal';
 import {
   LucideBarChart,
   LucideLoader2,
@@ -13,7 +16,9 @@ import {
   LucideCalendar,
   LucideChevronLeft,
   LucideChevronRight,
-  LucideMaximize
+  LucideMaximize,
+  LucideEdit3,
+  LucideTrash2
 } from '@lucide/angular';
 
 interface GanttTask extends Todo {
@@ -26,13 +31,13 @@ interface GanttTask extends Todo {
   imports: [
     CommonModule,
     FormsModule,
-    LucideBarChart,
-    LucideLoader2,
-    LucideAlertCircle,
+    TodoModal,
     LucideCalendar,
     LucideChevronLeft,
     LucideChevronRight,
-    LucideMaximize
+    LucideEdit3,
+    LucideTrash2,
+    LucideAlertCircle
   ],
   templateUrl: './todo-gantt.html'
 })
@@ -40,8 +45,12 @@ export class TodoGantt implements OnInit, OnDestroy {
   private readonly todoService = inject(TodoService);
   private readonly signalRService = inject(SignalRService);
   private readonly notificationService = inject(NotificationService);
+  private readonly authService = inject(AuthService);
+  public readonly uiService = inject(TodoUiService);
 
   private signalRSub?: Subscription;
+
+  isEmployee = computed(() => this.authService.currentUser()?.role === 'Employee');
 
   todos = signal<Todo[]>([]);
   ganttTasks = signal<GanttTask[]>([]);
@@ -65,6 +74,10 @@ export class TodoGantt implements OnInit, OnDestroy {
   // Tooltip state
   hoveredTask: GanttTask | null = null;
   tooltipPos = { x: 0, y: 0 };
+
+  // Modal State
+  modalOpen = false;
+  selectedTodo: Todo | null = null;
 
   isOverdue(task: Todo): boolean {
     if (!task.dueDate || task.status === 'Done') return false;
@@ -104,9 +117,53 @@ export class TodoGantt implements OnInit, OnDestroy {
     this.generateTimeline();
     this.fetchTodos();
 
-    this.signalRSub = this.signalRService.todoUpdated$.subscribe(() => {
-      this.fetchTodos();
+    this.signalRSub = this.signalRService.todoUpdated$.subscribe((data) => {
+      if (data) {
+        this.fetchTodos();
+      }
     });
+  }
+
+  handleCreateOrUpdate(payload: CreateTodoRequest | UpdateTodoRequest) {
+    if (this.selectedTodo && this.selectedTodo.id !== 0) {
+      this.todoService.update(this.selectedTodo.id, payload as UpdateTodoRequest).subscribe({
+        next: () => {
+          this.notificationService.showToast('Task updated successfully', 'success');
+          this.fetchTodos();
+        },
+        error: () => this.notificationService.showToast('Failed to update task', 'error')
+      });
+    }
+    this.closeModal();
+  }
+
+  handleDelete(id: number) {
+    this.notificationService.confirm(
+      'Are you sure you want to permanently delete this task?',
+      'Delete Task',
+      'Delete',
+      'Cancel'
+    ).then((confirmed) => {
+      if (!confirmed) return;
+
+      this.todoService.delete(id).subscribe({
+        next: () => {
+          this.notificationService.showToast('Task deleted successfully', 'success');
+          this.fetchTodos();
+        },
+        error: () => this.notificationService.showToast('Failed to delete task', 'error')
+      });
+    });
+  }
+
+  openEditModal(todo: Todo) {
+    this.selectedTodo = todo;
+    this.modalOpen = true;
+  }
+
+  closeModal() {
+    this.modalOpen = false;
+    this.selectedTodo = null;
   }
 
   ngOnDestroy() {
@@ -215,14 +272,6 @@ export class TodoGantt implements OnInit, OnDestroy {
     return date.getDate() === today.getDate() && 
            date.getMonth() === today.getMonth() && 
            date.getFullYear() === today.getFullYear();
-  }
-
-  getPriorityColor(p: string): string {
-    switch (p) {
-      case 'High': return 'bg-red-500/20 text-red-600 border-red-500/30';
-      case 'Medium': return 'bg-amber-500/20 text-amber-600 border-amber-500/30';
-      default: return 'bg-emerald-500/20 text-emerald-600 border-emerald-500/30';
-    }
   }
 
   // Drag and Drop Interactivity

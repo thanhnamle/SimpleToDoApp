@@ -1,4 +1,4 @@
-<div class="space-y-6 h-full flex flex-col">
+<div class="h-full flex flex-col gap-6 animate-page-enter min-h-0">
   <!-- Board Header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shrink-0">
     <div>
@@ -7,7 +7,8 @@
     </div>
     <button
       (click)="openCreateModal()"
-      class="flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/10 transition-all hover:from-indigo-600 hover:to-violet-700 active:scale-98 cursor-pointer"
+      appMagnetic
+      class="flex items-center justify-center gap-1.5 rounded-xl bg-primary dark:bg-primary-dark px-4 py-2.5 text-sm font-semibold text-slate-800 dark:text-white shadow-lg shadow-primary/10 transition-all hover:brightness-95 dark:hover:brightness-110 active:scale-98 cursor-pointer shrink-0"
     >
       <svg lucidePlus class="h-4.5 w-4.5"></svg>
       Add Task
@@ -15,8 +16,24 @@
   </div>
 
   @if (loading()) {
-    <div class="flex-grow flex items-center justify-center h-64">
-      <svg lucideLoader2 class="h-10 w-10 animate-spin text-indigo-500"></svg>
+    <div class="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden min-h-0">
+      @for (c of [1, 2, 3]; track c) {
+        <div class="flex flex-col rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-900/10 p-4 h-full">
+          <div class="flex items-center justify-between mb-4">
+            <div class="h-4 w-24 rounded-md bg-slate-200 dark:bg-slate-800 animate-pulse"></div>
+            <div class="h-5 w-5 rounded-full bg-slate-200 dark:bg-slate-800 animate-pulse"></div>
+          </div>
+          <div class="space-y-3">
+            @for (i of [1, 2, 3]; track i) {
+              <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/40 p-4 h-24 animate-pulse">
+                <div class="h-3 w-3/4 rounded-md bg-slate-200 dark:bg-slate-800 mb-3"></div>
+                <div class="h-2 w-full rounded-md bg-slate-100 dark:bg-slate-800/60 mb-2"></div>
+                <div class="h-2 w-2/3 rounded-md bg-slate-100 dark:bg-slate-800/60"></div>
+              </div>
+            }
+          </div>
+        </div>
+      }
     </div>
   } @else if (error()) {
     <div class="flex flex-col items-center justify-center h-64 text-center rounded-2xl border border-red-500/10 bg-red-500/5 p-6 shrink-0">
@@ -32,22 +49,11 @@
     </div>
   } @else {
     <!-- Grid of Columns -->
-    <div class="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto lg:overflow-hidden min-h-[500px]">
+    <div cdkDropListGroup class="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto scrollbar-hide lg:overflow-hidden min-h-0">
       <!-- Column loop -->
       @for (col of columns; track col.id) {
         <div 
-          (dragover)="onDragOver($event)"
-          (drop)="onDrop($event, col.id)"
-          (dragenter)="onDragEnter($event, col.id)"
-          (dragleave)="onDragLeave($event, col.id)"
-          class="flex flex-col rounded-2xl border p-4 h-full shadow-sm transition-all duration-200"
-          [class.border-indigo-500]="activeDragColumn === col.id"
-          [class.bg-indigo-500/5]="activeDragColumn === col.id"
-          [class.scale-[1.01]]="activeDragColumn === col.id"
-          [class.border-slate-200]="activeDragColumn !== col.id"
-          [class.dark:border-slate-900]="activeDragColumn !== col.id"
-          [class.bg-slate-100/50]="activeDragColumn !== col.id"
-          [class.dark:bg-slate-900/10]="activeDragColumn !== col.id"
+          class="flex flex-col rounded-2xl border p-4 h-full shadow-sm transition-all duration-200 border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-900/10 min-h-0"
         >
           <!-- Column Title Header -->
           <div class="flex items-center justify-between mb-4 px-1 shrink-0">
@@ -66,20 +72,28 @@
           </div>
 
           <!-- Cards Scrollable list -->
-          <div class="flex-grow overflow-y-auto space-y-3.5 pr-1 max-h-[600px] lg:max-h-full">
-            @for (todo of getTodosByStatus(col.id); track todo.id) {
+          <div 
+            cdkDropList
+            [cdkDropListData]="col.id"
+            (cdkDropListDropped)="onDrop($event)"
+            class="flex-grow overflow-y-auto scrollbar-hide space-y-3.5 pr-1 min-h-0"
+          >
+            @for (todo of getTodosByStatus(col.id); track todo.id; let i = $index) {
               <div 
-                draggable="true"
-                (dragstart)="onDragStart(todo)"
-                class="group flex flex-col justify-between rounded-xl border bg-white dark:bg-slate-950/40 p-4 shadow-sm hover-lift transition-all duration-200 cursor-grab active:cursor-grabbing hover:shadow-md"
-                [class.border-red-400]="isOverdue(todo)"
-                [class.dark:border-red-950]="isOverdue(todo)"
-                [class.hover:border-red-500]="isOverdue(todo)"
-                [class.dark:hover:border-red-800]="isOverdue(todo)"
-                [class.border-slate-200]="!isOverdue(todo)"
-                [class.dark:border-slate-800/80]="!isOverdue(todo)"
-                [class.hover:border-slate-300]="!isOverdue(todo)"
-                [class.dark:hover:border-slate-700/80]="!isOverdue(todo)"
+                [id]="'board-task-' + todo.id"
+                cdkDrag
+                [cdkDragData]="todo"
+                appRipple
+                class="group flex flex-col justify-between rounded-xl border bg-white dark:bg-slate-950/40 p-4 shadow-sm hover-3d transition-all duration-300 cursor-grab active:cursor-grabbing hover:shadow-md animate-slide-up-fade relative overflow-hidden"
+                [style.animation-delay.ms]="i * 50"
+                [class.border-red-400]="uiService.isOverdue(todo)"
+                [class.dark:border-red-950]="uiService.isOverdue(todo)"
+                [class.hover:border-red-500]="uiService.isOverdue(todo)"
+                [class.dark:hover:border-red-800]="uiService.isOverdue(todo)"
+                [class.border-slate-200]="!uiService.isOverdue(todo)"
+                [class.dark:border-slate-800/80]="!uiService.isOverdue(todo)"
+                [class.hover:border-slate-300]="!uiService.isOverdue(todo)"
+                [class.dark:hover:border-slate-700/80]="!uiService.isOverdue(todo)"
               >
                 <div>
                   <div class="flex items-start justify-between gap-2">
@@ -87,7 +101,7 @@
                       {{ todo.title }}
                     </h4>
                     <div class="flex items-center gap-1 shrink-0">
-                      @if (isOverdue(todo)) {
+                      @if (uiService.isOverdue(todo)) {
                         <span class="text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase bg-red-500 text-white flex items-center gap-0.5 animate-pulse">
                           <svg lucideAlertTriangle class="h-2 w-2"></svg>
                           Overdue
@@ -95,7 +109,7 @@
                       }
                       <span
                         class="text-[8px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider"
-                        [class]="getPriorityStyle(todo.priority)"
+                        [class]="uiService.getPriorityStyle(todo.priority)"
                       >
                         {{ todo.priority }}
                       </span>
@@ -120,16 +134,16 @@
                       </span>
                     }
                     @if (todo.dueDate) {
-                      <span 
-                        class="flex items-center gap-1 text-[9px] font-medium transition-colors"
-                        [class.text-red-500]="isOverdue(todo)"
-                        [class.dark:text-red-400]="isOverdue(todo)"
-                        [class.text-slate-400]="!isOverdue(todo)"
-                        [class.dark:text-slate-500]="!isOverdue(todo)"
+                      <div class="flex items-center gap-1 mt-3"
+                        [class.text-red-500]="uiService.isOverdue(todo)"
+                        [class.dark:text-red-400]="uiService.isOverdue(todo)"
+                        [class.text-slate-500]="!uiService.isOverdue(todo)"
                       >
-                        <svg lucideClock class="h-2.5 w-2.5" [class.text-red-400]="isOverdue(todo)" [class.dark:text-red-500]="isOverdue(todo)" [class.text-slate-300]="!isOverdue(todo)" [class.dark:text-slate-600]="!isOverdue(todo)"></svg>
-                        {{ formatDisplayDate(todo.dueDate) }}
-                      </span>
+                        <svg lucideClock class="h-3 w-3"></svg>
+                        <span class="text-[10px] font-semibold">
+                          {{ formatDisplayDate(todo.dueDate) }}
+                        </span>
+                      </div>
                     }
                   </div>
                 </div>

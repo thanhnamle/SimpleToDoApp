@@ -23,16 +23,8 @@ namespace SimpleToDoApp.Application.Services
 
         public async Task<IEnumerable<TodoDto>> GetUserTodosAsync(int userId, UserRole role, int? departmentId)
         {
-            IQueryable<Todo> query = _context.Todos.Include(t => t.Account);
-            if (role == UserRole.Employee)
-            {
-                query = query.Where(t => t.UserId == userId);
-            }
-            else if (role == UserRole.Leader)
-            {
-                query = query.Where(t => t.Account != null && t.Account.DepartmentId == departmentId);
-            }
-            // DepartmentHead can see all, so no filter needed
+            var query = _context.Todos.Include(t => t.Account).AsQueryable();
+            query = ApplyRoleFilter(query, userId, role, departmentId);
 
             var todos = await query
                 .OrderByDescending(t => t.CreatedAt)
@@ -43,19 +35,8 @@ namespace SimpleToDoApp.Application.Services
 
         public async Task<TodoDto?> GetTodoByIdAsync(int id, int userId, UserRole role, int? departmentId)
         {
-            IQueryable<Todo> query = _context.Todos.Include(t => t.Account);
-            if (role == UserRole.Employee)
-            {
-                query = query.Where(t => t.Id == id && t.UserId == userId);
-            }
-            else if (role == UserRole.Leader)
-            {
-                query = query.Where(t => t.Id == id && t.Account != null && t.Account.DepartmentId == departmentId);
-            }
-            else if (role == UserRole.DepartmentHead)
-            {
-                query = query.Where(t => t.Id == id);
-            }
+            var query = _context.Todos.Include(t => t.Account).Where(t => t.Id == id);
+            query = ApplyRoleFilter(query, userId, role, departmentId);
 
             var todo = await query.FirstOrDefaultAsync();
             return todo == null ? null : MapToDto(todo);
@@ -119,19 +100,8 @@ namespace SimpleToDoApp.Application.Services
 
         public async Task<TodoDto?> UpdateTodoAsync(int id, UpdateTodoRequest request, int userId, UserRole role, int? departmentId)
         {
-            IQueryable<Todo> query = _context.Todos.Include(t => t.Account);
-            if (role == UserRole.Employee)
-            {
-                query = query.Where(t => t.Id == id && t.UserId == userId);
-            }
-            else if (role == UserRole.Leader)
-            {
-                query = query.Where(t => t.Id == id && t.Account != null && t.Account.DepartmentId == departmentId);
-            }
-            else if (role == UserRole.DepartmentHead)
-            {
-                query = query.Where(t => t.Id == id);
-            }
+            var query = _context.Todos.Include(t => t.Account).Where(t => t.Id == id);
+            query = ApplyRoleFilter(query, userId, role, departmentId);
 
             var todo = await query.FirstOrDefaultAsync();
             if (todo == null)
@@ -196,19 +166,8 @@ namespace SimpleToDoApp.Application.Services
 
         public async Task<TodoDto?> UpdateTodoStatusAsync(int id, UpdateTodoStatusRequest request, int userId, UserRole role, int? departmentId)
         {
-            IQueryable<Todo> query = _context.Todos.Include(t => t.Account);
-            if (role == UserRole.Employee)
-            {
-                query = query.Where(t => t.Id == id && t.UserId == userId);
-            }
-            else if (role == UserRole.Leader)
-            {
-                query = query.Where(t => t.Id == id && t.Account != null && t.Account.DepartmentId == departmentId);
-            }
-            else if (role == UserRole.DepartmentHead)
-            {
-                query = query.Where(t => t.Id == id);
-            }
+            var query = _context.Todos.Include(t => t.Account).Where(t => t.Id == id);
+            query = ApplyRoleFilter(query, userId, role, departmentId);
 
             var todo = await query.FirstOrDefaultAsync();
             if (todo == null)
@@ -234,19 +193,8 @@ namespace SimpleToDoApp.Application.Services
 
         public async Task<bool> DeleteTodoAsync(int id, int userId, UserRole role, int? departmentId)
         {
-            IQueryable<Todo> query = _context.Todos;
-            if (role == UserRole.Employee)
-            {
-                query = query.Where(t => t.Id == id && t.UserId == userId);
-            }
-            else if (role == UserRole.Leader)
-            {
-                query = query.Include(t => t.Account).Where(t => t.Id == id && t.Account != null && t.Account.DepartmentId == departmentId);
-            }
-            else if (role == UserRole.DepartmentHead)
-            {
-                query = query.Where(t => t.Id == id);
-            }
+            var query = _context.Todos.Include(t => t.Account).Where(t => t.Id == id);
+            query = ApplyRoleFilter(query, userId, role, departmentId);
 
             var todo = await query.FirstOrDefaultAsync();
             if (todo == null)
@@ -264,16 +212,8 @@ namespace SimpleToDoApp.Application.Services
 
         public async Task<IEnumerable<TodoDto>> GetUserCalendarTodosAsync(int userId, UserRole role, int? departmentId)
         {
-            IQueryable<Todo> query = _context.Todos.Include(t => t.Account);
-            if (role == UserRole.Employee)
-            {
-                query = query.Where(t => t.UserId == userId);
-            }
-            else if (role == UserRole.Leader)
-            {
-                query = query.Where(t => t.Account != null && t.Account.DepartmentId == departmentId);
-            }
-            // DepartmentHead can see all, so no filter needed
+            var query = _context.Todos.Include(t => t.Account).AsQueryable();
+            query = ApplyRoleFilter(query, userId, role, departmentId);
 
             var todos = await query
                 .OrderBy(t => t.StartDate)
@@ -300,8 +240,25 @@ namespace SimpleToDoApp.Application.Services
                 ReminderMinutes = todo.ReminderMinutes,
                 AssignedUserId = todo.UserId,
                 AssignedUsername = todo.Account?.Username,
-                AssignedEmail = todo.Account?.Email
+                AssignedEmail = todo.Account?.Email,
+                DepartmentId = todo.Account?.DepartmentId
             };
+        }
+
+        private IQueryable<Todo> ApplyRoleFilter(IQueryable<Todo> query, int userId, UserRole role, int? departmentId)
+        {
+            if (role == UserRole.Employee)
+            {
+                return query.Where(t => t.UserId == userId);
+            }
+            
+            if (role == UserRole.Leader)
+            {
+                return query.Where(t => t.Account != null && t.Account.DepartmentId == departmentId);
+            }
+
+            // DepartmentHead acts as Global Admin and has no filters applied.
+            return query;
         }
     }
 }

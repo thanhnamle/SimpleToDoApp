@@ -4,6 +4,7 @@ import { TodoService } from '../services/todo.service';
 import { NotificationService } from '../services/notification.service';
 import { ReminderService } from '../services/reminder.service';
 import { SignalRService } from '../services/signalr.service';
+import { TodoUiService } from '../services/todo-ui.service';
 import { Subscription, interval } from 'rxjs';
 import { CreateTodoRequest, Todo, UpdateTodoRequest } from '../models/todo';
 import { TodoModal } from '../todo-modal/todo-modal';
@@ -45,6 +46,7 @@ export class TodoCalendar implements OnInit {
   private readonly notificationService = inject(NotificationService);
   private readonly reminderService = inject(ReminderService);
   private readonly signalRService = inject(SignalRService);
+  public readonly uiService = inject(TodoUiService);
 
   private signalRSub?: Subscription;
   private clockSub?: Subscription;
@@ -303,14 +305,6 @@ export class TodoCalendar implements OnInit {
     this.selectedTodo = null;
   }
 
-  getPriorityColor(p: string): string {
-    switch (p) {
-      case 'High': return 'bg-red-500/20 text-red-600 dark:text-red-300 border border-red-500/30';
-      case 'Medium': return 'bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30';
-      default: return 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30';
-    }
-  }
-
   // Tooltip & Overdue States
   hoveredTodo: Todo | null = null;
   tooltipPos = { x: 0, y: 0 };
@@ -341,25 +335,6 @@ export class TodoCalendar implements OnInit {
 
   onTodoMouseLeave() {
     this.hoveredTodo = null;
-  }
-
-  isOverdue(todo: Todo): boolean {
-    if (!todo.dueDate || todo.status === 'Done') return false;
-    const due = new Date(todo.dueDate);
-    if (isNaN(due.getTime())) return false;
-    if (todo.isAllDay) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const match = todo.dueDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
-      if (match) {
-        const year = parseInt(match[1], 10);
-        const month = parseInt(match[2], 10) - 1;
-        const day = parseInt(match[3], 10);
-        const dueDateLocal = new Date(year, month, day);
-        return dueDateLocal < today;
-      }
-    }
-    return due < new Date();
   }
 
   formatTooltipDate(dateStr: string): string {

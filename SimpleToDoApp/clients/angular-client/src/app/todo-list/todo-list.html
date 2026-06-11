@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="space-y-6 animate-page-enter">
   <!-- Top dashboard summary header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
@@ -8,7 +8,8 @@
     @if (!isEmployee()) {
       <button
         (click)="openCreateModal()"
-        class="flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/10 transition-all hover:from-indigo-600 hover:to-violet-700 hover:shadow-indigo-500/20 active:scale-98 self-start sm:self-auto cursor-pointer"
+        appMagnetic
+        class="flex items-center justify-center gap-1.5 rounded-xl bg-primary dark:bg-primary-dark px-4 py-3 text-sm font-semibold text-slate-800 dark:text-white shadow-lg shadow-primary/10 transition-all hover:brightness-95 dark:hover:brightness-110 active:scale-98 self-start sm:self-auto cursor-pointer"
       >
         <svg lucidePlus class="h-5 w-5"></svg>
         Add Task
@@ -17,64 +18,102 @@
   </div>
 
   <!-- Filter / Search Bar Grid -->
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 bg-white dark:bg-slate-900/40 p-4 rounded-2xl border border-slate-200 dark:border-slate-900 shadow-sm dark:shadow-md backdrop-blur-xl">
-    <div class="relative">
-      <svg lucideSearch class="absolute top-3 left-3 h-5 w-5 text-slate-400 dark:text-slate-500"></svg>
-      <input
-        type="text"
-        placeholder="Search tasks, categories..."
-        class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 pl-10 pr-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-indigo-500 transition-all"
-        [(ngModel)]="search"
-        (ngModelChange)="applyFilters()"
-      />
-    </div>
+  <div class="bg-white dark:bg-slate-900/40 p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-md backdrop-blur-xl">
+    <div class="flex flex-col gap-4">
+      <!-- Search -->
+      <div class="relative w-full">
+        <svg lucideSearch class="absolute top-3 left-4 h-5 w-5 text-slate-400 dark:text-slate-500"></svg>
+        <input
+          type="text"
+          placeholder="Search tasks, categories..."
+          class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 pl-12 pr-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-indigo-500 transition-all focus:ring-4 focus:ring-indigo-500/10"
+          [(ngModel)]="search"
+          (ngModelChange)="applyFilters()"
+        />
+      </div>
 
-    <div>
-      <select
-        class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer"
-        [(ngModel)]="statusFilter"
-        (ngModelChange)="applyFilters()"
-      >
-        <option value="All">All Statuses</option>
-        <option value="Pending">Pending</option>
-        <option value="InProgress">In Progress</option>
-        <option value="Done">Done</option>
-      </select>
-    </div>
+      <!-- Filters Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        <select
+          class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900"
+          [(ngModel)]="statusFilter"
+          (ngModelChange)="applyFilters()"
+        >
+          <option value="All">All Statuses</option>
+          <option value="Pending">Pending</option>
+          <option value="InProgress">In Progress</option>
+          <option value="Done">Done</option>
+        </select>
 
-    <div>
-      <select
-        class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer"
-        [(ngModel)]="priorityFilter"
-        (ngModelChange)="applyFilters()"
-      >
-        <option value="All">All Priorities</option>
-        <option value="Low">Low Priority</option>
-        <option value="Medium">Medium Priority</option>
-        <option value="High">High Priority</option>
-      </select>
-    </div>
+        <select
+          class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900"
+          [(ngModel)]="priorityFilter"
+          (ngModelChange)="applyFilters()"
+        >
+          <option value="All">All Priorities</option>
+          <option value="Low">Low Priority</option>
+          <option value="Medium">Medium Priority</option>
+          <option value="High">High Priority</option>
+        </select>
 
-    <div>
-      <select
-        class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer"
-        [(ngModel)]="categoryFilter"
-        (ngModelChange)="applyFilters()"
-      >
-        <option value="All">All Categories</option>
-        @for (cat of categories; track cat) {
-          @if (cat !== 'All') {
-            <option [value]="cat">{{ cat }}</option>
+        <select
+          class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900"
+          [(ngModel)]="categoryFilter"
+          (ngModelChange)="applyFilters()"
+        >
+          <option value="All">All Categories</option>
+          @for (cat of categories; track cat) {
+            @if (cat !== 'All') {
+              <option [value]="cat">{{ cat }}</option>
+            }
           }
+        </select>
+
+        <select
+          class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900"
+          [(ngModel)]="sortFilter"
+          (ngModelChange)="applyFilters()"
+        >
+          <option value="Default">Sort By: Default</option>
+          <option value="DueDateAsc">Due Date (Closest)</option>
+          <option value="DueDateDesc">Due Date (Furthest)</option>
+        </select>
+
+        @if (isDepartmentHead()) {
+          <select
+            class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 sm:col-span-2 md:col-span-4 lg:col-span-1"
+            [(ngModel)]="departmentFilter"
+            (ngModelChange)="applyFilters()"
+          >
+            <option value="All">All Departments</option>
+            @for (dept of departments(); track dept.id) {
+              <option [value]="dept.id">{{ dept.name }}</option>
+            }
+          </select>
         }
-      </select>
+      </div>
     </div>
   </div>
 
   <!-- Main Grid Content -->
   @if (loading()) {
-    <div class="flex h-64 items-center justify-center">
-      <svg lucideLoader2 class="h-10 w-10 animate-spin text-indigo-500"></svg>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/20 p-5 h-[180px] animate-pulse">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="h-5 w-5 rounded-full bg-slate-200 dark:bg-slate-800"></div>
+            <div class="h-4 w-1/2 rounded-md bg-slate-200 dark:bg-slate-800"></div>
+          </div>
+          <div class="space-y-2">
+            <div class="h-3 w-full rounded-md bg-slate-100 dark:bg-slate-800/60"></div>
+            <div class="h-3 w-4/5 rounded-md bg-slate-100 dark:bg-slate-800/60"></div>
+          </div>
+          <div class="mt-8 flex gap-2">
+            <div class="h-5 w-16 rounded-full bg-slate-200 dark:bg-slate-800"></div>
+            <div class="h-5 w-20 rounded-full bg-slate-200 dark:bg-slate-800"></div>
+          </div>
+        </div>
+      }
     </div>
   } @else if (error()) {
     <div class="flex flex-col items-center justify-center h-64 text-center rounded-2xl border border-red-500/10 bg-red-500/5 p-6">
@@ -112,9 +151,12 @@
     </div>
   } @else {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-      @for (todo of filteredTodos(); track todo.id) {
+      @for (todo of filteredTodos(); track todo.id; let i = $index) {
         <div
-          class="group flex flex-col justify-between rounded-2xl border bg-white dark:bg-slate-900/30 p-5 backdrop-blur-xl shadow hover:shadow-lg dark:hover:shadow-indigo-500/5 hover-lift transition-all duration-200"
+          [id]="'task-' + todo.id"
+          appRipple
+          class="group flex flex-col justify-between rounded-2xl border bg-white dark:bg-slate-900/30 p-5 backdrop-blur-xl shadow hover:shadow-lg dark:hover:shadow-indigo-500/5 hover-3d transition-all duration-300 animate-slide-up-fade"
+          [style.animation-delay.ms]="i * 50"
           [class.border-slate-200\/60]="todo.status === 'Done'"
           [class.opacity-70]="todo.status === 'Done'"
           [class.border-slate-200]="todo.status !== 'Done'"
@@ -157,21 +199,21 @@
 
             <!-- Badges / Meta row -->
             <div class="flex flex-wrap gap-2 items-center pt-2">
-              @if (isOverdue(todo)) {
+              @if (uiService.isOverdue(todo)) {
                 <span class="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-red-500 text-white flex items-center gap-1 shadow-sm animate-pulse">
                   <svg lucideAlertTriangle class="h-2.5 w-2.5"></svg>
                   Overdue
                 </span>
               }
-              <span
-                class="text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider"
-                [class]="getPriorityStyle(todo.priority)"
+              <span 
+                class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm"
+                [class]="uiService.getPriorityStyle(todo.priority)"
               >
                 {{ todo.priority }}
               </span>
-              <span
-                class="text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider"
-                [class]="getStatusStyle(todo.status)"
+              <span 
+                class="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold"
+                [class]="uiService.getStatusStyle(todo.status)"
               >
                 {{ todo.status === 'InProgress' ? 'In Progress' : todo.status }}
               </span>
@@ -192,23 +234,26 @@
 
           <!-- Task Footer / Controls -->
           <div class="flex items-center justify-between border-t border-slate-100 dark:border-slate-900/60 pt-4 mt-5">
-            <div class="flex items-center gap-1.5 text-[11px] font-medium"
-              [class.text-red-500]="isOverdue(todo)"
-              [class.dark:text-red-400]="isOverdue(todo)"
-              [class.text-slate-500]="!isOverdue(todo)"
-            >
-              <svg lucideClock class="h-3.5 w-3.5"
-                [class.text-red-400]="isOverdue(todo)"
-                [class.text-slate-400]="!isOverdue(todo)"
-                [class.dark:text-slate-600]="!isOverdue(todo)"
-              ></svg>
-              <span>
-                @if (isOverdue(todo)) { ⚠ Overdue: } @else { Due: }
+            <div class="flex items-center gap-1.5" [class.text-red-500]="uiService.isOverdue(todo)" [class.dark:text-red-400]="uiService.isOverdue(todo)">
+              <svg lucideCalendar class="h-4 w-4 opacity-70"></svg>
+              <span class="text-xs font-bold truncate">
+                @if (uiService.isOverdue(todo)) {
+                  <span class="mr-1 animate-pulse">⚠️ Overdue</span>
+                }
                 {{ formatDisplayDate(todo.dueDate) }}
               </span>
             </div>
 
             <div class="flex items-center gap-1.5">
+              @if (isEmployee() && todo.status === 'Pending') {
+                <button
+                  (click)="startTask(todo)"
+                  title="Start Task"
+                  class="rounded-lg px-2.5 py-1 text-xs font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-400 dark:hover:bg-indigo-500/20 transition-colors cursor-pointer mr-1"
+                >
+                  Start
+                </button>
+              }
               <button
                 (click)="openDetailPanel(todo)"
                 title="View details"
@@ -257,9 +302,17 @@
     <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-6 py-4 shrink-0">
       <div class="flex items-center gap-2">
         <svg lucideInfo class="h-5 w-5 text-indigo-500"></svg>
-        <h2 class="text-base font-bold text-slate-900 dark:text-white">Task Details</h2>
+        <h2 class="text-base font-bold text-slate-900 dark:bg-white">Task Details</h2>
       </div>
       <div class="flex items-center gap-2">
+        @if (isEmployee() && detailTodo.status === 'Pending') {
+          <button
+            (click)="startTask(detailTodo); closeDetailPanel()"
+            class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-400 dark:hover:bg-indigo-500/20 transition-colors cursor-pointer"
+          >
+            Start Task
+          </button>
+        }
         @if (!isEmployee()) {
           <button
             (click)="openEditModal(detailTodo); closeDetailPanel()"
@@ -284,10 +337,10 @@
         >{{ detailTodo.title }}</h3>
 
         <div class="flex flex-wrap gap-2 mt-3">
-          <span class="text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider" [class]="getPriorityStyle(detailTodo.priority)">
+          <span class="text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider" [class]="uiService.getPriorityStyle(detailTodo.priority)">
             {{ detailTodo.priority }}
           </span>
-          <span class="text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider" [class]="getStatusStyle(detailTodo.status)">
+          <span class="text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider" [class]="uiService.getStatusStyle(detailTodo.status)">
             {{ detailTodo.status === 'InProgress' ? 'In Progress' : detailTodo.status }}
           </span>
           @if (detailTodo.isAllDay) {
@@ -295,7 +348,7 @@
               All Day
             </span>
           }
-          @if (isOverdue(detailTodo)) {
+          @if (uiService.isOverdue(detailTodo)) {
             <span class="flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider bg-red-500/10 text-red-500 dark:text-red-400">
               <svg lucideAlertTriangle class="h-3 w-3"></svg> Overdue
             </span>
@@ -355,31 +408,31 @@
 
         <!-- Due Date -->
         <div class="rounded-xl border p-3"
-          [class.bg-red-50]="isOverdue(detailTodo)"
-          [class.dark:bg-red-900/10]="isOverdue(detailTodo)"
-          [class.border-red-300]="isOverdue(detailTodo)"
-          [class.dark:border-red-800/50]="isOverdue(detailTodo)"
-          [class.bg-slate-50]="!isOverdue(detailTodo)"
-          [class.dark:bg-slate-800/40]="!isOverdue(detailTodo)"
-          [class.border-slate-200]="!isOverdue(detailTodo)"
-          [class.dark:border-slate-800]="!isOverdue(detailTodo)"
+          [class.bg-red-50]="uiService.isOverdue(detailTodo)"
+          [class.dark:bg-red-900/10]="uiService.isOverdue(detailTodo)"
+          [class.border-red-300]="uiService.isOverdue(detailTodo)"
+          [class.dark:border-red-800/50]="uiService.isOverdue(detailTodo)"
+          [class.bg-slate-50]="!uiService.isOverdue(detailTodo)"
+          [class.dark:bg-slate-800/40]="!uiService.isOverdue(detailTodo)"
+          [class.border-slate-200]="!uiService.isOverdue(detailTodo)"
+          [class.dark:border-slate-800]="!uiService.isOverdue(detailTodo)"
         >
           <p class="text-[10px] font-semibold uppercase tracking-wider mb-1"
-            [class.text-red-500]="isOverdue(detailTodo)"
-            [class.dark:text-red-400]="isOverdue(detailTodo)"
-            [class.text-slate-400]="!isOverdue(detailTodo)"
-          >Due Date @if (isOverdue(detailTodo)) { ⚠ }</p>
+            [class.text-red-500]="uiService.isOverdue(detailTodo)"
+            [class.dark:text-red-400]="uiService.isOverdue(detailTodo)"
+            [class.text-slate-400]="!uiService.isOverdue(detailTodo)"
+          >Due Date @if (uiService.isOverdue(detailTodo)) { ⚠ }</p>
           <div class="flex items-center gap-1.5">
             <svg lucideClock class="h-3.5 w-3.5"
-              [class.text-red-400]="isOverdue(detailTodo)"
-              [class.text-slate-400]="!isOverdue(detailTodo)"
-              [class.dark:text-slate-500]="!isOverdue(detailTodo)"
+              [class.text-red-400]="uiService.isOverdue(detailTodo)"
+              [class.text-slate-400]="!uiService.isOverdue(detailTodo)"
+              [class.dark:text-slate-500]="!uiService.isOverdue(detailTodo)"
             ></svg>
             <span class="text-xs font-semibold"
-              [class.text-red-600]="isOverdue(detailTodo)"
-              [class.dark:text-red-400]="isOverdue(detailTodo)"
-              [class.text-slate-700]="!isOverdue(detailTodo)"
-              [class.dark:text-slate-200]="!isOverdue(detailTodo)"
+              [class.text-red-600]="uiService.isOverdue(detailTodo)"
+              [class.dark:text-red-400]="uiService.isOverdue(detailTodo)"
+              [class.text-slate-700]="!uiService.isOverdue(detailTodo)"
+              [class.dark:text-slate-200]="!uiService.isOverdue(detailTodo)"
             >{{ formatDetailDate(detailTodo.dueDate) }}</span>
           </div>
         </div>
