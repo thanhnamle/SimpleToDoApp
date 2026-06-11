@@ -17,7 +17,24 @@ namespace SimpleToDoApp.Api.Services
 
         public async Task NotifyTodoUpdatedAsync(TodoDto dto)
         {
-            await _hubContext.Clients.All.SendAsync("TodoUpdated", dto);
+            if (dto == null) 
+            {
+                // In case of delete broadcast without dto
+                await _hubContext.Clients.All.SendAsync("TodoUpdated", null);
+                return;
+            }
+
+            // Send to assigned user
+            await _hubContext.Clients.Group($"User_{dto.AssignedUserId}").SendAsync("TodoUpdated", dto);
+
+            // Send to department
+            if (dto.DepartmentId != null)
+            {
+                await _hubContext.Clients.Group($"Dept_{dto.DepartmentId}").SendAsync("TodoUpdated", dto);
+            }
+
+            // Send to global admins (DepartmentHead)
+            await _hubContext.Clients.Group("GlobalAdmin").SendAsync("TodoUpdated", dto);
         }
     }
 }

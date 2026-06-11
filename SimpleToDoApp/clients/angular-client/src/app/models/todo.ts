@@ -17,6 +17,7 @@ export interface Todo {
   assignedUserId?: number;
   assignedUsername?: string;
   assignedEmail?: string;
+  departmentId?: number;
 }
 
 export interface CreateTodoRequest {

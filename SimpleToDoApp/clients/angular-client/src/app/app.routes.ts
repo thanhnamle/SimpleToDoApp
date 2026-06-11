@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { Welcome } from './welcome/welcome';
 import { Login } from './login/login';
 import { Register } from './register/register';
 import { ForgotPassword } from './forgot-password/forgot-password';
@@ -13,6 +14,7 @@ import { TodoGantt } from './todo-gantt/todo-gantt';
 import { authGuard } from './core/auth.guard';
 
 export const routes: Routes = [
+  { path: '', component: Welcome },
   { path: 'login', component: Login },
   { path: 'register', component: Register },
   { path: 'forgot-password', component: ForgotPassword },
@@ -30,6 +32,5 @@ export const routes: Routes = [
       { path: 'department', component: TodoDepartment }
     ]
   },
-  { path: '', redirectTo: 'todos', pathMatch: 'full' },
-  { path: '**', redirectTo: 'todos' }
+  { path: '**', redirectTo: '' }
 ];

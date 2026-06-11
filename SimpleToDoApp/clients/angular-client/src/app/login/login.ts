@@ -12,7 +12,8 @@ import {
   LucideSun,
   LucideMoon,
   LucideEye,
-  LucideEyeOff
+  LucideEyeOff,
+  LucideArrowLeft
 } from '@lucide/angular';
 
 @Component({
@@ -28,7 +29,8 @@ import {
     LucideSun,
     LucideMoon,
     LucideEye,
-    LucideEyeOff
+    LucideEyeOff,
+    LucideArrowLeft
   ],
   templateUrl: './login.html'
 })

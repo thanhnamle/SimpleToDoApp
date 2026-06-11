@@ -20,5 +20,6 @@ namespace SimpleToDoApp.Application.DTOs.Todos
         public int AssignedUserId { get; set; }
         public string? AssignedUsername { get; set; }
         public string? AssignedEmail { get; set; }
+        public int? DepartmentId { get; set; }
     }
 }

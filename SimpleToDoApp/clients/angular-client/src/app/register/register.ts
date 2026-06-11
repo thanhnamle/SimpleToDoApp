@@ -4,17 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 import { ThemeService } from '../services/theme.service';
-import { 
-  LucideCheckSquare, 
-  LucideAlertCircle, 
-  LucideLoader2, 
-  LucideArrowRight,
-  LucideSun,
-  LucideMoon,
-  LucideMail,
-  LucideEye,
-  LucideEyeOff
-} from '@lucide/angular';
+import { LucideCheckSquare, LucideAlertCircle, LucideLoader2, LucideArrowRight, LucideSun, LucideMoon, LucideMail, LucideEye, LucideEyeOff, LucideArrowLeft } from '@lucide/angular';
 
 @Component({
   selector: 'app-register',
@@ -30,8 +20,9 @@ import {
     LucideMoon,
     LucideMail,
     LucideEye,
-    LucideEyeOff
-  ],
+    LucideEyeOff,
+    LucideArrowLeft
+],
   templateUrl: './register.html'
 })
 export class Register implements OnInit {

@@ -3,9 +3,10 @@ import { TodoService } from './todo.service';
 import { NotificationService } from './notification.service';
 import { Todo } from '../models/todo';
 
-export interface ReminderItem {
+export interface NotificationItem {
   todo: Todo;
-  minutesLeft: number;
+  minutesLeft?: number;
+  type: 'reminder' | 'overdue';
 }
 
 @Injectable({
@@ -19,21 +20,44 @@ export class ReminderService implements OnDestroy {
   private refreshIntervalId: any;
   private clockIntervalId: any;
   private notifiedKeys = new Set<string>();
+  private isFirstLoad = true;
 
-  upcomingReminders = computed<ReminderItem[]>(() => {
+  activeNotifications = computed<NotificationItem[]>(() => {
     const now = this.now();
-    return this.todos()
-      .filter(t => t.status !== 'Done' && t.reminderMinutes > 0 && t.startDate)
-      .map(t => {
+    const items: NotificationItem[] = [];
+
+    this.todos().forEach(t => {
+      if (t.status === 'Done') return;
+
+      // Upcoming Reminders
+      if (t.reminderMinutes > 0 && t.startDate) {
         const startMs = new Date(t.startDate).getTime();
         const minutesLeft = Math.round((startMs - now) / 60000);
-        return { todo: t, minutesLeft };
-      })
-      .filter(r => r.minutesLeft >= 0 && r.minutesLeft <= r.todo.reminderMinutes)
-      .sort((a, b) => a.minutesLeft - b.minutesLeft);
+        if (minutesLeft >= 0 && minutesLeft <= t.reminderMinutes) {
+          items.push({ todo: t, minutesLeft, type: 'reminder' });
+        }
+      }
+
+      // Overdue Tasks
+      if (t.dueDate) {
+        const dueMs = new Date(t.dueDate).getTime();
+        if (now > dueMs) {
+          items.push({ todo: t, type: 'overdue' });
+        }
+      }
+    });
+
+    return items.sort((a, b) => {
+      if (a.type === 'overdue' && b.type !== 'overdue') return -1;
+      if (a.type !== 'overdue' && b.type === 'overdue') return 1;
+      if (a.type === 'reminder' && b.type === 'reminder') {
+        return (a.minutesLeft || 0) - (b.minutesLeft || 0);
+      }
+      return 0;
+    });
   });
 
-  reminderCount = computed(() => this.upcomingReminders().length);
+  notificationCount = computed(() => this.activeNotifications().length);
 
   load() {
     this.todoService.getAll().subscribe({
@@ -41,6 +65,8 @@ export class ReminderService implements OnDestroy {
         this.now.set(Date.now());
         this.todos.set(data);
         this.notifyActiveReminders(data);
+        this.notifyOverdueTasks(data, this.isFirstLoad);
+        this.isFirstLoad = false;
       },
       error: () => {}
     });
@@ -53,6 +79,7 @@ export class ReminderService implements OnDestroy {
     this.clockIntervalId = setInterval(() => {
       this.now.set(Date.now());
       this.notifyActiveReminders(this.todos());
+      this.notifyOverdueTasks(this.todos(), false);
     }, 15000);
   }
 
@@ -110,6 +137,28 @@ export class ReminderService implements OnDestroy {
         minutesLeft <= 0 ? 'warning' : 'info'
       );
       this.notifiedKeys.add(key);
+    }
+  }
+
+  private notifyOverdueTasks(todos: Todo[], silent: boolean) {
+    const now = Date.now();
+    for (const todo of todos) {
+      if (todo.status === 'Done' || !todo.dueDate) continue;
+      const dueMs = new Date(todo.dueDate).getTime();
+      if (isNaN(dueMs)) continue;
+
+      if (now > dueMs) {
+        const key = `overdue:${todo.id}:${todo.dueDate}`;
+        if (this.notifiedKeys.has(key)) continue;
+        
+        this.notifiedKeys.add(key);
+        if (!silent) {
+          this.notificationService.showToast(
+            `Task Overdue: "${todo.title}" is overdue!`,
+            'error'
+          );
+        }
+      }
     }
   }
 }

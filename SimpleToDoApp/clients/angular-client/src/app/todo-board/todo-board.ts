@@ -4,9 +4,13 @@ import { TodoService } from '../services/todo.service';
 import { NotificationService } from '../services/notification.service';
 import { ReminderService } from '../services/reminder.service';
 import { SignalRService } from '../services/signalr.service';
+import { TodoUiService } from '../services/todo-ui.service';
 import { Subscription } from 'rxjs';
 import { CreateTodoRequest, Todo, TodoStatus, UpdateTodoRequest } from '../models/todo';
 import { TodoModal } from '../todo-modal/todo-modal';
+import { RippleDirective } from '../core/ripple.directive';
+import { MagneticDirective } from '../core/magnetic.directive';
+import { AudioService } from '../services/audio.service';
 import {
   LucidePlus,
   LucideTrash2,
@@ -20,12 +24,23 @@ import {
   LucideAlertTriangle,
   LucideUser
 } from '@lucide/angular';
+import {
+  CdkDragDrop,
+  CdkDrag,
+  CdkDropList,
+  CdkDropListGroup
+} from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-todo-board',
   imports: [
     CommonModule,
     TodoModal,
+    RippleDirective,
+    MagneticDirective,
+    CdkDropListGroup,
+    CdkDropList,
+    CdkDrag,
     LucidePlus,
     LucideTrash2,
     LucideEdit3,
@@ -45,6 +60,8 @@ export class TodoBoard implements OnInit {
   private readonly notificationService = inject(NotificationService);
   private readonly reminderService = inject(ReminderService);
   private readonly signalRService = inject(SignalRService);
+  public readonly uiService = inject(TodoUiService);
+  private readonly audioService = inject(AudioService);
 
   private signalRSub?: Subscription;
 
@@ -61,10 +78,6 @@ export class TodoBoard implements OnInit {
   // Modal control
   modalOpen = false;
   selectedTodo: Todo | null = null;
-
-  // Drag and Drop state
-  draggedTodo: Todo | null = null;
-  activeDragColumn: string | null = null;
 
   ngOnInit() {
     this.fetchTodos();
@@ -99,34 +112,15 @@ export class TodoBoard implements OnInit {
   getTodosByStatus(status: string): Todo[] {
     return this.todos().filter(t => t.status === status);
   }
-
-  // Native HTML5 Drag and Drop Handlers
-  onDragStart(todo: Todo) {
-    this.draggedTodo = todo;
-  }
-
-  onDragOver(event: DragEvent) {
-    event.preventDefault(); // Necessary to allow drop
-  }
-
-  onDragEnter(event: DragEvent, columnId: string) {
-    event.preventDefault();
-    this.activeDragColumn = columnId;
-  }
-
-  onDragLeave(event: DragEvent, columnId: string) {
-    if (this.activeDragColumn === columnId) {
-      this.activeDragColumn = null;
-    }
-  }
-
-  onDrop(event: DragEvent, nextStatus: string) {
-    event.preventDefault();
-    this.activeDragColumn = null;
-    if (this.draggedTodo && this.draggedTodo.status !== nextStatus) {
-      const todoToMove = this.draggedTodo;
-      this.draggedTodo = null;
-      this.updateStatus(todoToMove, nextStatus as TodoStatus);
+  // CDK Drag and Drop Handler
+  onDrop(event: CdkDragDrop<string>) {
+    // If dropped in the same column, do nothing (we don't support custom ordering yet)
+    if (event.previousContainer !== event.container) {
+      const todo = event.item.data as Todo;
+      const newStatus = event.container.data as TodoStatus;
+      if (todo.status !== newStatus) {
+        this.updateStatus(todo, newStatus);
+      }
     }
   }
 
@@ -149,6 +143,19 @@ export class TodoBoard implements OnInit {
   }
 
   private updateStatus(todo: Todo, nextStatus: TodoStatus) {
+    if (nextStatus === 'Done' && todo.status !== 'Done') {
+      this.audioService.playSuccess();
+      import('canvas-confetti').then((confetti) => {
+        confetti.default({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#4f46e5', '#3b82f6', '#10b981', '#f59e0b', '#ec4899'],
+          zIndex: 9999
+        });
+      });
+    }
+
     // Optimistic status update
     this.todos.update(prev => 
       prev.map(t => t.id === todo.id ? { ...t, status: nextStatus, isCompleted: nextStatus === 'Done' } : t)
@@ -178,8 +185,17 @@ export class TodoBoard implements OnInit {
     ).then((confirmed) => {
       if (!confirmed) return;
 
-      // Optimistic delete
-      this.todos.update(prev => prev.filter(t => t.id !== id));
+      this.audioService.playDelete();
+
+      const el = document.getElementById('board-task-' + id);
+      if (el) {
+        el.classList.add('animate-destroy');
+      }
+
+      setTimeout(() => {
+        // Optimistic delete
+        this.todos.update(prev => prev.filter(t => t.id !== id));
+      }, 400);
 
       this.todoService.delete(id).subscribe({
         next: () => {
@@ -257,39 +273,9 @@ export class TodoBoard implements OnInit {
     this.selectedTodo = null;
   }
 
-  getPriorityStyle(p: string): string {
-    switch (p) {
-      case 'High':
-        return 'bg-red-500/20 text-red-600 dark:text-red-300 border-red-500/30 border border-solid';
-      case 'Medium':
-        return 'bg-amber-500/20 text-amber-600 dark:text-amber-300 border-amber-500/30 border border-solid';
-      default:
-        return 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/30 border border-solid';
-    }
-  }
-
   formatDisplayDate(dateStr: string): string {
     if (!dateStr) return '';
     const date = new Date(dateStr);
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  }
-
-  isOverdue(todo: Todo): boolean {
-    if (!todo.dueDate || todo.status === 'Done') return false;
-    const due = new Date(todo.dueDate);
-    if (isNaN(due.getTime())) return false;
-    if (todo.isAllDay) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const match = todo.dueDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
-      if (match) {
-        const year = parseInt(match[1], 10);
-        const month = parseInt(match[2], 10) - 1;
-        const day = parseInt(match[3], 10);
-        const dueDateLocal = new Date(year, month, day);
-        return dueDateLocal < today;
-      }
-    }
-    return due < new Date();
   }
 }
