@@ -27,36 +27,36 @@
 
     <nav class="grow space-y-1.5 px-4 py-6">
       <a routerLink="/todos" [routerLinkActiveOptions]="{ exact: true }"
-        routerLinkActive="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-l-4 border-indigo-500"
+        routerLinkActive="bg-primary/20 dark:bg-primary-dark/20 text-primary-dark dark:text-primary dark:text-primary-dark dark:text-primary border-l-4 border-primary-dark dark:border-primary"
         (click)="closeSidebarOnMobile()"
         class="flex items-center gap-3.5 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-500 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/60 hover:text-slate-900 dark:hover:text-slate-200">
         <svg lucideListTodo class="h-5 w-5"></svg>
         Tasks List
       </a>
       <a routerLink="/todos/calendar"
-        routerLinkActive="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-l-4 border-indigo-500"
+        routerLinkActive="bg-primary/20 dark:bg-primary-dark/20 text-primary-dark dark:text-primary dark:text-primary-dark dark:text-primary border-l-4 border-primary-dark dark:border-primary"
         (click)="closeSidebarOnMobile()"
         class="flex items-center gap-3.5 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-500 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/60 hover:text-slate-900 dark:hover:text-slate-200">
         <svg lucideCalendar class="h-5 w-5"></svg>
         Calendar
       </a>
       <a routerLink="/todos/gantt"
-        routerLinkActive="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-l-4 border-indigo-500"
+        routerLinkActive="bg-primary/20 dark:bg-primary-dark/20 text-primary-dark dark:text-primary dark:text-primary-dark dark:text-primary border-l-4 border-primary-dark dark:border-primary"
         (click)="closeSidebarOnMobile()"
         class="flex items-center gap-3.5 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-500 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/60 hover:text-slate-900 dark:hover:text-slate-200">
         <svg lucideKanban class="h-5 w-5"></svg>
         Gantt Chart
       </a>
       <a routerLink="/todos/board"
-        routerLinkActive="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-l-4 border-indigo-500"
+        routerLinkActive="bg-primary/20 dark:bg-primary-dark/20 text-primary-dark dark:text-primary dark:text-primary-dark dark:text-primary border-l-4 border-primary-dark dark:border-primary"
         (click)="closeSidebarOnMobile()"
         class="flex items-center gap-3.5 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-500 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/60 hover:text-slate-900 dark:hover:text-slate-200">
         <svg lucideKanban class="h-5 w-5"></svg>
         Kanban Board
       </a>
-      @if (!isEmployee()) {
+      @if (isLeader() || isDepartmentHead()) {
         <a routerLink="/todos/department"
-          routerLinkActive="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-l-4 border-indigo-500"
+          routerLinkActive="bg-primary/20 dark:bg-primary-dark/20 text-primary-dark dark:text-primary dark:text-primary-dark dark:text-primary border-l-4 border-primary-dark dark:border-primary"
           (click)="closeSidebarOnMobile()"
           class="flex items-center gap-3.5 rounded-xl border border-transparent px-4 py-3 text-sm font-semibold text-slate-500 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/60 hover:text-slate-900 dark:hover:text-slate-200">
           <svg lucideUsers class="h-5 w-5"></svg>
@@ -68,7 +68,7 @@
     <div class="border-t border-slate-200 dark:border-slate-900 p-4">
       <div class="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-900 p-3">
         <div class="flex items-center gap-3 min-w-0">
-          <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 text-xs font-bold text-indigo-600 dark:text-indigo-400">
+          <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/20 dark:bg-primary-dark/20 border border-indigo-100 dark:border-primary-dark dark:border-primary/20 text-xs font-bold text-primary-dark dark:text-primary dark:text-primary-dark dark:text-primary">
             {{ userInitials() }}
           </div>
           <div class="min-w-0">
@@ -79,11 +79,11 @@
 
         <div class="flex items-center gap-1 shrink-0">
           <button (click)="toggleTheme()" [title]="isDark() ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
-            class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-900 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">
+            class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-900 hover:text-primary-dark dark:text-primary dark:hover:text-primary-dark dark:text-primary transition-colors cursor-pointer">
             @if (isDark()) {
               <svg lucideSun class="h-4.5 w-4.5 text-amber-400"></svg>
             } @else {
-              <svg lucideMoon class="h-4.5 w-4.5 text-indigo-600"></svg>
+              <svg lucideMoon class="h-4.5 w-4.5 text-primary-dark dark:text-primary"></svg>
             }
           </button>
           <a routerLink="/welcome">
@@ -116,7 +116,7 @@
 
       <div class="relative ml-auto">
         <button (click)="toggleBell()" title="Notifications"
-          class="relative rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">
+          class="relative rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-primary-dark dark:text-primary dark:hover:text-primary-dark dark:text-primary transition-colors cursor-pointer">
           <svg lucideBell class="h-5 w-5"></svg>
           @if (reminderService.notificationCount() > 0) {
             <span class="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white shadow-md">
@@ -129,7 +129,7 @@
           <div class="absolute right-0 top-full mt-2 z-50 w-80 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl animate-scale-up origin-top-right">
             <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-4 py-3">
               <div class="flex items-center gap-2">
-                <svg lucideBell class="h-4 w-4 text-indigo-500"></svg>
+                <svg lucideBell class="h-4 w-4 text-primary-dark dark:text-primary"></svg>
                 <span class="text-sm font-bold text-slate-900 dark:text-white">Notifications</span>
                 @if (reminderService.notificationCount() > 0) {
                   <span class="rounded-full bg-red-500/10 border border-red-500/20 px-1.5 py-0.5 text-[9px] font-bold text-red-500">

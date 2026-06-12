@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using SimpleToDoApp.Application.DTOs.Auth;
 using SimpleToDoApp.Application.Interfaces;
 using SimpleToDoApp.Domain.Entities;
+using SimpleToDoApp.Domain.Enums;
 
 namespace SimpleToDoApp.Application.Services
 {
@@ -24,6 +25,7 @@ namespace SimpleToDoApp.Application.Services
         {
             var accounts = await _context.Accounts
                 .Include(a => a.Department)
+                .Where(a => a.Role != UserRole.User && !(a.Role == UserRole.Employee && a.DepartmentId == null))
                 .ToListAsync();
 
             return accounts.Select(MapToDto);

@@ -22,7 +22,7 @@ export class TodoUiService {
       case 'Pending':
         return 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300';
       case 'InProgress':
-        return 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 border border-indigo-500/20';
+        return 'bg-primary/20 text-primary-dark dark:text-primary dark:bg-primary-dark/30 dark:text-primary-dark dark:text-primary border border-primary-dark dark:border-primary/20';
       case 'Done':
         return 'bg-emerald-500 text-white shadow-sm';
       default:

@@ -5,7 +5,7 @@
       <div class="flex items-center gap-3">
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Calendar Schedule</h1>
         <div class="hidden md:flex items-center gap-2 rounded-lg bg-slate-100 dark:bg-slate-800 px-3 py-1.5 text-sm font-bold text-slate-700 dark:text-slate-200">
-          <svg lucideClock class="h-4 w-4 text-indigo-500"></svg>
+          <svg lucideClock class="h-4 w-4 text-primary-dark dark:text-primary"></svg>
           {{ currentTime() | date:'HH:mm:ss' }}
         </div>
       </div>
@@ -19,8 +19,8 @@
           class="rounded-lg p-1.5 transition-colors flex items-center gap-2 text-sm font-semibold"
           [class.bg-slate-100]="viewMode() === 'month'"
           [class.dark:bg-slate-800]="viewMode() === 'month'"
-          [class.text-indigo-600]="viewMode() === 'month'"
-          [class.dark:text-indigo-400]="viewMode() === 'month'"
+          [class.text-primary-dark dark:text-primary]="viewMode() === 'month'"
+          [class.dark:text-primary-dark dark:text-primary]="viewMode() === 'month'"
           [class.text-slate-500]="viewMode() !== 'month'"
         >
           <svg lucideCalendarDays class="h-4 w-4"></svg>
@@ -31,8 +31,8 @@
           class="rounded-lg p-1.5 transition-colors flex items-center gap-2 text-sm font-semibold"
           [class.bg-slate-100]="viewMode() === 'timeline'"
           [class.dark:bg-slate-800]="viewMode() === 'timeline'"
-          [class.text-indigo-600]="viewMode() === 'timeline'"
-          [class.dark:text-indigo-400]="viewMode() === 'timeline'"
+          [class.text-primary-dark dark:text-primary]="viewMode() === 'timeline'"
+          [class.dark:text-primary-dark dark:text-primary]="viewMode() === 'timeline'"
           [class.text-slate-500]="viewMode() !== 'timeline'"
         >
           <svg lucideList class="h-4 w-4"></svg>
@@ -129,10 +129,10 @@
                   </button>
                   <span
                     class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition-all duration-200"
-                    [class.bg-indigo-500]="isToday(day)"
+                    [class.bg-primary-dark]="isToday(day)"
                     [class.text-white]="isToday(day)"
                     [class.shadow-md]="isToday(day)"
-                    [class.shadow-indigo-500\/20]="isToday(day)"
+                    [class.shadow-primary-dark\/20]="isToday(day)"
                     [class.text-slate-400]="!isToday(day)"
                     [class.dark:text-slate-400]="!isToday(day)"
                     [class.group-hover:text-slate-900]="!isToday(day)"
@@ -166,7 +166,7 @@
                   @if (getTodosForDay(day).length > 3) {
                     <div 
                       (click)="openDayModal($event, day)"
-                      class="text-[8px] font-bold text-indigo-600 dark:text-indigo-400 text-center pt-0.5 cursor-pointer hover:underline hover:text-indigo-700 dark:hover:text-indigo-300">
+                      class="text-[8px] font-bold text-primary-dark dark:text-primary dark:text-primary-dark dark:text-primary text-center pt-0.5 cursor-pointer hover:underline hover:text-indigo-700 dark:hover:text-indigo-300">
                       +{{ getTodosForDay(day).length - 3 }} more
                     </div>
                   }
@@ -325,7 +325,7 @@
       <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 p-4 shrink-0 bg-slate-50 dark:bg-slate-900/50">
         <div>
           <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <svg lucideCalendarDays class="h-5 w-5 text-indigo-500"></svg>
+            <svg lucideCalendarDays class="h-5 w-5 text-primary-dark dark:text-primary"></svg>
             {{ monthNames[month] }} {{ selectedDayForModal }}, {{ year }}
           </h2>
           <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">All tasks for this day</p>
@@ -371,10 +371,10 @@
                   [class.text-slate-600]="todo.status === 'Pending'"
                   [class.dark:bg-slate-800]="todo.status === 'Pending'"
                   [class.dark:text-slate-400]="todo.status === 'Pending'"
-                  [class.bg-indigo-100]="todo.status === 'InProgress'"
+                  [class.bg-primary/30]="todo.status === 'InProgress'"
                   [class.text-indigo-700]="todo.status === 'InProgress'"
-                  [class.dark:bg-indigo-500/20]="todo.status === 'InProgress'"
-                  [class.dark:text-indigo-400]="todo.status === 'InProgress'"
+                  [class.dark:bg-primary-dark/30]="todo.status === 'InProgress'"
+                  [class.dark:text-primary-dark dark:text-primary]="todo.status === 'InProgress'"
                   [class.bg-emerald-100]="todo.status === 'Done'"
                   [class.text-emerald-700]="todo.status === 'Done'"
                   [class.dark:bg-emerald-500/20]="todo.status === 'Done'"
@@ -399,7 +399,7 @@
       <div class="p-4 border-t border-slate-200 dark:border-slate-800 shrink-0 bg-slate-50 dark:bg-slate-900/50">
         <button
           (click)="closeDayModal(); handleDayClick(selectedDayForModal!)"
-          class="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 py-2.5 font-bold transition-colors"
+          class="w-full flex items-center justify-center gap-2 rounded-xl bg-primary/20 dark:bg-primary-dark/20 text-primary-dark dark:text-primary dark:text-primary-dark dark:text-primary hover:bg-primary/40 dark:hover:bg-primary-dark/20 py-2.5 font-bold transition-colors"
         >
           <svg lucidePlus class="h-4 w-4"></svg>
           Add Task on this day

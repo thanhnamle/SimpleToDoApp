@@ -4,6 +4,7 @@ namespace SimpleToDoApp.Domain.Enums
     {
         Employee,
         Leader,
-        DepartmentHead
+        DepartmentHead,
+        User
     }
 }

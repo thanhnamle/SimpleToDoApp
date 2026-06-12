@@ -247,7 +247,7 @@ namespace SimpleToDoApp.Application.Services
 
         private IQueryable<Todo> ApplyRoleFilter(IQueryable<Todo> query, int userId, UserRole role, int? departmentId)
         {
-            if (role == UserRole.Employee)
+            if (role == UserRole.User || role == UserRole.Employee)
             {
                 return query.Where(t => t.UserId == userId);
             }
@@ -257,8 +257,9 @@ namespace SimpleToDoApp.Application.Services
                 return query.Where(t => t.Account != null && t.Account.DepartmentId == departmentId);
             }
 
-            // DepartmentHead acts as Global Admin and has no filters applied.
-            return query;
+            // DepartmentHead acts as Global Admin for enterprise.
+            // They see all tasks EXCEPT those belonging to regular external Users or legacy external employees.
+            return query.Where(t => t.Account != null && t.Account.Role != UserRole.User && !(t.Account.Role == UserRole.Employee && t.Account.DepartmentId == null));
         }
     }
 }

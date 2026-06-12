@@ -19,7 +19,9 @@ import {
   LucideEdit3,
   LucideTrash2,
   LucideX,
-  LucideLoader2
+  LucideLoader2,
+  LucideEye,
+  LucideEyeOff
 } from '@lucide/angular';
 
 @Component({
@@ -36,7 +38,9 @@ import {
     LucideEdit3,
     LucideTrash2,
     LucideX,
-    LucideLoader2
+    LucideLoader2,
+    LucideEye,
+    LucideEyeOff
   ],
   templateUrl: './todo-department.html'
 })
@@ -121,8 +125,13 @@ export class TodoDepartment implements OnInit, OnDestroy {
 
     // Fetch members and todos in parallel
     this.authService.getDepartmentMembers().subscribe({
-      next: (users) => {
-        this.members.set(users);
+      next: (data) => {
+        // Filter out User role and legacy external users (Employee without department)
+        const filteredAccounts = data.filter(acc => 
+          acc.role !== 'User' && 
+          !(acc.role === 'Employee' && !acc.departmentId)
+        );
+        this.members.set(filteredAccounts);
         
         // Fetch todos
         this.todoService.getAll().subscribe({
@@ -161,8 +170,9 @@ export class TodoDepartment implements OnInit, OnDestroy {
   modalOpen = false;
   selectedAccount: User | null = null;
   isSavingAccount = false;
-  accountFormData = {
-    username: '',
+  showPassword = false;
+
+  accountFormData: Partial<User> & { password?: string } = {
     email: '',
     password: '',
     role: 'Employee',

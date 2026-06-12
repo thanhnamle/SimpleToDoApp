@@ -36,7 +36,7 @@
             type="text"
             name="title"
             required
-            class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3.5 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-indigo-500 transition-all"
+            class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3.5 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-primary-dark dark:border-primary transition-all"
             placeholder="What needs to be done?"
             [(ngModel)]="formData.title"
           />
@@ -49,7 +49,7 @@
             id="modal-desc"
             name="description"
             rows="3"
-            class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3.5 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-indigo-500 transition-all resize-none"
+            class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3.5 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-primary-dark dark:border-primary transition-all resize-none"
             placeholder="Add detailed task notes..."
             [(ngModel)]="formData.description"
           ></textarea>
@@ -63,7 +63,7 @@
               id="modal-category"
               type="text"
               name="category"
-              class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3.5 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-indigo-500 transition-all"
+              class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3.5 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-primary-dark dark:border-primary transition-all"
               placeholder="e.g. Work, Health"
               [(ngModel)]="formData.category"
             />
@@ -74,7 +74,7 @@
             <select
               id="modal-priority"
               name="priority"
-              class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3 py-2 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer"
+              class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3 py-2 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-primary-dark dark:border-primary transition-all cursor-pointer"
               [(ngModel)]="formData.priority"
             >
               <option value="Low">Low</option>
@@ -91,7 +91,7 @@
             <select
               id="modal-status"
               name="status"
-              class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3 py-2 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer"
+              class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3 py-2 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-primary-dark dark:border-primary transition-all cursor-pointer"
               [(ngModel)]="formData.status"
             >
               <option value="Pending">Pending</option>
@@ -108,7 +108,7 @@
               id="modal-allday"
               (click)="formData.isAllDay = !formData.isAllDay; onAllDayChange()"
               class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none cursor-pointer"
-              [class.bg-indigo-500]="formData.isAllDay"
+              [class.bg-primary-dark]="formData.isAllDay"
               [class.bg-slate-200]="!formData.isAllDay"
               [class.dark:bg-slate-700]="!formData.isAllDay"
             >
@@ -128,7 +128,7 @@
             <select
               id="modal-assignee"
               name="assignedUserId"
-              class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3 py-2 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer"
+              class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3 py-2 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-primary-dark dark:border-primary transition-all cursor-pointer"
               [(ngModel)]="formData.assignedUserId"
             >
               @for (member of members(); track member.userId) {
@@ -146,10 +146,10 @@
             <button
               type="button"
               (click)="showStartPicker = !showStartPicker; showDuePicker = false"
-              class="mt-1.5 w-full flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all cursor-pointer"
+              class="mt-1.5 w-full flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 focus:border-primary-dark dark:border-primary focus:ring-2 focus:ring-primary-dark dark:ring-primary/10 transition-all cursor-pointer"
             >
               <span class="flex items-center gap-2">
-                <svg lucideCalendar class="h-4.5 w-4.5 text-indigo-500"></svg>
+                <svg lucideCalendar class="h-4.5 w-4.5 text-primary-dark dark:text-primary"></svg>
                 {{ formatDisplayDate(formData.startDate) }}
               </span>
               <svg lucideChevronDown class="h-4 w-4 text-slate-400 transition-transform duration-200" [class.rotate-180]="showStartPicker"></svg>
@@ -186,7 +186,7 @@
                       [disabled]="cell.isPast && !isEditMode"
                       (click)="selectStartDate(cell)"
                       class="h-8 w-8 rounded-lg text-xs font-medium flex items-center justify-center transition-all cursor-pointer mx-auto"
-                      [class.bg-indigo-500]="startDateDate === cell.dateString"
+                      [class.bg-primary-dark]="startDateDate === cell.dateString"
                       [class.text-white]="startDateDate === cell.dateString"
                       [class.font-bold]="startDateDate === cell.dateString"
                       [class.text-slate-800]="startDateDate !== cell.dateString && cell.isCurrentMonth"
@@ -207,17 +207,17 @@
                 @if (!formData.isAllDay) {
                   <div class="border-t border-slate-100 dark:border-slate-800 mt-4 pt-3 flex items-center justify-between">
                     <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                      <svg lucideClock class="h-3.5 w-3.5 text-indigo-500"></svg>
+                      <svg lucideClock class="h-3.5 w-3.5 text-primary-dark dark:text-primary"></svg>
                       Time
                     </span>
                     <div class="flex items-center gap-1">
-                      <select [(ngModel)]="startDateTimeHour" name="startHour" class="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-2 py-1 text-xs text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 cursor-pointer">
+                      <select [(ngModel)]="startDateTimeHour" name="startHour" class="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-2 py-1 text-xs text-slate-800 dark:text-slate-300 outline-none focus:border-primary-dark dark:border-primary cursor-pointer">
                         @for (h of hoursList; track h) {
                           <option [value]="h">{{ h }}</option>
                         }
                       </select>
                       <span class="text-slate-400">:</span>
-                      <select [(ngModel)]="startDateTimeMinute" name="startMinute" class="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-2 py-1 text-xs text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 cursor-pointer">
+                      <select [(ngModel)]="startDateTimeMinute" name="startMinute" class="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-2 py-1 text-xs text-slate-800 dark:text-slate-300 outline-none focus:border-primary-dark dark:border-primary cursor-pointer">
                         @for (m of minutesList; track m) {
                           <option [value]="m">{{ m }}</option>
                         }
@@ -228,7 +228,7 @@
 
                 <!-- Footer Action to close picker -->
                 <div class="flex items-center justify-end mt-4">
-                  <button type="button" (click)="showStartPicker = false" class="rounded-lg bg-indigo-50 dark:bg-indigo-500/10 px-3.5 py-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-all cursor-pointer">
+                  <button type="button" (click)="showStartPicker = false" class="rounded-lg bg-primary/20 dark:bg-primary-dark/20 px-3.5 py-1.5 text-xs font-bold text-primary-dark dark:text-primary dark:text-primary-dark dark:text-primary hover:bg-primary/40 dark:hover:bg-primary-dark/20 transition-all cursor-pointer">
                     Done
                   </button>
                 </div>
@@ -264,7 +264,7 @@
               [class.dark:hover:bg-slate-900]="!isDueDateOverdue"
             >
               <span class="flex items-center gap-2">
-                <svg lucideCalendar class="h-4.5 w-4.5" [class.text-red-500]="isDueDateOverdue" [class.text-indigo-500]="!isDueDateOverdue"></svg>
+                <svg lucideCalendar class="h-4.5 w-4.5" [class.text-red-500]="isDueDateOverdue" [class.text-primary-dark dark:text-primary]="!isDueDateOverdue"></svg>
                 {{ formatDisplayDate(formData.dueDate) }}
               </span>
               <svg lucideChevronDown class="h-4 w-4 text-slate-400 transition-transform duration-200" [class.rotate-180]="showDuePicker"></svg>
@@ -301,7 +301,7 @@
                       [disabled]="cell.isPast && !isEditMode"
                       (click)="selectDueDate(cell)"
                       class="h-8 w-8 rounded-lg text-xs font-medium flex items-center justify-center transition-all cursor-pointer mx-auto"
-                      [class.bg-indigo-500]="dueDateDate === cell.dateString"
+                      [class.bg-primary-dark]="dueDateDate === cell.dateString"
                       [class.text-white]="dueDateDate === cell.dateString"
                       [class.font-bold]="dueDateDate === cell.dateString"
                       [class.text-slate-800]="dueDateDate !== cell.dateString && cell.isCurrentMonth"
@@ -322,17 +322,17 @@
                 @if (!formData.isAllDay) {
                   <div class="border-t border-slate-100 dark:border-slate-800 mt-4 pt-3 flex items-center justify-between">
                     <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                      <svg lucideClock class="h-3.5 w-3.5 text-indigo-500"></svg>
+                      <svg lucideClock class="h-3.5 w-3.5 text-primary-dark dark:text-primary"></svg>
                       Time
                     </span>
                     <div class="flex items-center gap-1">
-                      <select [(ngModel)]="dueDateTimeHour" name="dueHour" class="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-2 py-1 text-xs text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 cursor-pointer">
+                      <select [(ngModel)]="dueDateTimeHour" name="dueHour" class="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-2 py-1 text-xs text-slate-800 dark:text-slate-300 outline-none focus:border-primary-dark dark:border-primary cursor-pointer">
                         @for (h of hoursList; track h) {
                           <option [value]="h">{{ h }}</option>
                         }
                       </select>
                       <span class="text-slate-400">:</span>
-                      <select [(ngModel)]="dueDateTimeMinute" name="dueMinute" class="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-2 py-1 text-xs text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 cursor-pointer">
+                      <select [(ngModel)]="dueDateTimeMinute" name="dueMinute" class="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-2 py-1 text-xs text-slate-800 dark:text-slate-300 outline-none focus:border-primary-dark dark:border-primary cursor-pointer">
                         @for (m of minutesList; track m) {
                           <option [value]="m">{{ m }}</option>
                         }
@@ -343,7 +343,7 @@
 
                 <!-- Footer Action to close picker -->
                 <div class="flex items-center justify-end mt-4">
-                  <button type="button" (click)="showDuePicker = false" class="rounded-lg bg-indigo-50 dark:bg-indigo-500/10 px-3.5 py-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-all cursor-pointer">
+                  <button type="button" (click)="showDuePicker = false" class="rounded-lg bg-primary/20 dark:bg-primary-dark/20 px-3.5 py-1.5 text-xs font-bold text-primary-dark dark:text-primary dark:text-primary-dark dark:text-primary hover:bg-primary/40 dark:hover:bg-primary-dark/20 transition-all cursor-pointer">
                     Done
                   </button>
                 </div>
@@ -364,7 +364,7 @@
           <select
             id="modal-reminder"
             name="reminderMinutes"
-            class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3 py-2 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer"
+            class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-3 py-2 text-sm text-slate-800 dark:text-slate-300 outline-none focus:border-primary-dark dark:border-primary transition-all cursor-pointer"
             [(ngModel)]="formData.reminderMinutes"
           >
             <option [value]="0">No reminder</option>
