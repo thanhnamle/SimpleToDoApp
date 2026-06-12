@@ -10,19 +10,19 @@
       @if (isDark()) {
         <svg lucideSun class="h-5 w-5 text-amber-400"></svg>
       } @else {
-        <svg lucideMoon class="h-5 w-5 text-indigo-600"></svg>
+        <svg lucideMoon class="h-5 w-5 text-primary-dark dark:text-primary"></svg>
       }
     </button>
   </div>
 
   <!-- Background blobs -->
   <div class="absolute top-1/4 left-1/4 h-72 w-72 rounded-full bg-violet-600/5 dark:bg-violet-600/10 blur-[120px]"></div>
-  <div class="absolute bottom-1/4 right-1/4 h-72 w-72 rounded-full bg-indigo-600/5 dark:bg-indigo-600/10 blur-[120px]"></div>
+  <div class="absolute bottom-1/4 right-1/4 h-72 w-72 rounded-full bg-primary-dark/5 dark:bg-primary-dark/10 blur-[120px]"></div>
 
   <div class="z-10 w-full max-w-md space-y-8 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 p-8 shadow-xl dark:shadow-2xl backdrop-blur-xl transition-all duration-200">
     @if (status() === 'loading') {
       <div class="flex flex-col items-center justify-center text-center space-y-6 py-8">
-        <svg lucideLoader2 class="h-12 w-12 animate-spin text-indigo-600 dark:text-indigo-400"></svg>
+        <svg lucideLoader2 class="h-12 w-12 animate-spin text-primary-dark dark:text-primary dark:text-primary-dark dark:text-primary"></svg>
         <div class="space-y-2">
           <h2 class="text-2xl font-bold tracking-tight text-slate-950 dark:text-white">
             Verifying your email
@@ -80,7 +80,7 @@
           </a>
           <a
             routerLink="/login"
-            class="inline-block text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 mt-2"
+            class="inline-block text-sm font-semibold text-primary-dark dark:text-primary dark:text-primary-dark dark:text-primary hover:text-primary-dark dark:text-primary dark:hover:text-indigo-300 mt-2"
           >
             Back to Sign In
           </a>

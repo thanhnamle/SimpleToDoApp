@@ -19,10 +19,10 @@
       [class.text-red-600]="toast.type === 'error'"
       [class.dark:text-red-400]="toast.type === 'error'"
 
-      [class.bg-indigo-500/10]="toast.type === 'info'"
-      [class.border-indigo-500/20]="toast.type === 'info'"
-      [class.text-indigo-600]="toast.type === 'info'"
-      [class.dark:text-indigo-400]="toast.type === 'info'"
+      [class.bg-primary-dark/10]="toast.type === 'info'"
+      [class.border-primary-dark dark:border-primary/20]="toast.type === 'info'"
+      [class.text-primary-dark dark:text-primary]="toast.type === 'info'"
+      [class.dark:text-primary-dark dark:text-primary]="toast.type === 'info'"
 
       [class.bg-amber-500/10]="toast.type === 'warning'"
       [class.border-amber-500/20]="toast.type === 'warning'"

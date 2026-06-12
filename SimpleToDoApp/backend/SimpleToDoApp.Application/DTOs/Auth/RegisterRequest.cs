@@ -21,6 +21,6 @@ namespace SimpleToDoApp.Application.DTOs.Auth
 
         public int? DepartmentId { get; set; }
 
-        public SimpleToDoApp.Domain.Enums.UserRole Role { get; set; } = SimpleToDoApp.Domain.Enums.UserRole.Employee;
+        public SimpleToDoApp.Domain.Enums.UserRole Role { get; set; } = SimpleToDoApp.Domain.Enums.UserRole.User;
     }
 }

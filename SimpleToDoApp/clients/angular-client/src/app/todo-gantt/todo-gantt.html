@@ -23,7 +23,7 @@
           <input 
             type="number" 
             min="1" 
-            class="w-16 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded px-2 py-1 text-xs font-bold outline-none focus:border-indigo-500 ml-1 text-slate-900 dark:text-white"
+            class="w-16 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded px-2 py-1 text-xs font-bold outline-none focus:border-primary-dark dark:border-primary ml-1 text-slate-900 dark:text-white"
             [value]="daysToView"
             (change)="onCustomDaysChange($event)"
             placeholder="Days"
@@ -45,7 +45,7 @@
 
   @if (loading()) {
     <div class="flex-grow flex items-center justify-center h-64">
-      <svg lucideLoader2 class="h-10 w-10 animate-spin text-indigo-500"></svg>
+      <svg lucideLoader2 class="h-10 w-10 animate-spin text-primary-dark dark:text-primary"></svg>
     </div>
   } @else if (error()) {
     <div class="flex flex-col items-center justify-center h-64 text-center rounded-2xl border border-red-500/10 bg-red-500/5 p-6 shrink-0">
@@ -66,9 +66,9 @@
         </div>
         <div class="flex-1 flex" [style.min-width.px]="timelineDays.length * 60">
           @for (day of timelineDays; track day.getTime()) {
-            <div class="flex-1 border-r border-slate-200/50 dark:border-slate-800/50 p-2 text-center" [class.bg-indigo-50]="isToday(day)" [class.dark:bg-indigo-500/10]="isToday(day)">
+            <div class="flex-1 border-r border-slate-200/50 dark:border-slate-800/50 p-2 text-center" [class.bg-primary/20]="isToday(day)" [class.dark:bg-primary-dark/20]="isToday(day)">
               <div class="text-[10px] font-semibold text-slate-400 uppercase">{{ day | date:'E' }}</div>
-              <div class="text-xs font-bold mt-0.5" [class.text-indigo-600]="isToday(day)" [class.dark:text-indigo-400]="isToday(day)" [class.text-slate-700]="!isToday(day)" [class.dark:text-slate-300]="!isToday(day)">
+              <div class="text-xs font-bold mt-0.5" [class.text-primary-dark dark:text-primary]="isToday(day)" [class.dark:text-primary-dark dark:text-primary]="isToday(day)" [class.text-slate-700]="!isToday(day)" [class.dark:text-slate-300]="!isToday(day)">
                 {{ day | date:'dd MMM' }}
               </div>
             </div>
@@ -91,7 +91,7 @@
             <div class="w-48 shrink-0 border-r border-slate-200 dark:border-slate-800 p-3 flex flex-col justify-center sticky left-0 z-20 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800 transition-colors shadow-[1px_0_0_0_rgba(241,245,249,1)] dark:shadow-[1px_0_0_0_rgba(30,41,59,1)] group/sidebar relative">
               <div class="flex items-center gap-2 max-w-[200px]">
                   <span class="w-1.5 h-1.5 rounded-full" [class]="uiService.getPriorityStyle(task.priority).split(' ')[0]"></span>
-                  <span class="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" [class.line-through]="task.status === 'Done'" [class.text-slate-400]="task.status === 'Done'">
+                  <span class="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate group-hover:text-primary-dark dark:text-primary dark:group-hover:text-primary-dark dark:text-primary transition-colors" [class.line-through]="task.status === 'Done'" [class.text-slate-400]="task.status === 'Done'">
                 {{ task.title }}
               </span>
               </div>
@@ -102,16 +102,14 @@
               </div>
               
               <!-- Action buttons -->
-              @if (!isEmployee()) {
                 <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover/sidebar:opacity-100 transition-opacity bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-md p-1 shadow-sm border border-slate-200 dark:border-slate-800">
-                  <button (click)="openEditModal(task)" title="Edit" class="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 p-1 rounded-sm cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800">
+                  <button (click)="openEditModal(task)" title="Edit" class="text-slate-400 hover:text-primary-dark dark:text-primary dark:hover:text-primary-dark dark:text-primary p-1 rounded-sm cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800">
                     <svg lucideEdit3 class="h-3 w-3"></svg>
                   </button>
                   <button (click)="handleDelete(task.id)" title="Delete" class="text-slate-400 hover:text-red-600 dark:hover:text-red-400 p-1 rounded-sm cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800">
                     <svg lucideTrash2 class="h-3 w-3"></svg>
                   </button>
                 </div>
-              }
             </div>
             
             <!-- Timeline Track -->
@@ -119,7 +117,7 @@
               <!-- Background Grid Lines -->
               <div class="absolute inset-0 flex pointer-events-none">
                 @for (day of timelineDays; track day.getTime()) {
-                  <div class="flex-1 border-r border-slate-200/50 dark:border-slate-800/50" [class.bg-indigo-50]="isToday(day)" [class.dark:bg-indigo-500/10]="isToday(day)"></div>
+                  <div class="flex-1 border-r border-slate-200/50 dark:border-slate-800/50" [class.bg-primary/20]="isToday(day)" [class.dark:bg-primary-dark/20]="isToday(day)"></div>
                 }
               </div>
 
