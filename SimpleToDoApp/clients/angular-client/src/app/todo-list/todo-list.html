@@ -18,79 +18,129 @@
   </div>
 
   <!-- Filter / Search Bar Grid -->
-  <div class="bg-white dark:bg-slate-900/40 p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-md backdrop-blur-xl">
-    <div class="flex flex-col gap-4">
+  <div class="bg-white dark:bg-slate-900/40 p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-xl backdrop-blur-xl mb-6">
+    <div class="flex flex-col gap-5">
       <!-- Search -->
       <div class="relative w-full">
-        <svg lucideSearch class="absolute top-3 left-4 h-5 w-5 text-slate-400 dark:text-slate-500"></svg>
+        <svg lucideSearch class="absolute top-3.5 left-4 h-5 w-5 text-slate-400 dark:text-slate-500"></svg>
         <input
           type="text"
           placeholder="Search tasks, categories..."
-          class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 pl-12 pr-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-indigo-500 transition-all focus:ring-4 focus:ring-indigo-500/10"
+          class="w-full rounded-2xl border-2 border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-950/40 pl-12 pr-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 transition-all focus:ring-4 focus:ring-indigo-500/10 font-medium"
           [(ngModel)]="search"
           (ngModelChange)="applyFilters()"
         />
       </div>
 
-      <!-- Filters Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-        <select
-          class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900"
-          [(ngModel)]="statusFilter"
-          (ngModelChange)="applyFilters()"
-        >
-          <option value="All">All Statuses</option>
-          <option value="Pending">Pending</option>
-          <option value="InProgress">In Progress</option>
-          <option value="Done">Done</option>
-        </select>
+      <div class="flex flex-col lg:flex-row gap-5 lg:items-start lg:justify-between">
+        <!-- Status & Priority Chips -->
+        <div class="flex flex-col gap-4 overflow-hidden w-full lg:w-auto">
+          <!-- Status Chips -->
+          <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 -mb-1 w-full">
+            <span class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0 mr-1">Status</span>
+            <button 
+              (click)="statusFilter = 'All'; applyFilters()"
+              [class]="statusFilter === 'All' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
+              class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all cursor-pointer">
+              All
+            </button>
+            <button 
+              (click)="statusFilter = 'Pending'; applyFilters()"
+              [class]="statusFilter === 'Pending' ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
+              class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all cursor-pointer">
+              Pending
+            </button>
+            <button 
+              (click)="statusFilter = 'InProgress'; applyFilters()"
+              [class]="statusFilter === 'InProgress' ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/20' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
+              class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all cursor-pointer">
+              In Progress
+            </button>
+            <button 
+              (click)="statusFilter = 'Done'; applyFilters()"
+              [class]="statusFilter === 'Done' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
+              class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all cursor-pointer">
+              Done
+            </button>
+          </div>
 
-        <select
-          class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900"
-          [(ngModel)]="priorityFilter"
-          (ngModelChange)="applyFilters()"
-        >
-          <option value="All">All Priorities</option>
-          <option value="Low">Low Priority</option>
-          <option value="Medium">Medium Priority</option>
-          <option value="High">High Priority</option>
-        </select>
+          <!-- Priority Chips -->
+          <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 -mb-1 w-full">
+            <span class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0 mr-1">Priority</span>
+            <button 
+              (click)="priorityFilter = 'All'; applyFilters()"
+              [class]="priorityFilter === 'All' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
+              class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all cursor-pointer">
+              All
+            </button>
+            <button 
+              (click)="priorityFilter = 'Low'; applyFilters()"
+              [class]="priorityFilter === 'Low' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
+              class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all cursor-pointer">
+              Low
+            </button>
+            <button 
+              (click)="priorityFilter = 'Medium'; applyFilters()"
+              [class]="priorityFilter === 'Medium' ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
+              class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all cursor-pointer">
+              Medium
+            </button>
+            <button 
+              (click)="priorityFilter = 'High'; applyFilters()"
+              [class]="priorityFilter === 'High' ? 'bg-rose-500 text-white shadow-md shadow-rose-500/20' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
+              class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all cursor-pointer">
+              High
+            </button>
+          </div>
+        </div>
 
-        <select
-          class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900"
-          [(ngModel)]="categoryFilter"
-          (ngModelChange)="applyFilters()"
-        >
-          <option value="All">All Categories</option>
-          @for (cat of categories; track cat) {
-            @if (cat !== 'All') {
-              <option [value]="cat">{{ cat }}</option>
-            }
+        <!-- Other Selects -->
+        <div class="flex flex-wrap lg:flex-nowrap items-center gap-3 shrink-0 lg:ml-auto">
+          <div class="relative min-w-[140px] flex-1 lg:flex-none">
+            <select
+              class="w-full appearance-none rounded-full border-2 border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-950/40 px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 pr-10"
+              [(ngModel)]="categoryFilter"
+              (ngModelChange)="applyFilters()"
+            >
+              <option value="All">All Categories</option>
+              @for (cat of categories; track cat) {
+                @if (cat !== 'All') {
+                  <option [value]="cat">{{ cat }}</option>
+                }
+              }
+            </select>
+            <svg lucideChevronDown class="absolute right-3.5 top-3 h-4 w-4 text-slate-400 pointer-events-none"></svg>
+          </div>
+
+          <div class="relative min-w-[140px] flex-1 lg:flex-none">
+            <select
+              class="w-full appearance-none rounded-full border-2 border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-950/40 px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 pr-10"
+              [(ngModel)]="sortFilter"
+              (ngModelChange)="applyFilters()"
+            >
+              <option value="Default">Sort: Default</option>
+              <option value="DueDateAsc">Due: Closest</option>
+              <option value="DueDateDesc">Due: Furthest</option>
+            </select>
+            <svg lucideChevronDown class="absolute right-3.5 top-3 h-4 w-4 text-slate-400 pointer-events-none"></svg>
+          </div>
+
+          @if (isDepartmentHead()) {
+            <div class="relative min-w-[160px] flex-1 lg:flex-none">
+              <select
+                class="w-full appearance-none rounded-full border-2 border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-950/40 px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 pr-10"
+                [(ngModel)]="departmentFilter"
+                (ngModelChange)="applyFilters()"
+              >
+                <option value="All">All Departments</option>
+                @for (dept of departments(); track dept.id) {
+                  <option [value]="dept.id">{{ dept.name }}</option>
+                }
+              </select>
+              <svg lucideChevronDown class="absolute right-3.5 top-3 h-4 w-4 text-slate-400 pointer-events-none"></svg>
+            </div>
           }
-        </select>
-
-        <select
-          class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900"
-          [(ngModel)]="sortFilter"
-          (ngModelChange)="applyFilters()"
-        >
-          <option value="Default">Sort By: Default</option>
-          <option value="DueDateAsc">Due Date (Closest)</option>
-          <option value="DueDateDesc">Due Date (Furthest)</option>
-        </select>
-
-        @if (isDepartmentHead()) {
-          <select
-            class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 outline-none focus:border-indigo-500 transition-all cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 sm:col-span-2 md:col-span-4 lg:col-span-1"
-            [(ngModel)]="departmentFilter"
-            (ngModelChange)="applyFilters()"
-          >
-            <option value="All">All Departments</option>
-            @for (dept of departments(); track dept.id) {
-              <option [value]="dept.id">{{ dept.name }}</option>
-            }
-          </select>
-        }
+        </div>
       </div>
     </div>
   </div>

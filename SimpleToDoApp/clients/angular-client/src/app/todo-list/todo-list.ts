@@ -31,7 +31,8 @@ import {
   LucideBell,
   LucideAlertTriangle,
   LucideInfo,
-  LucideUser
+  LucideUser,
+  LucideChevronDown
 } from '@lucide/angular';
 
 @Component({
@@ -59,7 +60,8 @@ import {
     LucideBell,
     LucideAlertTriangle,
     LucideInfo,
-    LucideUser
+    LucideUser,
+    LucideChevronDown
   ],
   templateUrl: './todo-list.html'
 })
