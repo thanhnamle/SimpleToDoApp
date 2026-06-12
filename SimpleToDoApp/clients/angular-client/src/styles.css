@@ -59,6 +59,11 @@ html.dark {
   scrollbar-width: none !important;
 }
 
+.mask-linear-fade {
+  mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+}
+
 /* Toast Animations */
 @keyframes slideIn {
   from {
@@ -188,10 +193,15 @@ html.dark {
 .cdk-drag-preview {
   box-sizing: border-box;
   border-radius: 12px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
   cursor: grabbing !important;
   /* CRITICAL: Disable animation so it doesn't override CDK's inline transform! */
   animation: none !important;
+  /* Natural drag tilt and pop using modern CSS properties (independent of transform) */
+  rotate: 3deg;
+  scale: 1.03;
+  opacity: 0.95;
+  transition: rotate 200ms cubic-bezier(0.2, 0, 0, 1), scale 200ms cubic-bezier(0.2, 0, 0, 1) !important;
 }
 
 .dark .cdk-drag-preview {
@@ -203,6 +213,7 @@ html.dark {
   border: 2px dashed #cbd5e1 !important;
   background: #f8fafc !important;
   border-radius: 12px;
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .dark .cdk-drag-placeholder {
@@ -210,8 +221,14 @@ html.dark {
   background: #0f172a !important;
 }
 
+/* Animate the dragged item snapping into place */
 .cdk-drag-animating {
-  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  transition: transform 300ms cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+/* Animate the other items sliding out of the way */
+.cdk-drop-list-dragging .cdk-drag {
+  transition: transform 300ms cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 /* View Transitions API Native Morphing */

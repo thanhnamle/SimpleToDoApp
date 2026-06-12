@@ -74,40 +74,7 @@
             />
           </div>
 
-          <div>
-            <label for="department" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Department
-            </label>
-            <select
-              id="department"
-              name="department"
-              required
-              class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/60 px-4 py-3 text-sm text-slate-900 dark:text-white outline-none ring-offset-white dark:ring-offset-slate-900 transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:ring-offset-2"
-              [(ngModel)]="selectedDepartmentId"
-              [disabled]="isSubmitting()"
-            >
-              @for (dept of departments(); track dept.id) {
-                <option [value]="dept.id">{{ dept.name }}</option>
-              }
-            </select>
-          </div>
 
-          <div>
-            <label for="role" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Role
-            </label>
-            <select
-              id="role"
-              name="role"
-              required
-              class="mt-1.5 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/60 px-4 py-3 text-sm text-slate-900 dark:text-white outline-none ring-offset-white dark:ring-offset-slate-900 transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:ring-offset-2"
-              [(ngModel)]="selectedRole"
-              [disabled]="isSubmitting()"
-            >
-              <option value="Employee">Employee</option>
-              <option value="Leader">Leader</option>
-            </select>
-          </div>
 
           <div>
             <label for="password" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">

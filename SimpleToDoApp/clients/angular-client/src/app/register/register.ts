@@ -44,15 +44,7 @@ export class Register implements OnInit {
   isRegistered = signal<boolean>(false);
 
   ngOnInit() {
-    this.authService.getDepartments().subscribe({
-      next: (depts) => {
-        this.departments.set(depts);
-        if (depts.length > 0) {
-          this.selectedDepartmentId = depts[0].id;
-        }
-      },
-      error: (err) => console.error('Failed to load departments', err)
-    });
+    // Regular users do not load departments.
   }
 
   toggleTheme() {
@@ -64,7 +56,7 @@ export class Register implements OnInit {
   }
 
   onSubmit() {
-    if (!this.username.trim() || !this.email.trim() || !this.password.trim() || !this.confirmPassword.trim() || this.selectedDepartmentId === null) {
+    if (!this.username.trim() || !this.email.trim() || !this.password.trim() || !this.confirmPassword.trim()) {
       this.error.set('Please fill in all fields.');
       return;
     }

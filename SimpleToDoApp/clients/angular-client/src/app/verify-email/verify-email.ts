@@ -4,8 +4,6 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 import { ThemeService } from '../services/theme.service';
 import { 
-  LucideAlertCircle, 
-  LucideLoader2, 
   LucideSun,
   LucideMoon,
   LucideMailCheck
@@ -16,8 +14,6 @@ import {
   imports: [
     CommonModule,
     RouterLink,
-    LucideAlertCircle,
-    LucideLoader2,
     LucideSun,
     LucideMoon,
     LucideMailCheck

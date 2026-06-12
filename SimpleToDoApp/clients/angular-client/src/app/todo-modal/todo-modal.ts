@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { CreateTodoRequest, Todo, UpdateTodoRequest } from '../models/todo';
 import { AuthService } from '../services/auth.service';
 import { User } from '../models/auth';
-import { LucideX, LucideAlertTriangle, LucideBell, LucideCalendar, LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideClock } from '@lucide/angular';
+import { LucideX, LucideBell, LucideCalendar, LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideClock } from '@lucide/angular';
 
 @Component({
   selector: 'app-todo-modal',
@@ -12,7 +12,6 @@ import { LucideX, LucideAlertTriangle, LucideBell, LucideCalendar, LucideChevron
     CommonModule,
     FormsModule,
     LucideX,
-    LucideAlertTriangle,
     LucideBell,
     LucideCalendar,
     LucideChevronDown,

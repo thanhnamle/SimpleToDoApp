@@ -12,9 +12,6 @@ import {
   LucideChevronLeft,
   LucideChevronRight,
   LucidePlus,
-  LucideLoader2,
-  LucideAlertCircle,
-  LucideAlertTriangle,
   LucideClock,
   LucideBell,
   LucideTag,
@@ -30,9 +27,6 @@ import {
     LucideChevronLeft,
     LucideChevronRight,
     LucidePlus,
-    LucideLoader2,
-    LucideAlertCircle,
-    LucideAlertTriangle,
     LucideClock,
     LucideBell,
     LucideTag,
@@ -70,6 +64,9 @@ export class TodoCalendar implements OnInit {
   // Modal State
   modalOpen = false;
   selectedTodo: Todo | null = null;
+  
+  dayModalOpen = false;
+  selectedDayForModal: number | null = null;
 
   monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -240,6 +237,17 @@ export class TodoCalendar implements OnInit {
       reminderMinutes: 0
     };
     this.modalOpen = true;
+  }
+
+  openDayModal(event: Event, day: number) {
+    event.stopPropagation();
+    this.selectedDayForModal = day;
+    this.dayModalOpen = true;
+  }
+
+  closeDayModal() {
+    this.dayModalOpen = false;
+    this.selectedDayForModal = null;
   }
 
   handleTimelineTimeClick(hour: number) {
