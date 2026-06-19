@@ -14,12 +14,12 @@ export class AuthService {
   private readonly accountsUrl = `${environment.apiUrl.endsWith('/') ? environment.apiUrl.slice(0, -1) : environment.apiUrl}/api/accounts`;
 
   readonly currentUser = signal<User | null>(this.getStoredUser());
-  readonly currentToken = signal<string | null>(this.getStoredToken());
+  readonly currentToken = signal<string | null>('cookie-based');
   readonly loading = signal<boolean>(false);
 
   constructor() {
-    const token = this.getStoredToken();
-    if (token) {
+    const user = this.getStoredUser();
+    if (user) {
       this.getMe().subscribe({
         error: (err) => console.error('Failed to validate user on startup', err)
       });
@@ -96,18 +96,19 @@ export class AuthService {
   }
 
   logout(): void {
-    this.clearSession();
+    this.http.post(`${this.baseUrl}/logout`, {}).subscribe({
+      next: () => this.clearSession(),
+      error: () => this.clearSession()
+    });
   }
 
   private setSession(res: AuthResponse): void {
-    localStorage.setItem('todo_app_auth_token', res.token);
     localStorage.setItem('todo_app_auth_user', JSON.stringify(res.user));
-    this.currentToken.set(res.token);
+    this.currentToken.set('cookie-based');
     this.currentUser.set(res.user);
   }
 
   private clearSession(): void {
-    localStorage.removeItem('todo_app_auth_token');
     localStorage.removeItem('todo_app_auth_user');
     this.currentToken.set(null);
     this.currentUser.set(null);
@@ -123,7 +124,5 @@ export class AuthService {
     }
   }
 
-  private getStoredToken(): string | null {
-    return localStorage.getItem('todo_app_auth_token');
-  }
+
 }

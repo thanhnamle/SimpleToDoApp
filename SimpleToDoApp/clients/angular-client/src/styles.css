@@ -282,55 +282,7 @@ html.dark {
   }
 }
 
-/* Custom Cursor Styles */
-body {
-  cursor: none; /* Hide default cursor */
-}
 
-/* Fallback for elements that shouldn't hide cursor */
-a, button, input, select, textarea, [draggable="true"] {
-  cursor: none;
-}
-
-.custom-cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 32px;
-  height: 32px;
-  border: 2px solid rgba(99, 102, 241, 0.6);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 99999;
-  transform: translate3d(-50%, -50%, 0);
-  transition: width 0.2s, height 0.2s, background-color 0.2s, border-color 0.2s;
-  mix-blend-mode: difference;
-}
-
-.custom-cursor::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 6px;
-  height: 6px;
-  background-color: rgb(99, 102, 241);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.2s, height 0.2s, background-color 0.2s;
-}
-
-.custom-cursor.cursor-active {
-  width: 24px;
-  height: 24px;
-  background-color: rgba(99, 102, 241, 0.2);
-  border-color: rgb(99, 102, 241);
-}
-
-.custom-cursor.cursor-active::after {
-  width: 10px;
-  height: 10px;
-}
 
 @keyframes destroyTask {
   0% { transform: scale(1) rotate(0); opacity: 1; filter: brightness(1); }
@@ -341,4 +293,10 @@ a, button, input, select, textarea, [draggable="true"] {
 .animate-destroy {
   animation: destroyTask 0.4s cubic-bezier(0.36, -0.32, 0.24, 1.46) forwards !important;
   pointer-events: none;
+}
+
+@media (min-width: 1024px) {
+  .lg\:animate-slide-in-right {
+    animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
 }

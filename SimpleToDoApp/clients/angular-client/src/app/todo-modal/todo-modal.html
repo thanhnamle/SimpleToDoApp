@@ -1,10 +1,12 @@
 @if (isOpen) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in pointer-events-none">
     <!-- Overlay backdrop -->
-    <div (click)="onClose()" class="fixed inset-0 bg-slate-950/60 dark:bg-slate-950/80 backdrop-blur-sm transition-opacity"></div>
+    <div (click)="onClose()" class="fixed inset-0 bg-slate-950/60 dark:bg-slate-950/80 backdrop-blur-sm transition-opacity pointer-events-auto"></div>
 
-    <!-- Modal body -->
-    <div class="z-10 w-full max-w-lg overflow-y-auto scrollbar-hide max-h-[92vh] rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl animate-scale-up">
+    <!-- Layout Wrapper -->
+    <div class="flex items-start justify-center gap-6 w-full max-w-5xl pointer-events-none animate-scale-up mt-[2vh] md:mt-[6vh]">
+      <!-- Modal body -->
+      <div class="pointer-events-auto z-10 w-full max-w-lg rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl shrink-0">
       <!-- Header -->
       <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-900 bg-slate-50 dark:bg-slate-950/40 px-6 py-4 sticky top-0 z-10">
         <h3 class="text-lg font-bold text-slate-950 dark:text-white">
@@ -155,85 +157,7 @@
               <svg lucideChevronDown class="h-4 w-4 text-slate-400 transition-transform duration-200" [class.rotate-180]="showStartPicker"></svg>
             </button>
 
-            <!-- Custom Start Date Picker Dropdown -->
-            @if (showStartPicker) {
-              <div class="absolute left-0 right-0 z-30 mt-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl p-4">
-                <!-- Month & Year Header -->
-                <div class="flex items-center justify-between mb-3">
-                  <button type="button" (click)="prevStartMonth()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
-                    <svg lucideChevronLeft class="h-4 w-4"></svg>
-                  </button>
-                  <span class="text-sm font-bold text-slate-800 dark:text-slate-200">
-                    {{ monthNames[startCalendarMonth] }} {{ startCalendarYear }}
-                  </span>
-                  <button type="button" (click)="nextStartMonth()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
-                    <svg lucideChevronRight class="h-4 w-4"></svg>
-                  </button>
-                </div>
 
-                <!-- Weekdays Header -->
-                <div class="grid grid-cols-7 gap-1 text-center mb-1">
-                  @for (day of ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']; track day) {
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ day }}</span>
-                  }
-                </div>
-
-                <!-- Days Grid -->
-                <div class="grid grid-cols-7 gap-1 text-center">
-                  @for (cell of getCalendarDays(startCalendarYear, startCalendarMonth); track cell.dateString + cell.isCurrentMonth) {
-                    <button
-                      type="button"
-                      [disabled]="cell.isPast && !isEditMode"
-                      (click)="selectStartDate(cell)"
-                      class="h-8 w-8 rounded-lg text-xs font-medium flex items-center justify-center transition-all cursor-pointer mx-auto"
-                      [class.bg-primary-dark]="startDateDate === cell.dateString"
-                      [class.text-white]="startDateDate === cell.dateString"
-                      [class.font-bold]="startDateDate === cell.dateString"
-                      [class.text-slate-800]="startDateDate !== cell.dateString && cell.isCurrentMonth"
-                      [class.dark:text-slate-200]="startDateDate !== cell.dateString && cell.isCurrentMonth"
-                      [class.text-slate-400]="startDateDate !== cell.dateString && !cell.isCurrentMonth"
-                      [class.dark:text-slate-600]="startDateDate !== cell.dateString && !cell.isCurrentMonth"
-                      [class.hover:bg-slate-100]="startDateDate !== cell.dateString && (!cell.isPast || isEditMode)"
-                      [class.dark:hover:bg-slate-800]="startDateDate !== cell.dateString && (!cell.isPast || isEditMode)"
-                      [class.opacity-30]="cell.isPast && !isEditMode"
-                      [class.pointer-events-none]="cell.isPast && !isEditMode"
-                    >
-                      {{ cell.day }}
-                    </button>
-                  }
-                </div>
-
-                <!-- Time Selector (if not all day) -->
-                @if (!formData.isAllDay) {
-                  <div class="border-t border-slate-100 dark:border-slate-800 mt-4 pt-3 flex items-center justify-between">
-                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                      <svg lucideClock class="h-3.5 w-3.5 text-primary-dark dark:text-primary"></svg>
-                      Time
-                    </span>
-                    <div class="flex items-center gap-1">
-                      <select [(ngModel)]="startDateTimeHour" name="startHour" class="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-2 py-1 text-xs text-slate-800 dark:text-slate-300 outline-none focus:border-primary-dark dark:border-primary cursor-pointer">
-                        @for (h of hoursList; track h) {
-                          <option [value]="h">{{ h }}</option>
-                        }
-                      </select>
-                      <span class="text-slate-400">:</span>
-                      <select [(ngModel)]="startDateTimeMinute" name="startMinute" class="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-2 py-1 text-xs text-slate-800 dark:text-slate-300 outline-none focus:border-primary-dark dark:border-primary cursor-pointer">
-                        @for (m of minutesList; track m) {
-                          <option [value]="m">{{ m }}</option>
-                        }
-                      </select>
-                    </div>
-                  </div>
-                }
-
-                <!-- Footer Action to close picker -->
-                <div class="flex items-center justify-end mt-4">
-                  <button type="button" (click)="showStartPicker = false" class="rounded-lg bg-primary/20 dark:bg-primary-dark/20 px-3.5 py-1.5 text-xs font-bold text-primary-dark dark:text-primary dark:text-primary-dark dark:text-primary hover:bg-primary/40 dark:hover:bg-primary-dark/20 transition-all cursor-pointer">
-                    Done
-                  </button>
-                </div>
-              </div>
-            }
           </div>
 
           <!-- Due Date with overdue highlight -->
@@ -264,91 +188,13 @@
               [class.dark:hover:bg-slate-900]="!isDueDateOverdue"
             >
               <span class="flex items-center gap-2">
-                <svg lucideCalendar class="h-4.5 w-4.5" [class.text-red-500]="isDueDateOverdue" [class.text-primary-dark dark:text-primary]="!isDueDateOverdue"></svg>
+                <svg lucideCalendar class="h-4.5 w-4.5" [class.text-red-500]="isDueDateOverdue" [class.text-primary-dark]="!isDueDateOverdue" [class.dark:text-primary]="!isDueDateOverdue"></svg>
                 {{ formatDisplayDate(formData.dueDate) }}
               </span>
               <svg lucideChevronDown class="h-4 w-4 text-slate-400 transition-transform duration-200" [class.rotate-180]="showDuePicker"></svg>
             </button>
 
-            <!-- Custom Due Date Picker Dropdown -->
-            @if (showDuePicker) {
-              <div class="absolute left-0 right-0 z-30 mt-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl p-4">
-                <!-- Month & Year Header -->
-                <div class="flex items-center justify-between mb-3">
-                  <button type="button" (click)="prevDueMonth()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
-                    <svg lucideChevronLeft class="h-4 w-4"></svg>
-                  </button>
-                  <span class="text-sm font-bold text-slate-800 dark:text-slate-200">
-                    {{ monthNames[dueCalendarMonth] }} {{ dueCalendarYear }}
-                  </span>
-                  <button type="button" (click)="nextDueMonth()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
-                    <svg lucideChevronRight class="h-4 w-4"></svg>
-                  </button>
-                </div>
 
-                <!-- Weekdays Header -->
-                <div class="grid grid-cols-7 gap-1 text-center mb-1">
-                  @for (day of ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']; track day) {
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ day }}</span>
-                  }
-                </div>
-
-                <!-- Days Grid -->
-                <div class="grid grid-cols-7 gap-1 text-center">
-                  @for (cell of getCalendarDays(dueCalendarYear, dueCalendarMonth); track cell.dateString + cell.isCurrentMonth) {
-                    <button
-                      type="button"
-                      [disabled]="cell.isPast && !isEditMode"
-                      (click)="selectDueDate(cell)"
-                      class="h-8 w-8 rounded-lg text-xs font-medium flex items-center justify-center transition-all cursor-pointer mx-auto"
-                      [class.bg-primary-dark]="dueDateDate === cell.dateString"
-                      [class.text-white]="dueDateDate === cell.dateString"
-                      [class.font-bold]="dueDateDate === cell.dateString"
-                      [class.text-slate-800]="dueDateDate !== cell.dateString && cell.isCurrentMonth"
-                      [class.dark:text-slate-200]="dueDateDate !== cell.dateString && cell.isCurrentMonth"
-                      [class.text-slate-400]="dueDateDate !== cell.dateString && !cell.isCurrentMonth"
-                      [class.dark:text-slate-600]="dueDateDate !== cell.dateString && !cell.isCurrentMonth"
-                      [class.hover:bg-slate-100]="dueDateDate !== cell.dateString && (!cell.isPast || isEditMode)"
-                      [class.dark:hover:bg-slate-800]="dueDateDate !== cell.dateString && (!cell.isPast || isEditMode)"
-                      [class.opacity-30]="cell.isPast && !isEditMode"
-                      [class.pointer-events-none]="cell.isPast && !isEditMode"
-                    >
-                      {{ cell.day }}
-                    </button>
-                  }
-                </div>
-
-                <!-- Time Selector (if not all day) -->
-                @if (!formData.isAllDay) {
-                  <div class="border-t border-slate-100 dark:border-slate-800 mt-4 pt-3 flex items-center justify-between">
-                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                      <svg lucideClock class="h-3.5 w-3.5 text-primary-dark dark:text-primary"></svg>
-                      Time
-                    </span>
-                    <div class="flex items-center gap-1">
-                      <select [(ngModel)]="dueDateTimeHour" name="dueHour" class="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-2 py-1 text-xs text-slate-800 dark:text-slate-300 outline-none focus:border-primary-dark dark:border-primary cursor-pointer">
-                        @for (h of hoursList; track h) {
-                          <option [value]="h">{{ h }}</option>
-                        }
-                      </select>
-                      <span class="text-slate-400">:</span>
-                      <select [(ngModel)]="dueDateTimeMinute" name="dueMinute" class="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-2 py-1 text-xs text-slate-800 dark:text-slate-300 outline-none focus:border-primary-dark dark:border-primary cursor-pointer">
-                        @for (m of minutesList; track m) {
-                          <option [value]="m">{{ m }}</option>
-                        }
-                      </select>
-                    </div>
-                  </div>
-                }
-
-                <!-- Footer Action to close picker -->
-                <div class="flex items-center justify-end mt-4">
-                  <button type="button" (click)="showDuePicker = false" class="rounded-lg bg-primary/20 dark:bg-primary-dark/20 px-3.5 py-1.5 text-xs font-bold text-primary-dark dark:text-primary dark:text-primary-dark dark:text-primary hover:bg-primary/40 dark:hover:bg-primary-dark/20 transition-all cursor-pointer">
-                    Done
-                  </button>
-                </div>
-              </div>
-            }
             @if (isDueDateOverdue) {
               <p class="mt-1 text-[10px] text-red-500 dark:text-red-400">⚠ This task is past its due date.</p>
             }
@@ -396,5 +242,170 @@
         </div>
       </form>
     </div>
+
+    <!-- Side Picker (Slides from Right on Desktop, overlaps on Mobile) -->
+    @if (showStartPicker || showDuePicker) {
+      <div class="pointer-events-auto fixed inset-0 m-auto z-50 h-fit w-[340px] max-w-[90vw] rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl p-5 animate-scale-up lg:static lg:inset-auto lg:m-0 lg:animate-slide-in-right shrink-0">
+        <!-- Custom Start Date Picker Dropdown -->
+        @if (showStartPicker) {
+          <div class="w-full">
+            <!-- Month & Year Header -->
+            <div class="flex items-center justify-between mb-3">
+              <button type="button" (click)="prevStartMonth()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
+                <svg lucideChevronLeft class="h-4 w-4"></svg>
+              </button>
+              <span class="text-sm font-bold text-slate-800 dark:text-slate-200">
+                {{ monthNames[startCalendarMonth] }} {{ startCalendarYear }}
+              </span>
+              <button type="button" (click)="nextStartMonth()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
+                <svg lucideChevronRight class="h-4 w-4"></svg>
+              </button>
+            </div>
+
+            <!-- Weekdays Header -->
+            <div class="grid grid-cols-7 gap-1 text-center mb-1">
+              @for (day of ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']; track day) {
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ day }}</span>
+              }
+            </div>
+
+            <!-- Days Grid -->
+            <div class="grid grid-cols-7 gap-1 text-center">
+              @for (cell of getCalendarDays(startCalendarYear, startCalendarMonth); track cell.dateString + cell.isCurrentMonth) {
+                <button
+                  type="button"
+                  [disabled]="cell.isPast && !isEditMode"
+                  (click)="selectStartDate(cell)"
+                  class="h-8 w-8 rounded-lg text-xs font-medium flex items-center justify-center transition-all cursor-pointer mx-auto"
+                  [class.bg-primary-dark]="startDateDate === cell.dateString"
+                  [class.text-white]="startDateDate === cell.dateString"
+                  [class.font-bold]="startDateDate === cell.dateString"
+                  [class.text-slate-800]="startDateDate !== cell.dateString && cell.isCurrentMonth"
+                  [class.dark:text-slate-200]="startDateDate !== cell.dateString && cell.isCurrentMonth"
+                  [class.text-slate-400]="startDateDate !== cell.dateString && !cell.isCurrentMonth"
+                  [class.dark:text-slate-600]="startDateDate !== cell.dateString && !cell.isCurrentMonth"
+                  [class.hover:bg-slate-100]="startDateDate !== cell.dateString && (!cell.isPast || isEditMode)"
+                  [class.dark:hover:bg-slate-800]="startDateDate !== cell.dateString && (!cell.isPast || isEditMode)"
+                  [class.opacity-30]="cell.isPast && !isEditMode"
+                  [class.pointer-events-none]="cell.isPast && !isEditMode"
+                >
+                  {{ cell.day }}
+                </button>
+              }
+            </div>
+
+            <!-- Time Selector (if not all day) -->
+            @if (!formData.isAllDay) {
+              <div class="border-t border-slate-100 dark:border-slate-800 mt-4 pt-3 flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                  <svg lucideClock class="h-3.5 w-3.5 text-primary-dark dark:text-primary"></svg>
+                  Time
+                </span>
+                <div class="flex items-center gap-1">
+                  <select [(ngModel)]="startDateTimeHour" name="startHour" class="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-2 py-1 text-xs text-slate-800 dark:text-slate-300 outline-none focus:border-primary-dark dark:border-primary cursor-pointer">
+                @for (h of hoursList; track h) {
+                  <option [value]="h">{{ h }}</option>
+                }
+                  </select>
+                  <span class="text-slate-400">:</span>
+                  <select [(ngModel)]="startDateTimeMinute" name="startMinute" class="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-2 py-1 text-xs text-slate-800 dark:text-slate-300 outline-none focus:border-primary-dark dark:border-primary cursor-pointer">
+                @for (m of minutesList; track m) {
+                  <option [value]="m">{{ m }}</option>
+                }
+                  </select>
+                </div>
+              </div>
+            }
+
+            <!-- Footer Action to close picker -->
+            <div class="flex items-center justify-end mt-4">
+              <button type="button" (click)="showStartPicker = false" class="rounded-lg bg-primary/20 dark:bg-primary-dark/20 px-3.5 py-1.5 text-xs font-bold text-primary-dark dark:text-primary dark:text-primary-dark dark:text-primary hover:bg-primary/40 dark:hover:bg-primary-dark/20 transition-all cursor-pointer">
+                Done
+              </button>
+            </div>
+          </div>
+        }
+        <!-- Custom Due Date Picker Dropdown -->
+        @if (showDuePicker) {
+          <div class="w-full">
+            <!-- Month & Year Header -->
+            <div class="flex items-center justify-between mb-3">
+              <button type="button" (click)="prevDueMonth()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
+                <svg lucideChevronLeft class="h-4 w-4"></svg>
+              </button>
+              <span class="text-sm font-bold text-slate-800 dark:text-slate-200">
+                {{ monthNames[dueCalendarMonth] }} {{ dueCalendarYear }}
+              </span>
+              <button type="button" (click)="nextDueMonth()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
+                <svg lucideChevronRight class="h-4 w-4"></svg>
+              </button>
+            </div>
+
+            <!-- Weekdays Header -->
+            <div class="grid grid-cols-7 gap-1 text-center mb-1">
+              @for (day of ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']; track day) {
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ day }}</span>
+              }
+            </div>
+
+            <!-- Days Grid -->
+            <div class="grid grid-cols-7 gap-1 text-center">
+              @for (cell of getCalendarDays(dueCalendarYear, dueCalendarMonth); track cell.dateString + cell.isCurrentMonth) {
+                <button
+                  type="button"
+                  [disabled]="cell.isPast && !isEditMode"
+                  (click)="selectDueDate(cell)"
+                  class="h-8 w-8 rounded-lg text-xs font-medium flex items-center justify-center transition-all cursor-pointer mx-auto"
+                  [class.bg-primary-dark]="dueDateDate === cell.dateString"
+                  [class.text-white]="dueDateDate === cell.dateString"
+                  [class.font-bold]="dueDateDate === cell.dateString"
+                  [class.text-slate-800]="dueDateDate !== cell.dateString && cell.isCurrentMonth"
+                  [class.dark:text-slate-200]="dueDateDate !== cell.dateString && cell.isCurrentMonth"
+                  [class.text-slate-400]="dueDateDate !== cell.dateString && !cell.isCurrentMonth"
+                  [class.dark:text-slate-600]="dueDateDate !== cell.dateString && !cell.isCurrentMonth"
+                  [class.hover:bg-slate-100]="dueDateDate !== cell.dateString && (!cell.isPast || isEditMode)"
+                  [class.dark:hover:bg-slate-800]="dueDateDate !== cell.dateString && (!cell.isPast || isEditMode)"
+                  [class.opacity-30]="cell.isPast && !isEditMode"
+                  [class.pointer-events-none]="cell.isPast && !isEditMode"
+                >
+                  {{ cell.day }}
+                </button>
+              }
+            </div>
+
+            <!-- Time Selector (if not all day) -->
+            @if (!formData.isAllDay) {
+              <div class="border-t border-slate-100 dark:border-slate-800 mt-4 pt-3 flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                  <svg lucideClock class="h-3.5 w-3.5 text-primary-dark dark:text-primary"></svg>
+                  Time
+                </span>
+                <div class="flex items-center gap-1">
+                  <select [(ngModel)]="dueDateTimeHour" name="dueHour" class="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-2 py-1 text-xs text-slate-800 dark:text-slate-300 outline-none focus:border-primary-dark dark:border-primary cursor-pointer">
+                @for (h of hoursList; track h) {
+                  <option [value]="h">{{ h }}</option>
+                }
+                  </select>
+                  <span class="text-slate-400">:</span>
+                  <select [(ngModel)]="dueDateTimeMinute" name="dueMinute" class="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-2 py-1 text-xs text-slate-800 dark:text-slate-300 outline-none focus:border-primary-dark dark:border-primary cursor-pointer">
+                @for (m of minutesList; track m) {
+                  <option [value]="m">{{ m }}</option>
+                }
+                  </select>
+                </div>
+              </div>
+            }
+
+            <!-- Footer Action to close picker -->
+            <div class="flex items-center justify-end mt-4">
+              <button type="button" (click)="showDuePicker = false" class="rounded-lg bg-primary/20 dark:bg-primary-dark/20 px-3.5 py-1.5 text-xs font-bold text-primary-dark dark:text-primary dark:text-primary-dark dark:text-primary hover:bg-primary/40 dark:hover:bg-primary-dark/20 transition-all cursor-pointer">
+                Done
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
   </div>
+</div>
 }

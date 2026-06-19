@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using SimpleToDoApp.Application.DTOs.Todos;
+using SimpleToDoApp.Application.Interfaces;
 using SimpleToDoApp.Application.Services;
 using SimpleToDoApp.Domain.Entities;
 using SimpleToDoApp.Domain.Enums;
@@ -35,14 +37,17 @@ namespace SimpleToDoApp.Tests
             });
             await context.SaveChangesAsync();
 
-            var service = new TodoService(context);
+            var mockNotificationService = new Mock<ITodoNotificationService>();
+            var service = new TodoService(context, mockNotificationService.Object);
+
+            var parameters = new TodoQueryParameters { PageNumber = 1, PageSize = 10 };
 
             // Act
-            var todos = (await service.GetUserTodosAsync(1)).ToList();
+            var result = await service.GetUserTodosAsync(parameters, 1, UserRole.User, null);
 
             // Assert
-            Assert.Single(todos);
-            Assert.Equal("User1 Task", todos[0].Title);
+            Assert.Single(result.Items);
+            Assert.Equal("User1 Task", result.Items.First().Title);
         }
 
         [Fact]
@@ -50,7 +55,8 @@ namespace SimpleToDoApp.Tests
         {
             // Arrange
             var context = CreateDbContext();
-            var service = new TodoService(context);
+            var mockNotificationService = new Mock<ITodoNotificationService>();
+            var service = new TodoService(context, mockNotificationService.Object);
 
             var request = new CreateTodoRequest
             {
@@ -64,7 +70,7 @@ namespace SimpleToDoApp.Tests
             };
 
             // Act
-            var result = await service.CreateTodoAsync(request, 1);
+            var result = await service.CreateTodoAsync(request, 1, UserRole.User, null);
 
             // Assert
             Assert.NotNull(result);
@@ -87,11 +93,12 @@ namespace SimpleToDoApp.Tests
             context.Todos.Add(todo);
             await context.SaveChangesAsync();
 
-            var service = new TodoService(context);
+            var mockNotificationService = new Mock<ITodoNotificationService>();
+            var service = new TodoService(context, mockNotificationService.Object);
             var request = new UpdateTodoStatusRequest { Status = "Done" };
 
             // Act
-            var result = await service.UpdateTodoStatusAsync(1, request, 1);
+            var result = await service.UpdateTodoStatusAsync(1, request, 1, UserRole.User, null);
 
             // Assert
             Assert.NotNull(result);
@@ -99,6 +106,7 @@ namespace SimpleToDoApp.Tests
             Assert.True(result.IsCompleted);
 
             var saved = await context.Todos.FindAsync(1);
+            Assert.NotNull(saved);
             Assert.True(saved.IsCompleted);
         }
 
@@ -111,7 +119,8 @@ namespace SimpleToDoApp.Tests
             context.Todos.Add(todo);
             await context.SaveChangesAsync();
 
-            var service = new TodoService(context);
+            var mockNotificationService = new Mock<ITodoNotificationService>();
+            var service = new TodoService(context, mockNotificationService.Object);
             var request = new UpdateTodoRequest
             {
                 Title = "Updated",
@@ -123,7 +132,7 @@ namespace SimpleToDoApp.Tests
             };
 
             // Act
-            var result = await service.UpdateTodoAsync(1, request, 2); // Different User ID
+            var result = await service.UpdateTodoAsync(1, request, 2, UserRole.User, null); // Different User ID
 
             // Assert
             Assert.Null(result);
@@ -138,10 +147,11 @@ namespace SimpleToDoApp.Tests
             context.Todos.Add(todo);
             await context.SaveChangesAsync();
 
-            var service = new TodoService(context);
+            var mockNotificationService = new Mock<ITodoNotificationService>();
+            var service = new TodoService(context, mockNotificationService.Object);
 
             // Act
-            var success = await service.DeleteTodoAsync(1, 1);
+            var success = await service.DeleteTodoAsync(1, 1, UserRole.User, null);
 
             // Assert
             Assert.True(success);

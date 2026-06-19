@@ -63,9 +63,9 @@ export class ReminderService implements OnDestroy {
     this.todoService.getAll().subscribe({
       next: (data) => {
         this.now.set(Date.now());
-        this.todos.set(data);
-        this.notifyActiveReminders(data);
-        this.notifyOverdueTasks(data, this.isFirstLoad);
+        this.todos.set(data.items);
+        this.notifyActiveReminders(data.items);
+        this.notifyOverdueTasks(data.items, this.isFirstLoad);
         this.isFirstLoad = false;
       },
       error: () => {}

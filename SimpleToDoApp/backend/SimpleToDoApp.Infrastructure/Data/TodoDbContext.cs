@@ -46,7 +46,7 @@ namespace SimpleToDoApp.Infrastructure.Data
             );
 
             // Hash for "Password@123"
-            var defaultPasswordHash = "$2a$11$hm8JAwHl9M3D7omt2EM/PebH.cKJHZSUAqxAdCv/ILOTvYA25tbwe";
+            var defaultPasswordHash = "$2a$11$hm8JAwHl9M3D7omt2EM/WxeuMOoxADB4EZ3u7dfGcRQjEIKuryi4/S";
             
             // Seed 1 DepartmentHead
             var seedAccounts = new List<Account>();

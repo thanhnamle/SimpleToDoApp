@@ -2,9 +2,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SimpleToDoApp.Infrastructure.Data;
 
 #nullable disable
@@ -12,8 +12,8 @@ using SimpleToDoApp.Infrastructure.Data;
 namespace SimpleToDoApp.Infrastructure.Migrations
 {
     [DbContext(typeof(TodoDbContext))]
-    [Migration("20260604033524_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260618024326_InitialPostgresCreate")]
+    partial class InitialPostgresCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,52 +21,52 @@ namespace SimpleToDoApp.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "10.0.5")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("SimpleToDoApp.Domain.Entities.Account", b =>
                 {
                     b.Property<int>("UserId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserId"));
 
                     b.Property<int?>("DepartmentId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("character varying(255)");
 
                     b.Property<string>("EmailVerificationToken")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("EmailVerificationTokenExpiry")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsEmailVerified")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("PasswordResetToken")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("PasswordResetTokenExpiry")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Role")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("character varying(255)");
 
                     b.HasKey("UserId");
 
@@ -80,7 +80,7 @@ namespace SimpleToDoApp.Infrastructure.Migrations
                             UserId = 1,
                             Email = "admin@company.com",
                             IsEmailVerified = true,
-                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/PebH.cKJHZSUAqxAdCv/ILOTvYA25tbwe",
+                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/WxeuMOoxADB4EZ3u7dfGcRQjEIKuryi4/S",
                             Role = 2,
                             Username = "admin_head"
                         },
@@ -90,7 +90,7 @@ namespace SimpleToDoApp.Infrastructure.Migrations
                             DepartmentId = 1,
                             Email = "leader1@company.com",
                             IsEmailVerified = true,
-                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/PebH.cKJHZSUAqxAdCv/ILOTvYA25tbwe",
+                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/WxeuMOoxADB4EZ3u7dfGcRQjEIKuryi4/S",
                             Role = 1,
                             Username = "leader_dept1"
                         },
@@ -100,7 +100,7 @@ namespace SimpleToDoApp.Infrastructure.Migrations
                             DepartmentId = 1,
                             Email = "emp1@company.com",
                             IsEmailVerified = true,
-                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/PebH.cKJHZSUAqxAdCv/ILOTvYA25tbwe",
+                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/WxeuMOoxADB4EZ3u7dfGcRQjEIKuryi4/S",
                             Role = 0,
                             Username = "emp_dept1"
                         },
@@ -110,7 +110,7 @@ namespace SimpleToDoApp.Infrastructure.Migrations
                             DepartmentId = 2,
                             Email = "leader2@company.com",
                             IsEmailVerified = true,
-                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/PebH.cKJHZSUAqxAdCv/ILOTvYA25tbwe",
+                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/WxeuMOoxADB4EZ3u7dfGcRQjEIKuryi4/S",
                             Role = 1,
                             Username = "leader_dept2"
                         },
@@ -120,7 +120,7 @@ namespace SimpleToDoApp.Infrastructure.Migrations
                             DepartmentId = 2,
                             Email = "emp2@company.com",
                             IsEmailVerified = true,
-                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/PebH.cKJHZSUAqxAdCv/ILOTvYA25tbwe",
+                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/WxeuMOoxADB4EZ3u7dfGcRQjEIKuryi4/S",
                             Role = 0,
                             Username = "emp_dept2"
                         },
@@ -130,7 +130,7 @@ namespace SimpleToDoApp.Infrastructure.Migrations
                             DepartmentId = 3,
                             Email = "leader3@company.com",
                             IsEmailVerified = true,
-                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/PebH.cKJHZSUAqxAdCv/ILOTvYA25tbwe",
+                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/WxeuMOoxADB4EZ3u7dfGcRQjEIKuryi4/S",
                             Role = 1,
                             Username = "leader_dept3"
                         },
@@ -140,7 +140,7 @@ namespace SimpleToDoApp.Infrastructure.Migrations
                             DepartmentId = 3,
                             Email = "emp3@company.com",
                             IsEmailVerified = true,
-                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/PebH.cKJHZSUAqxAdCv/ILOTvYA25tbwe",
+                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/WxeuMOoxADB4EZ3u7dfGcRQjEIKuryi4/S",
                             Role = 0,
                             Username = "emp_dept3"
                         },
@@ -150,7 +150,7 @@ namespace SimpleToDoApp.Infrastructure.Migrations
                             DepartmentId = 4,
                             Email = "leader4@company.com",
                             IsEmailVerified = true,
-                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/PebH.cKJHZSUAqxAdCv/ILOTvYA25tbwe",
+                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/WxeuMOoxADB4EZ3u7dfGcRQjEIKuryi4/S",
                             Role = 1,
                             Username = "leader_dept4"
                         },
@@ -160,7 +160,7 @@ namespace SimpleToDoApp.Infrastructure.Migrations
                             DepartmentId = 4,
                             Email = "emp4@company.com",
                             IsEmailVerified = true,
-                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/PebH.cKJHZSUAqxAdCv/ILOTvYA25tbwe",
+                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/WxeuMOoxADB4EZ3u7dfGcRQjEIKuryi4/S",
                             Role = 0,
                             Username = "emp_dept4"
                         },
@@ -170,7 +170,7 @@ namespace SimpleToDoApp.Infrastructure.Migrations
                             DepartmentId = 5,
                             Email = "leader5@company.com",
                             IsEmailVerified = true,
-                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/PebH.cKJHZSUAqxAdCv/ILOTvYA25tbwe",
+                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/WxeuMOoxADB4EZ3u7dfGcRQjEIKuryi4/S",
                             Role = 1,
                             Username = "leader_dept5"
                         },
@@ -180,7 +180,7 @@ namespace SimpleToDoApp.Infrastructure.Migrations
                             DepartmentId = 5,
                             Email = "emp5@company.com",
                             IsEmailVerified = true,
-                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/PebH.cKJHZSUAqxAdCv/ILOTvYA25tbwe",
+                            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/WxeuMOoxADB4EZ3u7dfGcRQjEIKuryi4/S",
                             Role = 0,
                             Username = "emp_dept5"
                         });
@@ -190,14 +190,14 @@ namespace SimpleToDoApp.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -235,54 +235,54 @@ namespace SimpleToDoApp.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<DateTime>("DueDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsAllDay")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsCompleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Priority")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int>("ReminderMinutes")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

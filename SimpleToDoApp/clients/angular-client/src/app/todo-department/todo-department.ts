@@ -135,8 +135,8 @@ export class TodoDepartment implements OnInit, OnDestroy {
         
         // Fetch todos
         this.todoService.getAll().subscribe({
-          next: (tasks) => {
-            this.todos.set(tasks);
+          next: (data) => {
+            this.todos.set(data.items);
             this.loading.set(false);
           },
           error: (err) => {

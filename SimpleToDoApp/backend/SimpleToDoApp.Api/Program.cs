@@ -18,11 +18,18 @@ builder.Services.AddCustomSwagger();
 builder.Services.AddSignalR();
 
 builder.Services.AddDbContext<TodoDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("LocalDbCS")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddScoped<SimpleToDoApp.Application.Interfaces.ITodoNotificationService, SimpleToDoApp.Api.Services.TodoNotificationService>();
+
+builder.Services.AddAntiforgery(options => 
+{
+    options.HeaderName = "X-XSRF-TOKEN";
+    options.Cookie.Name = "XSRF-TOKEN";
+    options.Cookie.HttpOnly = false;
+});
 
 var app = builder.Build();
 
@@ -42,7 +49,13 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
-app.UseCors("AllowAll");
+app.UseCors(policy =>
+{
+    policy.WithOrigins("http://localhost:4200", "https://simpletodoapp.enterprise.com")
+          .AllowAnyHeader()
+          .AllowAnyMethod()
+          .AllowCredentials();
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -69,7 +82,7 @@ using (var scope = app.Services.CreateScope())
         {
             Username = "admin_head",
             Email = "admin@company.com",
-            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/PebH.cKJHZSUAqxAdCv/ILOTvYA25tbwe",
+            Password = "$2a$11$hm8JAwHl9M3D7omt2EM/WxeuMOoxADB4EZ3u7dfGcRQjEIKuryi4/S",
             Role = SimpleToDoApp.Domain.Enums.UserRole.DepartmentHead,
             IsEmailVerified = true
         };

@@ -26,7 +26,7 @@ namespace SimpleToDoApp.Tests
         [Fact]
         public void VerifySeededPasswordHash()
         {
-            var hash = "$2a$11$hm8JAwHl9M3D7omt2EM/PebH.cKJHZSUAqxAdCv/ILOTvYA25tbwe";
+            var hash = "$2a$11$hm8JAwHl9M3D7omt2EM/WxeuMOoxADB4EZ3u7dfGcRQjEIKuryi4/S";
             var matches = BCrypt.Net.BCrypt.Verify("Password@123", hash);
             Assert.True(matches);
         }

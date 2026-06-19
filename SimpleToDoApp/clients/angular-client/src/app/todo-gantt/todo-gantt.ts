@@ -176,7 +176,7 @@ export class TodoGantt implements OnInit, OnDestroy {
     this.loading.set(true);
     this.todoService.getAll().subscribe({
       next: (data) => {
-        this.todos.set(data);
+        this.todos.set(data.items);
         this.processGanttTasks();
         this.error.set(null);
       },

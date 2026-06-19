@@ -19,7 +19,6 @@ import {
   LucideArrowLeft,
   LucideClock,
   LucideTag,
-  LucideLoader2,
   LucideAlertCircle,
   LucideAlertTriangle,
   LucideUser
@@ -48,7 +47,6 @@ import {
     LucideArrowLeft,
     LucideClock,
     LucideTag,
-    LucideLoader2,
     LucideAlertCircle,
     LucideAlertTriangle,
     LucideUser
@@ -96,7 +94,7 @@ export class TodoBoard implements OnInit {
     this.loading.set(true);
     this.todoService.getAll().subscribe({
       next: (data) => {
-        this.todos.set(data);
+        this.todos.set(data.items);
         this.error.set(null);
       },
       error: (err) => {

@@ -261,5 +261,116 @@ namespace SimpleToDoApp.Application.Services
             // They see all tasks EXCEPT those belonging to regular external Users or legacy external employees.
             return query.Where(t => t.Account != null && t.Account.Role != UserRole.User && !(t.Account.Role == UserRole.Employee && t.Account.DepartmentId == null));
         }
+
+        public async Task SeedTasksAsync(int userId, int? departmentId)
+        {
+            var tasks = new List<Todo>();
+            var random = new Random();
+            var categories = new[] { "Work", "Personal", "Project", "Shopping", "Meeting" };
+            var statuses = new[] { TodoStatus.Pending, TodoStatus.InProgress, TodoStatus.Done };
+            var priorities = new[] { TodoPriority.Low, TodoPriority.Medium, TodoPriority.High };
+
+            for (int i = 1; i <= 50; i++)
+            {
+                var createdAt = DateTime.UtcNow.AddDays(-random.Next(1, 30));
+                tasks.Add(new Todo
+                {
+                    Title = $"Generated Task {i}",
+                    Description = $"This is an automatically generated task number {i} for pagination testing.",
+                    Status = statuses[random.Next(statuses.Length)],
+                    Priority = priorities[random.Next(priorities.Length)],
+                    Category = categories[random.Next(categories.Length)],
+                    UserId = userId,
+                    CreatedAt = createdAt,
+                    IsAllDay = false,
+                    IsCompleted = false,
+                    StartDate = createdAt,
+                    DueDate = createdAt.AddDays(random.Next(1, 10)),
+                    ReminderMinutes = 15
+                });
+            }
+
+            _context.Todos.AddRange(tasks);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<PagedResult<TodoDto>> GetUserTodosAsync(TodoQueryParameters parameters, int userId, UserRole role, int? departmentId)
+        {
+            var query = _context.Todos.Include(t => t.Account).AsQueryable();
+            query = ApplyRoleFilter(query, userId, role, departmentId);
+            
+            // 1. Áp dụng các bộ lọc (Filters)
+            if (!string.IsNullOrWhiteSpace(parameters.Search))
+            {
+                var searchTerm = parameters.Search.ToLower();
+                query = query.Where(t => t.Title.ToLower().Contains(searchTerm) || 
+                                 (t.Description != null && t.Description.ToLower().Contains(searchTerm)) ||
+                                 (t.Category != null && t.Category.ToLower().Contains(searchTerm)));
+            }
+            
+            if (!string.IsNullOrWhiteSpace(parameters.Status) && parameters.Status != "All")
+            {
+                if (Enum.TryParse<TodoStatus>(parameters.Status, out var status))
+                    query = query.Where(t => t.Status == status);
+            }
+            
+            if (!string.IsNullOrWhiteSpace(parameters.Priority) && parameters.Priority != "All")
+            {
+                if (Enum.TryParse<TodoPriority>(parameters.Priority, out var priority))
+                    query = query.Where(t => t.Priority == priority);
+            }
+            
+            if (!string.IsNullOrWhiteSpace(parameters.Category) && parameters.Category != "All")
+            {
+                query = query.Where(t => t.Category == parameters.Category);
+            }
+            
+            if (parameters.DepartmentId.HasValue)
+            {
+                query = query.Where(t => t.Account != null && t.Account.DepartmentId == parameters.DepartmentId.Value);
+            }
+            
+            // 2. Sắp xếp (Sorting)
+            if (parameters.Sort == "DueDateAsc")
+                query = query.OrderBy(t => t.DueDate);
+            else if (parameters.Sort == "DueDateDesc")
+                query = query.OrderByDescending(t => t.DueDate);
+            else
+                query = query.OrderByDescending(t => t.CreatedAt);
+            
+            // 3. Đếm tổng số lượng để phân trang
+            var totalCount = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalCount / (double)parameters.PageSize);
+            
+            // 4. Lấy dữ liệu theo trang (Skip & Take)
+            var todos = await query
+                .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                .Take(parameters.PageSize)
+                .ToListAsync();
+            
+            return new PagedResult<TodoDto>
+            {
+                Items = todos.Select(MapToDto),
+                TotalCount = totalCount,
+                TotalPages = totalPages,
+                CurrentPage = parameters.PageNumber,
+                PageSize = parameters.PageSize
+            };
+        }
+
+        public async Task<IEnumerable<string>> GetCategoriesAsync(int userId, UserRole role, int? departmentId)
+        {
+            var query = _context.Todos.AsQueryable();
+            query = ApplyRoleFilter(query, userId, role, departmentId);
+
+            var categories = await query
+                .Where(t => !string.IsNullOrEmpty(t.Category))
+                .Select(t => t.Category!)
+                .Distinct()
+                .ToListAsync();
+
+            return categories;
+        }
+
     }
 }

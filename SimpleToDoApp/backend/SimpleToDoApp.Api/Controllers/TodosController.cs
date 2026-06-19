@@ -40,12 +40,12 @@ namespace SimpleToDoApp.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery]TodoQueryParameters parameters)
         {
             var ctx = GetUserContext();
             if (ctx == null) return Unauthorized(new { message = "Unauthorized access." });
 
-            var todos = await _todoService.GetUserTodosAsync(ctx.Value.UserId, ctx.Value.Role, ctx.Value.DepartmentId);
+            var todos = await _todoService.GetUserTodosAsync(parameters, ctx.Value.UserId, ctx.Value.Role, ctx.Value.DepartmentId);
             return Ok(todos);
         }
 
@@ -58,6 +58,17 @@ namespace SimpleToDoApp.Api.Controllers
             var todos = await _todoService.GetUserCalendarTodosAsync(ctx.Value.UserId, ctx.Value.Role, ctx.Value.DepartmentId);
             return Ok(todos);
         }
+
+        [HttpGet("categories")]
+        public async Task<IActionResult> GetCategories()
+        {
+            var ctx = GetUserContext();
+            if (ctx == null) return Unauthorized(new { message = "Unauthorized access." });
+
+            var categories = await _todoService.GetCategoriesAsync(ctx.Value.UserId, ctx.Value.Role, ctx.Value.DepartmentId);
+            return Ok(categories);
+        }
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
@@ -145,6 +156,16 @@ namespace SimpleToDoApp.Api.Controllers
             {
                 return StatusCode(500, new { message = "An error occurred.", details = ex.Message });
             }
+        }
+
+        [HttpPost("seed")]
+        public async Task<IActionResult> SeedTasks()
+        {
+            var ctx = GetUserContext();
+            if (ctx == null) return Unauthorized(new { message = "Unauthorized access." });
+
+            await _todoService.SeedTasksAsync(ctx.Value.UserId, ctx.Value.DepartmentId);
+            return Ok(new { message = "Successfully generated 50 sample tasks." });
         }
 
         [HttpDelete("{id}")]
