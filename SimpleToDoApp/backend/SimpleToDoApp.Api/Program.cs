@@ -7,6 +7,9 @@ using SimpleToDoApp.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Enable legacy timestamp behavior for PostgreSQL (fixes 500 error when saving dates from Angular)
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -32,6 +35,8 @@ builder.Services.AddAntiforgery(options =>
 });
 
 var app = builder.Build();
+
+app.UseDeveloperExceptionPage();
 
 // Enable Swagger for development and testing
 if (app.Environment.IsDevelopment() || true) // Allow Swagger always for testing convenience

@@ -23,12 +23,18 @@ export class TodoService {
       if (params.category && params.category !== 'All') httpParams = httpParams.set('Category', params.category);
       if (params.sort) httpParams = httpParams.set('Sort', params.sort);
       if (params.departmentId && params.departmentId !== 'All') httpParams = httpParams.set('DepartmentId', params.departmentId);
+      if (params.startDateFrom) httpParams = httpParams.set('StartDateFrom', params.startDateFrom);
+      if (params.startDateTo) httpParams = httpParams.set('StartDateTo', params.startDateTo);
     } else {
       // Default fallback for legacy calls (Gantt, Board)
       httpParams = httpParams.set('PageSize', '1000');
     }
 
     return this.http.get<PagedResult<Todo>>(this.baseUrl, { params: httpParams });
+  }
+
+  getStats(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/stats`);
   }
 
   getCategories(): Observable<string[]> {

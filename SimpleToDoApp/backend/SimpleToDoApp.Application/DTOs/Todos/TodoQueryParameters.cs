@@ -11,5 +11,7 @@ namespace SimpleToDoApp.Application.DTOs.Todos
         public string? Category { get; set; }
         public string? Sort { get; set; }
         public int? DepartmentId { get; set; }
+        public DateTime? StartDateFrom { get; set; }
+        public DateTime? StartDateTo { get; set; }
     }
 }

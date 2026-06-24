@@ -90,6 +90,26 @@ namespace SimpleToDoApp.Infrastructure.Data
                 });
             }
             modelBuilder.Entity<Account>().HasData(seedAccounts);
+
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.HasPostgresExtension("pg_trgm");
+
+            modelBuilder.Entity<Todo>()
+                .HasIndex(t => t.Title)
+                .HasMethod("gin")
+                .HasOperators("gin_trgm_ops");
+
+            modelBuilder.Entity<Todo>()
+                .HasIndex(t => t.Description)
+                .HasMethod("gin")
+                .HasOperators("gin_trgm_ops");
+
+            modelBuilder.Entity<Todo>().HasIndex(t => t.Status);
+            modelBuilder.Entity<Todo>().HasIndex(t => t.Priority);
+            modelBuilder.Entity<Todo>().HasIndex(t => t.Category);
+            modelBuilder.Entity<Todo>().HasIndex(t => t.UserId);
+
         }
     }
 }

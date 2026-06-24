@@ -114,8 +114,7 @@ export class TodoGantt implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.currentDate.setHours(0, 0, 0, 0);
-    this.generateTimeline();
-    this.fetchTodos();
+    this.generateTimeline(); // This now calls fetchTodos() internally
 
     this.signalRSub = this.signalRService.todoUpdated$.subscribe((data) => {
       if (data) {
@@ -172,11 +171,31 @@ export class TodoGantt implements OnInit, OnDestroy {
     }
   }
 
-  fetchTodos() {
+  currentPage = 1;
+  hasMore = false;
+
+  fetchTodos(append = false) {
+    if (!append) {
+      this.currentPage = 1;
+      this.todos.set([]);
+    }
     this.loading.set(true);
-    this.todoService.getAll().subscribe({
+    
+    const params = {
+      startDateFrom: this.toLocalISOString(this.startDate),
+      startDateTo: this.toLocalISOString(this.endDate),
+      pageNumber: this.currentPage.toString(),
+      pageSize: '20'
+    };
+
+    this.todoService.getAll(params).subscribe({
       next: (data) => {
-        this.todos.set(data.items);
+        if (append) {
+          this.todos.update(t => [...t, ...data.items]);
+        } else {
+          this.todos.set(data.items);
+        }
+        this.hasMore = data.currentPage < data.totalPages;
         this.processGanttTasks();
         this.error.set(null);
       },
@@ -188,6 +207,11 @@ export class TodoGantt implements OnInit, OnDestroy {
         this.loading.set(false);
       }
     });
+  }
+
+  loadMore() {
+    this.currentPage++;
+    this.fetchTodos(true);
   }
 
   generateTimeline() {
@@ -207,9 +231,8 @@ export class TodoGantt implements OnInit, OnDestroy {
     }
     this.timelineDays = days;
     
-    if (this.todos().length > 0) {
-      this.processGanttTasks();
-    }
+    // Fetch data whenever timeline changes
+    this.fetchTodos();
   }
 
   processGanttTasks() {

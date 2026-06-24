@@ -1,12 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SimpleToDoApp.Application.DTOs.Todos;
 using SimpleToDoApp.Application.Interfaces;
 using SimpleToDoApp.Domain.Entities;
 using SimpleToDoApp.Domain.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Metadata;
+using System.Threading.Tasks;
 
 namespace SimpleToDoApp.Application.Services
 {
@@ -21,17 +22,6 @@ namespace SimpleToDoApp.Application.Services
             _notificationService = notificationService;
         }
 
-        public async Task<IEnumerable<TodoDto>> GetUserTodosAsync(int userId, UserRole role, int? departmentId)
-        {
-            var query = _context.Todos.Include(t => t.Account).AsQueryable();
-            query = ApplyRoleFilter(query, userId, role, departmentId);
-
-            var todos = await query
-                .OrderByDescending(t => t.CreatedAt)
-                .ToListAsync();
-
-            return todos.Select(MapToDto);
-        }
 
         public async Task<TodoDto?> GetTodoByIdAsync(int id, int userId, UserRole role, int? departmentId)
         {
@@ -299,13 +289,13 @@ namespace SimpleToDoApp.Application.Services
             var query = _context.Todos.Include(t => t.Account).AsQueryable();
             query = ApplyRoleFilter(query, userId, role, departmentId);
             
-            // 1. Áp dụng các bộ lọc (Filters)
             if (!string.IsNullOrWhiteSpace(parameters.Search))
             {
-                var searchTerm = parameters.Search.ToLower();
-                query = query.Where(t => t.Title.ToLower().Contains(searchTerm) || 
-                                 (t.Description != null && t.Description.ToLower().Contains(searchTerm)) ||
-                                 (t.Category != null && t.Category.ToLower().Contains(searchTerm)));
+                var searchTerm = $"%{parameters.Search}%";
+                query = query.Where(t => 
+                    Microsoft.EntityFrameworkCore.EF.Functions.ILike(t.Title, searchTerm) || 
+                    (t.Description != null && Microsoft.EntityFrameworkCore.EF.Functions.ILike(t.Description, searchTerm)) ||
+                    (t.Category != null && Microsoft.EntityFrameworkCore.EF.Functions.ILike(t.Category, searchTerm)));
             }
             
             if (!string.IsNullOrWhiteSpace(parameters.Status) && parameters.Status != "All")
@@ -330,6 +320,16 @@ namespace SimpleToDoApp.Application.Services
                 query = query.Where(t => t.Account != null && t.Account.DepartmentId == parameters.DepartmentId.Value);
             }
             
+            if (parameters.StartDateFrom.HasValue)
+            {
+                query = query.Where(t => t.DueDate >= parameters.StartDateFrom.Value || t.StartDate >= parameters.StartDateFrom.Value);
+            }
+            
+            if (parameters.StartDateTo.HasValue)
+            {
+                query = query.Where(t => t.StartDate <= parameters.StartDateTo.Value || t.DueDate <= parameters.StartDateTo.Value);
+            }
+            
             // 2. Sắp xếp (Sorting)
             if (parameters.Sort == "DueDateAsc")
                 query = query.OrderBy(t => t.DueDate);
@@ -338,8 +338,11 @@ namespace SimpleToDoApp.Application.Services
             else
                 query = query.OrderByDescending(t => t.CreatedAt);
             
-            // 3. Đếm tổng số lượng để phân trang
-            var totalCount = await query.CountAsync();
+            // 3. Đếm tổng số lượng (Capped Limit ở 10.000 để bảo vệ DB)
+            var actualCount = await query.CountAsync();
+            
+            // Áp dụng Capped Offset: Nếu số lượng > 10.000, ta chặn lại ở 10.000
+            var totalCount = actualCount > 10000 ? 10000 : actualCount;
             var totalPages = (int)Math.Ceiling(totalCount / (double)parameters.PageSize);
             
             // 4. Lấy dữ liệu theo trang (Skip & Take)
@@ -355,6 +358,46 @@ namespace SimpleToDoApp.Application.Services
                 TotalPages = totalPages,
                 CurrentPage = parameters.PageNumber,
                 PageSize = parameters.PageSize
+            };
+        }
+
+        public async Task<TodoStatsDto> GetTodoStatsAsync(int userId, UserRole role, int? departmentId)
+        {
+            var query = _context.Todos.AsQueryable();
+            query = ApplyRoleFilter(query, userId, role, departmentId);
+
+            var total = await query.CountAsync();
+            var pending = await query.CountAsync(t => t.Status == TodoStatus.Pending);
+            var inProgress = await query.CountAsync(t => t.Status == TodoStatus.InProgress);
+            var done = await query.CountAsync(t => t.Status == TodoStatus.Done);
+
+            var userGroups = await query
+                .GroupBy(t => t.UserId)
+                .Select(g => new
+                {
+                    UserId = g.Key,
+                    Total = g.Count(),
+                    Completed = g.Count(t => t.Status == TodoStatus.Done)
+                })
+                .ToListAsync();
+
+            var userStats = new System.Collections.Generic.Dictionary<int, UserTodoStats>();
+            foreach (var g in userGroups)
+            {
+                userStats[g.UserId] = new UserTodoStats
+                {
+                    TotalTasks = g.Total,
+                    CompletedTasks = g.Completed
+                };
+            }
+
+            return new TodoStatsDto
+            {
+                TotalTasks = total,
+                PendingTasks = pending,
+                InProgressTasks = inProgress,
+                CompletedTasks = done,
+                UserStats = userStats
             };
         }
 

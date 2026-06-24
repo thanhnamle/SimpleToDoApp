@@ -90,21 +90,51 @@ export class TodoBoard implements OnInit {
     }
   }
 
+  columnPages: Record<string, number> = { Pending: 1, InProgress: 1, Done: 1 };
+  columnHasMore: Record<string, boolean> = { Pending: true, InProgress: true, Done: true };
+  columnTotalCount: Record<string, number> = { Pending: 0, InProgress: 0, Done: 0 };
+
   fetchTodos() {
     this.loading.set(true);
-    this.todoService.getAll().subscribe({
+    this.todos.set([]);
+    this.columnPages = { Pending: 1, InProgress: 1, Done: 1 };
+    
+    // Fetch initial 15 for each column
+    ['Pending', 'InProgress', 'Done'].forEach(status => {
+      this.loadColumn(status, 1);
+    });
+  }
+
+  loadColumn(status: string, page: number) {
+    this.todoService.getAll({ status, pageNumber: page.toString(), pageSize: '15' }).subscribe({
       next: (data) => {
-        this.todos.set(data.items);
+        if (page === 1) {
+          this.todos.update(t => {
+            const others = t.filter(x => x.status !== status);
+            return [...others, ...data.items];
+          });
+        } else {
+          this.todos.update(t => [...t, ...data.items]);
+        }
+        this.columnHasMore[status] = data.currentPage < data.totalPages;
+        this.columnTotalCount[status] = data.totalCount;
         this.error.set(null);
+        
+        // Wait until all 3 initial columns are loaded to hide spinner
+        if (page === 1 && status === 'Done') {
+          this.loading.set(false);
+        }
       },
       error: (err) => {
         this.error.set(err.error?.message || err.message || 'Failed to fetch tasks.');
         this.loading.set(false);
-      },
-      complete: () => {
-        this.loading.set(false);
       }
     });
+  }
+
+  loadMore(status: string) {
+    this.columnPages[status]++;
+    this.loadColumn(status, this.columnPages[status]);
   }
 
   getTodosByStatus(status: string): Todo[] {

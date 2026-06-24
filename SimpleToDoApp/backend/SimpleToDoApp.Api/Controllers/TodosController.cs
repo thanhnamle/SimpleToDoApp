@@ -59,6 +59,16 @@ namespace SimpleToDoApp.Api.Controllers
             return Ok(todos);
         }
 
+        [HttpGet("stats")]
+        public async Task<IActionResult> GetStats()
+        {
+            var ctx = GetUserContext();
+            if (ctx == null) return Unauthorized(new { message = "Unauthorized access." });
+
+            var stats = await _todoService.GetTodoStatsAsync(ctx.Value.UserId, ctx.Value.Role, ctx.Value.DepartmentId);
+            return Ok(stats);
+        }
+
         [HttpGet("categories")]
         public async Task<IActionResult> GetCategories()
         {
@@ -126,9 +136,9 @@ namespace SimpleToDoApp.Api.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new { message = "An error occurred.", details = ex.Message });
+                throw;
             }
         }
 
