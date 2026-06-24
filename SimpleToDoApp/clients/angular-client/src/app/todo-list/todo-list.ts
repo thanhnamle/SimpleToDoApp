@@ -32,7 +32,10 @@ import {
   LucideAlertTriangle,
   LucideInfo,
   LucideUser,
-  LucideChevronDown
+  LucideChevronDown,
+  LucideDatabase,
+  LucideChevronLeft,
+  LucideChevronRight
 } from '@lucide/angular';
 
 @Component({
@@ -52,16 +55,18 @@ import {
     LucideCircle,
     LucideClock,
     LucideTag,
-    LucideLoader2,
     LucideAlertCircle,
     LucideEye,
     LucideX,
     LucideCalendar,
+    LucideChevronLeft,
+    LucideChevronRight,
     LucideBell,
     LucideAlertTriangle,
     LucideInfo,
     LucideUser,
-    LucideChevronDown
+    LucideChevronDown,
+    LucideDatabase
   ],
   templateUrl: './todo-list.html'
 })
@@ -94,6 +99,12 @@ export class TodoList implements OnInit, OnDestroy {
   departmentFilter = 'All';
   categories: string[] = ['All'];
 
+  // Pagination
+  currentPage = 1;
+  pageSize = 9;
+  totalPages = 1;
+  totalCount = 0;
+
   // Modal control
   modalOpen = false;
   selectedTodo: Todo | null = null;
@@ -103,6 +114,9 @@ export class TodoList implements OnInit, OnDestroy {
   detailTodo: Todo | null = null;
 
   ngOnInit() {
+    this.todoService.getCategories().subscribe(cats => {
+      this.categories = ['All', ...cats];
+    });
     this.fetchTodos();
     if (this.isDepartmentHead()) {
       this.authService.getDepartments().subscribe(d => this.departments.set(d));
@@ -120,10 +134,24 @@ export class TodoList implements OnInit, OnDestroy {
 
   fetchTodos() {
     this.loading.set(true);
-    this.todoService.getAll().subscribe({
+    const params = {
+      pageNumber: this.currentPage,
+      pageSize: this.pageSize,
+      search: this.search,
+      status: this.statusFilter,
+      priority: this.priorityFilter,
+      category: this.categoryFilter,
+      sort: this.sortFilter,
+      departmentId: this.departmentFilter !== 'All' ? this.departmentFilter : null
+    };
+
+    this.todoService.getAll(params).subscribe({
       next: (data) => {
-        this.todos.set(data);
-        this.applyFilters();
+        this.todos.set(data.items);
+        this.filteredTodos.set(data.items);
+        this.totalPages = data.totalPages;
+        this.totalCount = data.totalCount;
+        this.currentPage = data.currentPage;
         this.error.set(null);
       },
       error: (err) => {
@@ -137,39 +165,15 @@ export class TodoList implements OnInit, OnDestroy {
   }
 
   applyFilters() {
-    const list = this.todos();
-    
-    // Extrapolate categories list
-    const uniqCats = Array.from(new Set(list.map(t => t.category).filter(Boolean)));
-    this.categories = ['All', ...uniqCats];
+    this.currentPage = 1;
+    this.fetchTodos();
+  }
 
-    const filtered = list.filter(todo => {
-      const matchesSearch = todo.title.toLowerCase().includes(this.search.toLowerCase()) || 
-                            (todo.description && todo.description.toLowerCase().includes(this.search.toLowerCase())) ||
-                            (todo.category && todo.category.toLowerCase().includes(this.search.toLowerCase()));
-      const matchesStatus = this.statusFilter === 'All' || todo.status === this.statusFilter;
-      const matchesPriority = this.priorityFilter === 'All' || todo.priority === this.priorityFilter;
-      const matchesCategory = this.categoryFilter === 'All' || todo.category === this.categoryFilter;
-      const matchesDepartment = this.departmentFilter === 'All' || todo.departmentId?.toString() === this.departmentFilter;
-
-      return matchesSearch && matchesStatus && matchesPriority && matchesCategory && matchesDepartment;
-    });
-
-    if (this.sortFilter === 'DueDateAsc') {
-      filtered.sort((a, b) => {
-        if (!a.dueDate) return 1;
-        if (!b.dueDate) return -1;
-        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-      });
-    } else if (this.sortFilter === 'DueDateDesc') {
-      filtered.sort((a, b) => {
-        if (!a.dueDate) return 1;
-        if (!b.dueDate) return -1;
-        return new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime();
-      });
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.fetchTodos();
     }
-
-    this.filteredTodos.set(filtered);
   }
 
   handleToggleComplete(todo: Todo) {
@@ -349,5 +353,19 @@ export class TodoList implements OnInit, OnDestroy {
     if (minutes === 60) return '1 hour before';
     if (minutes < 1440) return `${minutes / 60} hours before`;
     return '1 day before';
+  }
+
+  seedTasks() {
+    this.todoService.seedTasks().subscribe({
+      next: () => {
+        this.notificationService.showToast('Tasks seeded successfully! Wait a moment for UI to update.', 'success');
+        this.audioService.playSuccess();
+        this.fetchTodos();
+      },
+      error: (err) => {
+        const errorMsg = this.notificationService.parseApiError(err, 'Failed to seed tasks.');
+        this.notificationService.showToast(errorMsg, 'error');
+      }
+    });
   }
 }

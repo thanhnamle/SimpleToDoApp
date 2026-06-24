@@ -81,11 +81,12 @@ export class TodoDepartment implements OnInit, OnDestroy {
     }));
   });
 
-  // Stats
-  totalTasks = computed(() => this.todos().length);
-  pendingTasks = computed(() => this.todos().filter(t => t.status === 'Pending').length);
-  inProgressTasks = computed(() => this.todos().filter(t => t.status === 'InProgress').length);
-  completedTasks = computed(() => this.todos().filter(t => t.status === 'Done').length);
+  // Stats variables
+  totalTasks = signal<number>(0);
+  pendingTasks = signal<number>(0);
+  inProgressTasks = signal<number>(0);
+  completedTasks = signal<number>(0);
+  
   completionRate = computed(() => {
     const total = this.totalTasks();
     if (total === 0) return 0;
@@ -121,43 +122,50 @@ export class TodoDepartment implements OnInit, OnDestroy {
 
   fetchData() {
     this.loading.set(true);
-    this.error.set(null);
-
-    // Fetch members and todos in parallel
+    
+    // 1. Fetch Users
     this.authService.getDepartmentMembers().subscribe({
-      next: (data) => {
-        // Filter out User role and legacy external users (Employee without department)
-        const filteredAccounts = data.filter(acc => 
+      next: (users) => {
+        const currentUserId = this.authService.currentUser()?.userId;
+        const filteredAccounts = users.filter(acc => 
           acc.role !== 'User' && 
-          !(acc.role === 'Employee' && !acc.departmentId)
+          !(acc.role === 'Employee' && !acc.departmentId) &&
+          acc.userId !== currentUserId
         );
         this.members.set(filteredAccounts);
-        
-        // Fetch todos
-        this.todoService.getAll().subscribe({
-          next: (tasks) => {
-            this.todos.set(tasks);
-            this.loading.set(false);
-          },
-          error: (err) => {
-            this.error.set('Failed to load department tasks.');
-            this.loading.set(false);
-          }
-        });
+        this.error.set(null);
       },
       error: (err) => {
-        this.error.set('Failed to load department members.');
+        this.error.set('Failed to load department members');
+        this.loading.set(false);
+      }
+    });
+
+    // 2. Fetch Stats
+    this.todoService.getStats().subscribe({
+      next: (stats) => {
+        this.totalTasks.set(stats.totalTasks);
+        this.pendingTasks.set(stats.pendingTasks);
+        this.inProgressTasks.set(stats.inProgressTasks);
+        this.completedTasks.set(stats.completedTasks);
+        this.userStats.set(stats.userStats || {});
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.error.set('Failed to load stats');
         this.loading.set(false);
       }
     });
   }
 
+  userStats = signal<any>({});
+
   getMemberTasksCount(userId: number): number {
-    return this.todos().filter(t => t.assignedUserId === userId).length;
+    return this.userStats()[userId]?.totalTasks || 0;
   }
 
   getMemberCompletedTasksCount(userId: number): number {
-    return this.todos().filter(t => t.assignedUserId === userId && t.status === 'Done').length;
+    return this.userStats()[userId]?.completedTasks || 0;
   }
 
   getMemberTasksCompletionRate(userId: number): number {

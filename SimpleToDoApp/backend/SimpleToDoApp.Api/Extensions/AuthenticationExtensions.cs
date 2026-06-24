@@ -33,6 +33,18 @@ namespace SimpleToDoApp.Api.Extensions
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyStr)),
                     ClockSkew = TimeSpan.Zero
                 };
+                
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        if (context.Request.Cookies.ContainsKey("todo_app_auth_token"))
+                        {
+                            context.Token = context.Request.Cookies["todo_app_auth_token"];
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
             return services;

@@ -1,4 +1,4 @@
-<div class="space-y-6 h-full flex flex-col animate-page-enter">
+<div class="space-y-6 h-full flex flex-col animate-page-enter pb-10">
   <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
@@ -109,7 +109,7 @@
     </div>
 
     <!-- Main Content Split Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 pb-3.5 lg:grid-cols-3 gap-6">
       <!-- Left side: Team members list -->
       <div class="lg:col-span-2 rounded-2xl border border-slate-200 dark:border-slate-900 bg-white dark:bg-slate-900/20 p-6 shadow-sm backdrop-blur-xl space-y-6">
         <h2 class="text-lg font-bold text-slate-900 dark:text-white">
@@ -124,7 +124,7 @@
               </h3>
               <div class="divide-y divide-slate-100 dark:divide-slate-800/60">
                 @for (member of group.members; track member.userId; let i = $index) {
-                  <div class="flex items-center justify-between py-4 first:pt-0 last:pb-0 gap-4 animate-slide-up-fade" [style.animation-delay.ms]="i * 50">
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between py-4 first:pt-0 last:pb-0 gap-4 animate-slide-up-fade" [style.animation-delay.ms]="i * 50">
                     <!-- Member profile info -->
                     <div class="flex items-center gap-3.5 min-w-0">
                       <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/20 dark:bg-primary-dark/20 border border-indigo-100 dark:border-primary-dark dark:border-primary/20 text-xs font-bold text-primary-dark dark:text-primary dark:text-primary-dark dark:text-primary">
@@ -141,40 +141,35 @@
                       </div>
                     </div>
 
-                    <!-- Department -->
-                    <div class="hidden md:flex flex-col gap-1 w-32 shrink-0">
-                      <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Department</p>
-                      <p class="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">
-                        {{ member.departmentName || 'Global' }}
-                      </p>
-                    </div>
+                    <!-- Metrics and Actions -->
+                    <div class="flex flex-wrap items-center gap-4 sm:gap-6 shrink-0 text-right">
+                      
+                      <!-- Position -->
+                      <div class="flex flex-col gap-0.5 w-20 shrink-0 text-left sm:text-right">
+                        <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Position</p>
+                        <p class="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">
+                          {{ member.role }}
+                        </p>
+                      </div>
 
-                    <!-- Position -->
-                    <div class="hidden md:flex flex-col gap-1 w-24 shrink-0">
-                      <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Position</p>
-                      <p class="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">
-                        {{ member.role }}
-                      </p>
-                    </div>
-
-                    <!-- Task summary metrics -->
-                    <div class="flex items-center gap-6 shrink-0 text-right">
-                      <div>
+                      <!-- Tasks -->
+                      <div class="flex flex-col gap-0.5 text-center sm:text-right">
                         <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Tasks</p>
                         <p class="text-sm font-bold text-slate-700 dark:text-slate-300">
                           {{ getMemberTasksCount(member.userId) }}
                         </p>
                       </div>
                       
-                      <div class="hidden sm:block">
-                        <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Completion</p>
+                      <!-- Completion -->
+                      <div class="flex flex-col gap-0.5 text-center sm:text-right">
+                        <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Done</p>
                         <p class="text-sm font-bold text-slate-700 dark:text-slate-300">
                           {{ getMemberTasksCompletionRate(member.userId) }}%
                         </p>
                       </div>
 
                       @if (isDepartmentHead() && member.role !== 'DepartmentHead') {
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-1">
                           <button (click)="openEditModal(member)" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-primary-dark dark:text-primary dark:hover:text-primary-dark dark:text-primary transition-colors">
                             <svg lucideEdit3 class="h-4 w-4"></svg>
                           </button>
@@ -183,7 +178,7 @@
                           </button>
                         </div>
                       } @else if (isDepartmentHead()) {
-                        <div class="w-[68px]"></div> <!-- placeholder to keep alignment -->
+                        <div class="w-[60px]"></div> <!-- placeholder to keep alignment -->
                       }
                     </div>
                   </div>

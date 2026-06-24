@@ -1,11 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SimpleToDoApp.Application.DTOs.Auth;
 using SimpleToDoApp.Application.Interfaces;
+using SimpleToDoApp.Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace SimpleToDoApp.Api.Controllers
 {
@@ -54,7 +55,17 @@ namespace SimpleToDoApp.Api.Controllers
             try
             {
                 var response = await _authService.LoginAsync(request);
-                return Ok(response);
+                
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true, 
+                    SameSite = SameSiteMode.None,
+                    Expires = DateTime.UtcNow.AddMinutes(1440)
+                };
+                Response.Cookies.Append("todo_app_auth_token", response.Token, cookieOptions);
+
+                return Ok(new { user = response.User });
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -64,6 +75,26 @@ namespace SimpleToDoApp.Api.Controllers
             {
                 return StatusCode(500, new { message = "An error occurred during login.", details = ex.Message });
             }
+        }
+
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("todo_app_auth_token");
+            return Ok(new { message = "Logged out successfully." });
+        }
+
+        [HttpGet("csrf-token")]
+        public IActionResult GetCsrfToken([FromServices] Microsoft.AspNetCore.Antiforgery.IAntiforgery antiforgery)
+        {
+            var tokens = antiforgery.GetAndStoreTokens(HttpContext);
+            Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken, new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = true,
+                SameSite = SameSiteMode.None
+            });
+            return NoContent();
         }
 
         [Authorize]

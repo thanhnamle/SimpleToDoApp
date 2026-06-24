@@ -46,7 +46,7 @@ namespace SimpleToDoApp.Infrastructure.Data
             );
 
             // Hash for "Password@123"
-            var defaultPasswordHash = "$2a$11$hm8JAwHl9M3D7omt2EM/PebH.cKJHZSUAqxAdCv/ILOTvYA25tbwe";
+            var defaultPasswordHash = "$2a$11$hm8JAwHl9M3D7omt2EM/WxeuMOoxADB4EZ3u7dfGcRQjEIKuryi4/S";
             
             // Seed 1 DepartmentHead
             var seedAccounts = new List<Account>();
@@ -90,6 +90,26 @@ namespace SimpleToDoApp.Infrastructure.Data
                 });
             }
             modelBuilder.Entity<Account>().HasData(seedAccounts);
+
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.HasPostgresExtension("pg_trgm");
+
+            modelBuilder.Entity<Todo>()
+                .HasIndex(t => t.Title)
+                .HasMethod("gin")
+                .HasOperators("gin_trgm_ops");
+
+            modelBuilder.Entity<Todo>()
+                .HasIndex(t => t.Description)
+                .HasMethod("gin")
+                .HasOperators("gin_trgm_ops");
+
+            modelBuilder.Entity<Todo>().HasIndex(t => t.Status);
+            modelBuilder.Entity<Todo>().HasIndex(t => t.Priority);
+            modelBuilder.Entity<Todo>().HasIndex(t => t.Category);
+            modelBuilder.Entity<Todo>().HasIndex(t => t.UserId);
+
         }
     }
 }

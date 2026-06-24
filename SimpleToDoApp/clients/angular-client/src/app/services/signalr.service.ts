@@ -30,7 +30,7 @@ export class SignalRService {
 
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl, {
-        accessTokenFactory: () => token
+        withCredentials: true
       })
       .withAutomaticReconnect()
       .build();
